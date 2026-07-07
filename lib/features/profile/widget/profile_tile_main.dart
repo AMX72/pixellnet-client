@@ -205,8 +205,8 @@ class ProfileTileMain extends HookConsumerWidget {
     if (host.endsWith('facebook.com')) {
       return uri.pathSegments.lastWhere((e) => e.isNotEmpty, orElse: () => '');
     }
-    if (host.endsWith('hiddify.com')) {
-      return "Hiddify";
+    if (host.endsWith('hiddify.com') || host.endsWith('pixellnet.com')) {
+      return "PIXELLNET";
     }
     return uri.host;
   }

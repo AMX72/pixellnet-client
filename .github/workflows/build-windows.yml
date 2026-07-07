@@ -1,0 +1,98 @@
+name: Build Windows
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 0.1.0)'
+        required: false
+        default: 'dev'
+
+concurrency:
+  group: build-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Flutter 3.44.5
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.5'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache pub
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            ${{ github.workspace }}/.dart_tool
+          key: pub-windows-${{ hashFiles('pubspec.lock') }}
+
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        run: |
+          if ("${{ github.ref }}" -like "refs/tags/v*") {
+            $v = "${{ github.ref }}" -replace 'refs/tags/v',''
+          } elseif ("${{ inputs.version }}" -ne "") {
+            $v = "${{ inputs.version }}"
+          } else {
+            $v = "dev-${{ github.run_number }}"
+          }
+          echo "version=$v" >> $env:GITHUB_OUTPUT
+          echo "Resolved version: $v"
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Download prebuilt hiddify-core Windows lib
+        shell: pwsh
+        run: |
+          $url = "https://github.com/hiddify/hiddify-core/releases/download/v4.1.0/hiddify-lib-windows-amd64.tar.gz"
+          Invoke-WebRequest -Uri $url -OutFile hiddify-lib.tar.gz -UseBasicParsing
+          New-Item -Path "libs/windows-amd64" -ItemType Directory -Force | Out-Null
+          tar -xzf hiddify-lib.tar.gz -C "libs/windows-amd64"
+          Remove-Item hiddify-lib.tar.gz
+
+      - name: Flutter build windows release
+        run: flutter build windows --release --build-number=${{ github.run_number }} --build-name=${{ steps.ver.outputs.version }}
+
+      - name: Bundle release assets (copy hiddify-core.dll next to exe)
+        shell: pwsh
+        run: |
+          $out = "build\windows\x64\runner\Release"
+          Copy-Item "libs\windows-amd64\hiddify-core.dll" "$out\" -Force
+          Copy-Item "libs\windows-amd64\libcronet.dll" "$out\" -Force -ErrorAction SilentlyContinue
+          Copy-Item "libs\windows-amd64\HiddifyCli.exe" "$out\" -Force -ErrorAction SilentlyContinue
+          Compress-Archive -Path "$out\*" -DestinationPath "pixellnet-windows-x64-${{ steps.ver.outputs.version }}.zip" -Force
+          Get-ChildItem "pixellnet-windows-x64-*.zip" | Select-Object Name, @{N='MB';E={[math]::Round($_.Length/1MB,1)}}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixellnet-windows-x64
+          path: pixellnet-windows-x64-*.zip
+          retention-days: 30
+
+      - name: Release on tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: pixellnet-windows-x64-*.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') }}

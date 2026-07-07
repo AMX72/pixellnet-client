@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/core/theme/app_theme_mode.dart';
 import 'package:hiddify/core/theme/theme_extensions.dart';
 
@@ -9,7 +10,7 @@ class AppTheme {
   final String fontFamily;
 
   ThemeData lightTheme(ColorScheme? lightColorScheme) {
-    final ColorScheme scheme = lightColorScheme ?? ColorScheme.fromSeed(seedColor: const Color(0xFF293CA0));
+    final ColorScheme scheme = lightColorScheme ?? ColorScheme.fromSeed(seedColor: PixellnetBrand.primary);
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
@@ -20,7 +21,14 @@ class AppTheme {
 
   ThemeData darkTheme(ColorScheme? darkColorScheme) {
     final ColorScheme scheme =
-        darkColorScheme ?? ColorScheme.fromSeed(seedColor: const Color(0xFF293CA0), brightness: Brightness.dark);
+        darkColorScheme ??
+            ColorScheme.fromSeed(seedColor: PixellnetBrand.primary, brightness: Brightness.dark).copyWith(
+              background: PixellnetBrand.bgDark,
+              surface: PixellnetBrand.surface,
+              onSurface: PixellnetBrand.textOnDark,
+              secondary: PixellnetBrand.accent,
+              onSecondary: PixellnetBrand.bgDark,
+            );
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,

@@ -1,7 +1,7 @@
 name: hiddify
-description: Cross Platform Multi Protocol Proxy Frontend.
+description: PIXELLNET VPN — commercial VPN client for Russia (internal package name kept as 'hiddify' to preserve upstream imports; user-facing brand is PIXELLNET everywhere)
 publish_to: "none"
-version: 4.1.2+40102
+version: 0.1.0+1
 
 environment:
   sdk: ^3.10.4
@@ -40,7 +40,7 @@ dependencies:
   path_provider: ^2.1.1
   mobile_scanner: ^7.2.0
   # protocol_handler: ^0.2.0
-  flutter_native_splash: ^2.3.10
+  flutter_native_splash: ^2.4.1
   share_plus: ^10.1.0
   window_manager: ^0.5.0
   tray_manager: ^0.5.0
@@ -121,9 +121,13 @@ dependencies:
   win32: ^5.12.0
   humanizer: ^3.0.1
 
+homepage: https://pixellnet.com
+repository: https://github.com/AMX72/pixellnet-client
+
 dev_dependencies:
   # flutter_test:
   #   sdk: flutter
+  flutter_launcher_icons: ^0.14.1
   lint: ^2.3.0
   build_web_compilers: ^4.0.11
   build_runner: ^2.4.13
@@ -174,12 +178,27 @@ flutter_gen:
     flutter_svg: true
 
 flutter_native_splash:
-  color: "#ffffff"
+  color: "#0F1729"
   image: assets/images/source/ic_launcher_splash.png
   android_gravity: center
   android_12:
-    color: "#ffffff"
+    color: "#0F1729"
     image: assets/images/source/ic_launcher_foreground.png
+
+flutter_launcher_icons:
+  # iOS/macOS disabled until Apple Developer registration (v1.1)
+  android: true
+  ios: false
+  image_path: "assets/brand/icon_source.png"
+  adaptive_icon_background: "#0F1729"
+  adaptive_icon_foreground: "assets/brand/icon_foreground.png"
+  min_sdk_android: 21
+  windows:
+    generate: true
+    image_path: "assets/brand/icon_source.png"
+    icon_size: 256
+  macos:
+    generate: false
 
 ffigen:
   name: "HiddifyCoreNativeLibrary"

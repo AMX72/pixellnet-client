@@ -10,6 +10,7 @@ import 'package:hiddify/features/log/model/log_level.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/settings/widget/preference_tile.dart';
 import 'package:hiddify/utils/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:humanizer/humanizer.dart';
 
@@ -71,18 +72,20 @@ class GeneralPage extends HookConsumerWidget {
             value: !ref.watch(Preferences.disableMemoryLimit),
             onChanged: (value) async => await ref.read(Preferences.disableMemoryLimit.notifier).update(!value),
           ),
-          SwitchListTile.adaptive(
-            title: Text(t.pages.settings.general.debugMode),
-            secondary: const Icon(Icons.bug_report_rounded),
-            value: ref.watch(debugModeNotifierProvider),
-            onChanged: (value) async {
-              if (value)
-                await ref
-                    .read(dialogNotifierProvider.notifier)
-                    .showOk(t.pages.settings.general.debugMode, t.pages.settings.general.debugModeMsg);
-              await ref.read(debugModeNotifierProvider.notifier).update(value);
-            },
-          ),
+          // Debug mode toggle — hidden in release builds (PIXELLNET brand)
+          if (kDebugMode)
+            SwitchListTile.adaptive(
+              title: Text(t.pages.settings.general.debugMode),
+              secondary: const Icon(Icons.bug_report_rounded),
+              value: ref.watch(debugModeNotifierProvider),
+              onChanged: (value) async {
+                if (value)
+                  await ref
+                      .read(dialogNotifierProvider.notifier)
+                      .showOk(t.pages.settings.general.debugMode, t.pages.settings.general.debugModeMsg);
+                await ref.read(debugModeNotifierProvider.notifier).update(value);
+              },
+            ),
           ChoicePreferenceWidget(
             selected: ref.watch(ConfigOptions.logLevel),
             preferences: ref.watch(ConfigOptions.logLevel.notifier),
