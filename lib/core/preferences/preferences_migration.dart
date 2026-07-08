@@ -14,6 +14,7 @@ class PreferencesMigration with InfraLogger {
     final List<PreferencesMigrationStep> migrationSteps = [
       PreferencesVersion1Migration(sharedPreferences),
       PreferencesVersion2Migration(sharedPreferences),
+      PreferencesVersion3Migration(sharedPreferences),
     ];
 
     if (currentVersion == migrationSteps.length) {
@@ -125,6 +126,30 @@ class PreferencesVersion2Migration extends PreferencesMigrationStep with InfraLo
     if (serviceMode == "system-proxy") {
       loggy.debug("PIXELLNET v2 migration: service-mode 'system-proxy' -> 'vpn' (TUN)");
       await sharedPreferences.setString("service-mode", "vpn");
+    }
+  }
+}
+
+/// PIXELLNET Version3: force-disable auxiliary local proxy ports (mixed 12334,
+/// direct 12337, redirect, tproxy). TUN handles all traffic via route table.
+/// These ports created listeners on 127.0.0.1 that some clients (v0.0.3 UI mixed
+/// on 12334) treated as WinInet system proxy — hijacked OS proxy setting.
+class PreferencesVersion3Migration extends PreferencesMigrationStep with InfraLogger {
+  PreferencesVersion3Migration(super.sharedPreferences);
+
+  @override
+  Future<void> migrate() async {
+    for (final key in const [
+      "enable-mixed-port",
+      "enable-tproxy-port",
+      "enable-redirect-port",
+      "enable-direct-port",
+    ]) {
+      final current = sharedPreferences.getBool(key);
+      if (current != false) {
+        loggy.debug("PIXELLNET v3 migration: $key: $current -> false");
+        await sharedPreferences.setBool(key, false);
+      }
     }
   }
 }

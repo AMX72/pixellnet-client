@@ -139,10 +139,13 @@ abstract class ConfigOptions {
     validator: (value) => isPort(value.toString()),
   );
 
-  static final enableMixedPort = PreferencesNotifier.create<bool, bool>("enable-mixed-port", true);
-  static final enableTproxyPort = PreferencesNotifier.create<bool, bool>("enable-tproxy-port", true);
-  static final enableRedirectPort = PreferencesNotifier.create<bool, bool>("enable-redirect-port", true);
-  static final enableDirectPort = PreferencesNotifier.create<bool, bool>("enable-direct-port", true);
+  // PIXELLNET: TUN-only mode. Auxiliary local proxy ports OFF by default.
+  // Rule no_windows_tweaks: mixed proxy on 127.0.0.1:12334 hijacks WinInet system
+  // proxy setting, breaks VS Code / Claude Code / any WinInet-aware app.
+  static final enableMixedPort = PreferencesNotifier.create<bool, bool>("enable-mixed-port", false);
+  static final enableTproxyPort = PreferencesNotifier.create<bool, bool>("enable-tproxy-port", false);
+  static final enableRedirectPort = PreferencesNotifier.create<bool, bool>("enable-redirect-port", false);
+  static final enableDirectPort = PreferencesNotifier.create<bool, bool>("enable-direct-port", false);
 
   static final tunImplementation = PreferencesNotifier.create<TunImplementation, String>(
     "tun-implementation",
