@@ -1,11 +1,15 @@
 {
   "common": {
     "appTitle": "PIXELLNET",
+    "appTagline": "PIXELLNET открывает сайты, которые не работают",
     "start": "Начать",
     "version": "Версия",
-    "ok": "OK",
+    "ok": "Понятно",
     "cancel": "Отмена",
     "kContinue": "Продолжить",
+    "retry": "Попробовать снова",
+    "paste": "Вставить ключ",
+    "extend": "Продлить",
     "showMore": "Показать больше",
     "showLess": "Показать меньше",
     "filter": "Фильтр",

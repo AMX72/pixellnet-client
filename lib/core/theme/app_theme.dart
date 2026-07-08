@@ -9,8 +9,30 @@ class AppTheme {
   final AppThemeMode mode;
   final String fontFamily;
 
+  /// PIXELLNET palette v2 (индирго + сейдж, мягкие цвета).
+  /// Явно строим `ColorScheme(...)` — иначе `fromSeed` перегенерит tonal palette
+  /// и перекроет наши sage-accent и off-black surface.
   ThemeData lightTheme(ColorScheme? lightColorScheme) {
-    final ColorScheme scheme = lightColorScheme ?? ColorScheme.fromSeed(seedColor: PixellnetBrand.primary);
+    final ColorScheme scheme = lightColorScheme ??
+        const ColorScheme(
+          brightness: Brightness.light,
+          primary: PixellnetColors.lightPrimary,
+          onPrimary: PixellnetColors.lightOnPrimary,
+          primaryContainer: PixellnetColors.lightPrimaryContainer,
+          onPrimaryContainer: PixellnetColors.lightOnPrimaryContainer,
+          secondary: PixellnetColors.lightAccent,
+          onSecondary: PixellnetColors.lightOnAccent,
+          tertiary: PixellnetColors.success,
+          onTertiary: PixellnetColors.onSuccess,
+          error: PixellnetColors.danger,
+          onError: PixellnetColors.onDanger,
+          surface: PixellnetColors.lightSurface,
+          onSurface: PixellnetColors.lightOnSurface,
+          surfaceContainer: PixellnetColors.lightSurfaceContainer,
+          surfaceContainerHighest: PixellnetColors.lightSurfaceContainerHigh,
+          onSurfaceVariant: PixellnetColors.lightOnSurfaceVariant,
+          outline: PixellnetColors.lightOutline,
+        );
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
@@ -20,19 +42,30 @@ class AppTheme {
   }
 
   ThemeData darkTheme(ColorScheme? darkColorScheme) {
-    final ColorScheme scheme =
-        darkColorScheme ??
-            ColorScheme.fromSeed(seedColor: PixellnetBrand.primary, brightness: Brightness.dark).copyWith(
-              background: PixellnetBrand.bgDark,
-              surface: PixellnetBrand.surface,
-              onSurface: PixellnetBrand.textOnDark,
-              secondary: PixellnetBrand.accent,
-              onSecondary: PixellnetBrand.bgDark,
-            );
+    final ColorScheme scheme = darkColorScheme ??
+        const ColorScheme(
+          brightness: Brightness.dark,
+          primary: PixellnetColors.darkPrimary,
+          onPrimary: PixellnetColors.darkOnPrimary,
+          primaryContainer: PixellnetColors.darkPrimaryContainer,
+          onPrimaryContainer: PixellnetColors.darkOnPrimaryContainer,
+          secondary: PixellnetColors.darkAccent,
+          onSecondary: PixellnetColors.darkOnAccent,
+          tertiary: PixellnetColors.success,
+          onTertiary: PixellnetColors.onSuccess,
+          error: PixellnetColors.danger,
+          onError: PixellnetColors.onDanger,
+          surface: PixellnetColors.darkSurface,
+          onSurface: PixellnetColors.darkOnSurface,
+          surfaceContainer: PixellnetColors.darkSurfaceContainer,
+          surfaceContainerHighest: PixellnetColors.darkSurfaceContainerHigh,
+          onSurfaceVariant: PixellnetColors.darkOnSurfaceVariant,
+          outline: PixellnetColors.darkOutline,
+        );
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: mode.trueBlack ? Colors.black : scheme.background,
+      scaffoldBackgroundColor: mode.trueBlack ? Colors.black : scheme.surface,
       fontFamily: fontFamily,
       extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
     );
