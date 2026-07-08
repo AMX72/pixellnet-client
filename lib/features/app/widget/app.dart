@@ -77,8 +77,11 @@ class App extends HookConsumerWidget with WidgetsBindingObserver, PresLogger {
       ShortcutWrapper(
         ToastificationWrapper(
           child: ConnectionWrapper(
-            DynamicColorBuilder(
-              builder: (ColorScheme? lightColorScheme, ColorScheme? darkColorScheme) {
+            Builder(
+              // PIXELLNET: intentionally NOT using DynamicColorBuilder — Windows 11
+              // system accent (пурпурный/фиолетовый у юзера) перекрывал brown+yellow+blue
+              // palette v3. Наши цвета из PixellnetColors — приоритет.
+              builder: (context) {
                 return MaterialApp.router(
                   routerConfig: router,
                   locale: locale.flutterLocale,
@@ -86,8 +89,8 @@ class App extends HookConsumerWidget with WidgetsBindingObserver, PresLogger {
                   localizationsDelegates: GlobalMaterialLocalizations.delegates,
                   debugShowCheckedModeBanner: false,
                   themeMode: themeMode.flutterThemeMode,
-                  theme: theme.lightTheme(lightColorScheme),
-                  darkTheme: theme.darkTheme(darkColorScheme),
+                  theme: theme.lightTheme(null),
+                  darkTheme: theme.darkTheme(null),
                   title: Constants.appName,
                   builder: (context, child) {
                     final theme = Theme.of(context);
