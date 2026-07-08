@@ -488,7 +488,11 @@ abstract class ConfigOptions {
       balancerStrategy: ref.watch(balancerStrategy),
       // blockAds: ref.watch(blockAds),
       useXrayCoreWhenPossible: ref.watch(useXrayCoreWhenPossible),
-      executeConfigAsIs: false,
+      // PIXELLNET: use server-rendered sing-box config verbatim so template-side
+      // fixes (dns.strategy=ipv4_only, interface_name=pixellnet-tun, mtu=1500,
+      // stack=gvisor, no IPv6 TUN, no local mixed/direct ports) actually apply.
+      // Without this, hiddify-core patches the config and reintroduces defaults.
+      executeConfigAsIs: true,
       logLevel: ref.watch(logLevel),
       resolveDestination: ref.watch(resolveDestination),
       ipv6Mode: ref.watch(ipv6Mode),
