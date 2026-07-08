@@ -1,20 +1,25 @@
-import 'package:dartx/dartx.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
 import 'package:hiddify/features/home/widget/connection_button.dart';
-import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
-import 'package:hiddify/features/profile/widget/profile_tile.dart';
-import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
-import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/gen/assets.gen.dart';
-import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 
+/// PIXELLNET — Главная (Sprint 2 radical simplification).
+///
+/// Держим ТРИ элемента (Hick-Hyman ≤ 5-7):
+/// 1. Заголовок в AppBar (логотип + название)
+/// 2. Connect button — единственный focal point, смещённый к низу
+/// 3. Строка «Автовыбор · Матрица» + 🟢🟡🔴 качество
+///
+/// **Удалено** (per design consilium 2026-07-08):
+/// - `TunToggleButton` в AppBar → в dev-menu (5-tap по версии)
+/// - `ProfileTile` карточка активного профиля → в раздел Мой ключ
+/// - Кнопка «+» add profile → в Настройки → Управление подпиской
+/// - `ActiveProxyFooter` — traffic/counter → в Настройки → Статистика
+/// - Bottom sheet «Быстрые настройки» — дублировал Настройки
+/// - `AppVersionLabel` рядом с логотипом → в низ Настроек (5-tap разблокирует dev-menu)
 class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
 
@@ -22,207 +27,44 @@ class HomePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final t = ref.watch(translationsProvider).requireValue;
-    // final hasAnyProfile = ref.watch(hasAnyProfileProvider);
-    final activeProfile = ref.watch(activeProfileProvider);
 
     return Scaffold(
       appBar: AppBar(
-        // leading: (RootScaffold.stateKey.currentState?.hasDrawer ?? false) && showDrawerButton(context)
-        //     ? DrawerButton(
-        //         onPressed: () {
-        //           RootScaffold.stateKey.currentState?.openDrawer();
-        //         },
-        //       )
-        //     : null,
         title: Row(
           children: [
             Assets.images.logo.svg(height: 24),
             const Gap(8),
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(text: t.common.appTitle),
-                  const TextSpan(text: " "),
-                  const WidgetSpan(child: AppVersionLabel(), alignment: PlaceholderAlignment.middle),
-                ],
-              ),
-            ),
+            Text(t.common.appTitle),
           ],
         ),
-        actions: [
-          const TunToggleButton(),
-          Semantics(
-            key: const ValueKey("profile_add_button"),
-            label: t.pages.profiles.add,
-            child: IconButton(
-              icon: Icon(Icons.add_rounded, color: theme.colorScheme.primary),
-              onPressed: () => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
-            ),
-          ),
-          const Gap(8),
-        ],
       ),
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: const AssetImage('assets/images/world_map.png'), // Replace with your image path
+            image: const AssetImage('assets/images/world_map.png'),
             fit: BoxFit.cover,
-            opacity: 0.09,
+            opacity: 0.06,
             colorFilter: theme.brightness == Brightness.dark
-                ? ColorFilter.mode(Colors.white.withValues(alpha: .15), BlendMode.srcIn) //
-                : ColorFilter.mode(
-                    Colors.grey.withValues(alpha: 1),
-                    BlendMode.srcATop,
-                  ), // Apply white tint in dark mode
+                ? ColorFilter.mode(theme.colorScheme.onSurface.withValues(alpha: .12), BlendMode.srcIn)
+                : ColorFilter.mode(theme.colorScheme.onSurface.withValues(alpha: .5), BlendMode.srcATop),
           ),
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 600, // Set the maximum width here
-                ),
-                child: CustomScrollView(
-                  slivers: [
-                    // switch (activeProfile) {
-                    // AsyncData(value: final profile?) =>
-                    MultiSliver(
-                      children: [
-                        // const Gap(100),
-                        switch (activeProfile) {
-                          AsyncData(value: final profile?) => ProfileTile(
-                            profile: profile,
-                            isMain: true,
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            color: Theme.of(context).colorScheme.surfaceContainer,
-                          ),
-                          _ => const Text(""),
-                        },
-                        const SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [ConnectionButton(), ActiveProxyDelayIndicator()],
-                                ),
-                              ),
-                              ActiveProxyFooter(),
-                              Gap(32),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    // AsyncData() => switch (hasAnyProfile) {
-                    //     AsyncData(value: true) => const EmptyActiveProfileHomeBody(),
-                    //     _ => const EmptyProfilesHomeBody(),
-                    //   },
-                    // AsyncError(:final error) => SliverErrorBodyPlaceholder(t.presentShortError(error)),
-                    // _ => const SliverToBoxAdapter(),
-                    // },
-                  ],
-                ),
-              ),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Column(
+              children: [
+                const Spacer(),
+                const ConnectionButton(),
+                const Gap(24),
+                const ActiveProxyDelayIndicator(),
+                const Spacer(),
+                // Bottom offset per UX Ergonomics agent (Fitts's Law: mouse rests
+                // near bottom-taskbar, Connect button reachable with least travel)
+                const Gap(96),
+              ],
             ),
-            if (ref.watch(hasAnyProfileProvider).value ?? false)
-              Positioned(
-                right: 0,
-                left: 0,
-                bottom: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Material(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                      child: InkWell(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                        ),
-                        onTap: () => ref.read(bottomSheetsNotifierProvider.notifier).showQuickSettings(),
-                        child: Container(
-                          height: 32,
-                          padding: const EdgeInsetsDirectional.only(start: 16, end: 8),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(t.pages.home.quickSettings),
-                              const Gap(4),
-                              const Icon(Icons.arrow_drop_up_rounded, size: 16),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// PIXELLNET: quick TUN on/off toggle on the home AppBar.
-/// TUN mode routes all Windows traffic through the WinTUN adapter (auto_route).
-/// Alternative — proxy mode — keeps sing-box running but only apps that manually
-/// point at 127.0.0.1:mixed-port use the VPN. Useful when TUN clashes with
-/// another VPN app (Happ, WireGuard) on the same machine.
-class TunToggleButton extends HookConsumerWidget {
-  const TunToggleButton({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final mode = ref.watch(ConfigOptions.serviceMode);
-    final isTun = mode == ServiceMode.tun;
-
-    return IconButton(
-      tooltip: isTun ? "TUN включён" : "TUN выключен",
-      icon: Icon(
-        isTun ? Icons.vpn_lock_rounded : Icons.vpn_lock_outlined,
-        color: isTun ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: .4),
-      ),
-      onPressed: () async {
-        final next = isTun ? ServiceMode.proxy : ServiceMode.tun;
-        await ref.read(ConfigOptions.serviceMode.notifier).update(next);
-      },
-    );
-  }
-}
-
-class AppVersionLabel extends HookConsumerWidget {
-  const AppVersionLabel({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = ref.watch(translationsProvider).requireValue;
-    final theme = Theme.of(context);
-
-    final version = ref.watch(appInfoProvider).requireValue.presentVersion;
-    if (version.isBlank) return const SizedBox();
-
-    return Semantics(
-      label: t.common.version,
-      button: false,
-      child: Container(
-        decoration: BoxDecoration(color: theme.colorScheme.secondaryContainer, borderRadius: BorderRadius.circular(4)),
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-        child: Text(
-          version,
-          textDirection: TextDirection.ltr,
-          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSecondaryContainer),
+          ),
         ),
       ),
     );

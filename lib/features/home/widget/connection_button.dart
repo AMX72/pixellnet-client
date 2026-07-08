@@ -239,7 +239,8 @@ class _ConnectionButton extends StatelessWidget {
                 focusColor: Colors.grey,
                 onTap: onTap,
                 child: Padding(
-                  padding: const EdgeInsets.all(36),
+                  // Sprint 2 UX-ergonomics: 36 -> 32 to align with 4/8/16/24/32 scale.
+                  padding: const EdgeInsets.all(32),
                   child: TweenAnimationBuilder(
                     tween: ColorTween(end: buttonColor),
                     duration: const Duration(milliseconds: 250),
