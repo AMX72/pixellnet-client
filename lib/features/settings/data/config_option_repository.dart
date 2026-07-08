@@ -33,7 +33,7 @@ abstract class ConfigOptions {
 
   static final region = PreferencesNotifier.create<Region, String>(
     "region",
-    Region.other,
+    Region.ru,
     mapFrom: Region.values.byName,
     mapTo: (value) => value.name,
   );
@@ -81,9 +81,11 @@ abstract class ConfigOptions {
 
   static final directDnsAddress = PreferencesNotifier.create<String, String>(
     "direct-dns-address",
-    "udp://1.1.1.1",
+    "https://77.88.8.8/dns-query",
     possibleValues: List.of([
       "local",
+      "https://77.88.8.8/dns-query",
+      "udp://77.88.8.8",
       "udp://223.5.5.5",
       "udp://1.1.1.1",
       "udp://1.1.1.2",
@@ -93,7 +95,11 @@ abstract class ConfigOptions {
       "4.4.2.2",
       "8.8.8.8",
     ]),
-    defaultValueFunction: (ref) => ref.read(region) == Region.cn ? "223.5.5.5" : "1.1.1.1",
+    defaultValueFunction: (ref) => switch (ref.read(region)) {
+      Region.cn => "223.5.5.5",
+      Region.ru => "https://77.88.8.8/dns-query",
+      _ => "1.1.1.1",
+    },
     validator: (value) => value.isNotBlank,
   );
 
@@ -137,7 +143,7 @@ abstract class ConfigOptions {
     mapTo: (value) => value.name,
   );
 
-  static final mtu = PreferencesNotifier.create<int, int>("mtu", 9000);
+  static final mtu = PreferencesNotifier.create<int, int>("mtu", 1500);
 
   static final strictRoute = PreferencesNotifier.create<bool, bool>("strict-route", true);
 
