@@ -77,3 +77,9 @@ windows/sign.cer
 /libs/windows-amd64/
 
 hiddify-core/bin/
+
+# Sentry native FetchContent artifacts (accidentally staged during clean rebuild)
+build/windows/x64/_deps/
+external/breakpad
+external/crashpad
+external/libunwindstack-ndk
