@@ -9,7 +9,9 @@ import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/profile/widget/profile_tile.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
+import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/gen/assets.gen.dart';
+import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
@@ -48,18 +50,7 @@ class HomePage extends HookConsumerWidget {
           ],
         ),
         actions: [
-          // IconButton(
-          //     onPressed: () => const QuickSettingsRoute().push(context),
-          //     icon: const Icon(FluentIcons.options_24_filled),
-          //     material: (context, platform) => MaterialIconButtonData(
-          //           tooltip: t.config.quickSettings,
-          //         )),
-          // IconButton(
-          //     onPressed: () => const AddProfileRoute().push(context),
-          //     icon: const Icon(FluentIcons.add_circle_24_filled),
-          //     material: (context, platform) => MaterialIconButtonData(
-          //           tooltip: t.profile.add.buttonText,
-          //         )),
+          const TunToggleButton(),
           Semantics(
             key: const ValueKey("profile_add_button"),
             label: t.pages.profiles.add,
@@ -179,6 +170,34 @@ class HomePage extends HookConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// PIXELLNET: quick TUN on/off toggle on the home AppBar.
+/// TUN mode routes all Windows traffic through the WinTUN adapter (auto_route).
+/// Alternative — proxy mode — keeps sing-box running but only apps that manually
+/// point at 127.0.0.1:mixed-port use the VPN. Useful when TUN clashes with
+/// another VPN app (Happ, WireGuard) on the same machine.
+class TunToggleButton extends HookConsumerWidget {
+  const TunToggleButton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final mode = ref.watch(ConfigOptions.serviceMode);
+    final isTun = mode == ServiceMode.tun;
+
+    return IconButton(
+      tooltip: isTun ? "TUN включён" : "TUN выключен",
+      icon: Icon(
+        isTun ? Icons.vpn_lock_rounded : Icons.vpn_lock_outlined,
+        color: isTun ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: .4),
+      ),
+      onPressed: () async {
+        final next = isTun ? ServiceMode.proxy : ServiceMode.tun;
+        await ref.read(ConfigOptions.serviceMode.notifier).update(next);
+      },
     );
   }
 }
