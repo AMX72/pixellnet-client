@@ -11,7 +11,10 @@ class PreferencesMigration with InfraLogger {
   Future<void> migrate() async {
     final currentVersion = sharedPreferences.getInt(versionKey) ?? 0;
 
-    final migrationSteps = [PreferencesVersion1Migration(sharedPreferences)];
+    final migrationSteps = [
+      PreferencesVersion1Migration(sharedPreferences),
+      PreferencesVersion2Migration(sharedPreferences),
+    ];
 
     if (currentVersion == migrationSteps.length) {
       loggy.debug("already using the latest version (v$currentVersion)");
@@ -106,4 +109,22 @@ class PreferencesVersion1Migration extends PreferencesMigrationStep with InfraLo
     "ipv6Only" => "ipv6_only",
     _ => "",
   };
+}
+
+/// PIXELLNET Version2: force service-mode from "system-proxy" to "vpn" (TUN).
+/// Rule "no_windows_tweaks": app must never hijack Windows Internet Options proxy.
+/// Existing users who first launched v0.0.3 (defaultMode was systemProxy on Desktop)
+/// have "system-proxy" stored — rewrite it on next launch so VS Code / Claude Code /
+/// any WinInet-aware app stops routing to phantom 127.0.0.1:12334 when VPN disabled.
+class PreferencesVersion2Migration extends PreferencesMigrationStep with InfraLogger {
+  PreferencesVersion2Migration(super.sharedPreferences);
+
+  @override
+  Future<void> migrate() async {
+    final serviceMode = sharedPreferences.getString("service-mode");
+    if (serviceMode == "system-proxy") {
+      loggy.debug("PIXELLNET v2 migration: service-mode 'system-proxy' -> 'vpn' (TUN)");
+      await sharedPreferences.setString("service-mode", "vpn");
+    }
+  }
 }

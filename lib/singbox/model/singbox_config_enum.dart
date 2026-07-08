@@ -18,17 +18,17 @@ enum ServiceMode {
 
   final String key;
 
-  static ServiceMode get defaultMode => PlatformUtils.isDesktop ? systemProxy : tun;
+  // PIXELLNET: TUN by default on ALL platforms — never touch Windows system proxy settings
+  // (rule: no_windows_tweaks). system-proxy mode hijacks OS proxy settings, breaks VS Code /
+  // Claude Code / any app that reads WinInet proxy when VPN disconnects.
+  static ServiceMode get defaultMode => tun;
 
   /// supported service mode based on platform, use this instead of [values] in UI
+  /// PIXELLNET: only TUN is exposed — proxy modes hijack Windows/macOS system
+  /// proxy settings which breaks other apps (VS Code, Claude Code, etc.) when
+  /// the VPN disconnects. Rule no_windows_tweaks.
   static List<ServiceMode> get choices {
-    if (Platform.isWindows || Platform.isLinux) {
-      return values;
-    } else if (Platform.isMacOS) {
-      return [proxy, systemProxy, tun];
-    }
-    // mobile
-    return [proxy, tun];
+    return [tun];
   }
 
   // bool get isExperimental => switch (this) {

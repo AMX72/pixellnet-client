@@ -20,7 +20,15 @@ abstract class ConfigOptions {
   static final serviceMode = PreferencesNotifier.create<ServiceMode, String>(
     "service-mode",
     ServiceMode.defaultMode,
-    mapFrom: (value) => ServiceMode.choices.firstWhere((e) => e.key == value),
+    // PIXELLNET migration: any legacy "system-proxy" / "proxy" from earlier builds
+    // is coerced to "vpn" (TUN). Rule no_windows_tweaks — never touch system proxy.
+    mapFrom: (value) {
+      if (value == "system-proxy" || value == "proxy") return ServiceMode.tun;
+      return ServiceMode.choices.firstWhere(
+        (e) => e.key == value,
+        orElse: () => ServiceMode.tun,
+      );
+    },
     mapTo: (value) => value.key,
   );
 
