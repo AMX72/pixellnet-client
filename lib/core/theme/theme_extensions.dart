@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hiddify/core/brand/pixellnet_brand.dart';
 
 class ConnectionButtonTheme extends ThemeExtension<ConnectionButtonTheme> {
   const ConnectionButtonTheme({this.idleColor, this.connectedColor});
@@ -6,9 +7,12 @@ class ConnectionButtonTheme extends ThemeExtension<ConnectionButtonTheme> {
   final Color? idleColor;
   final Color? connectedColor;
 
+  /// PIXELLNET palette v3:
+  /// - Idle (не подключено) — brown mocha (нейтральный, «выключено»)
+  /// - Connected (подключено) — olive success (Mullvad-style, «работает»)
   static const ConnectionButtonTheme light = ConnectionButtonTheme(
-    idleColor: Color(0xFF4a4d8b),
-    connectedColor: Color(0xFF44a334),
+    idleColor: PixellnetColors.darkPrimary,
+    connectedColor: PixellnetColors.success,
   );
 
   @override

@@ -66,7 +66,9 @@ class MyAdaptiveLayout extends HookConsumerWidget {
                   FocusScope(
                     node: navScopeNode,
                     child: NavigationRail(
-                      extended: Breakpoint(context).isDesktop(),
+                      // PIXELLNET: всегда показываем подписи «Главная / Настройки»
+                      // — только 2 пункта, места хватает даже в узком окне.
+                      extended: true,
                       destinations: _navRailDests(_actions(t)),
                       selectedIndex: visibleSelectedIndex,
                       onDestinationSelected: (visibleIndex) => _onTap(context, _mapVisibleToBranch(visibleIndex, showProfilesAction)),
