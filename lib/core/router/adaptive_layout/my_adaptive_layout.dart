@@ -53,6 +53,10 @@ class MyAdaptiveLayout extends HookConsumerWidget {
         HardwareKeyboard.instance.removeHandler(handler);
       };
     }, [isMobileBreakpoint, showProfilesAction, navigationShell.currentIndex]);
+    // Sprint 3 sidebar mapping. Видимые пункты: 0=Главная, 1=Настройки.
+    // Реальные go_router branches: 0=Home, 1=Profiles, 2=Settings, 3=Logs, 4=About.
+    // Юзер видит только 2, но branches все ещё активны для deep-link/dev-menu.
+    final visibleSelectedIndex = navigationShell.currentIndex == 0 ? 0 : 1;
     return Material(
       child: Scaffold(
         body: isMobileBreakpoint
@@ -63,11 +67,9 @@ class MyAdaptiveLayout extends HookConsumerWidget {
                     node: navScopeNode,
                     child: NavigationRail(
                       extended: Breakpoint(context).isDesktop(),
-                      destinations: _navRailDests(_actions(t, showProfilesAction, isMobileBreakpoint)),
-                      selectedIndex: navigationShell.currentIndex,
-                      onDestinationSelected: (index) => _onTap(context, index),
-                      // Sprint 2: SideBarStatsOverview удалён из nav rail — traffic counters
-                      // перенесены в Настройки → Статистика (не должно захламлять главную).
+                      destinations: _navRailDests(_actions(t)),
+                      selectedIndex: visibleSelectedIndex,
+                      onDestinationSelected: (visibleIndex) => _onTap(context, _mapVisibleToBranch(visibleIndex)),
                       trailing: null,
                     ),
                   ),
@@ -78,9 +80,9 @@ class MyAdaptiveLayout extends HookConsumerWidget {
             ? FocusScope(
                 node: navScopeNode,
                 child: NavigationBar(
-                  selectedIndex: navigationShell.currentIndex <= 1 ? navigationShell.currentIndex : 0,
-                  destinations: _navDests(_actions(t, showProfilesAction, isMobileBreakpoint)),
-                  onDestinationSelected: (index) => _onTap(context, index),
+                  selectedIndex: visibleSelectedIndex,
+                  destinations: _navDests(_actions(t)),
+                  onDestinationSelected: (visibleIndex) => _onTap(context, _mapVisibleToBranch(visibleIndex)),
                 ),
               )
             : null,
@@ -93,12 +95,16 @@ class MyAdaptiveLayout extends HookConsumerWidget {
     navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
   }
 
-  List<ShellRouteAction> _actions(Translations t, bool showProfilesAction, bool isMobileBreakpoint) => [
+  /// Маппинг видимого индекса → реальный go_router branch index.
+  /// UI: 0=Главная, 1=Настройки. Branches: 0=Home, 1=Profiles, 2=Settings.
+  int _mapVisibleToBranch(int visibleIndex) => visibleIndex == 0 ? 0 : 2;
+
+  /// Sprint 3: sidebar сокращён до 2 пунктов (Главная + Настройки).
+  /// «Профили», «Логи», «О программе» вынесены в Настройки → Дополнительно
+  /// и dev-menu (5-tap по версии). Один юзер = один ключ → отдельный «Профили» не нужен.
+  List<ShellRouteAction> _actions(Translations t) => [
     ShellRouteAction(Icons.power_settings_new_rounded, t.pages.home.title),
-    if (showProfilesAction && !isMobileBreakpoint) ShellRouteAction(Icons.view_list_rounded, t.pages.profiles.title),
     ShellRouteAction(Icons.settings_rounded, t.pages.settings.title),
-    if (!isMobileBreakpoint) ShellRouteAction(Icons.description_rounded, t.pages.logs.title),
-    if (!isMobileBreakpoint) ShellRouteAction(Icons.info_rounded, t.pages.about.title),
   ];
 
   List<NavigationDestination> _navDests(List<ShellRouteAction> actions) =>
