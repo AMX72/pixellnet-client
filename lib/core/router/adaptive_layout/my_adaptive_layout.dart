@@ -66,14 +66,9 @@ class MyAdaptiveLayout extends HookConsumerWidget {
                       destinations: _navRailDests(_actions(t, showProfilesAction, isMobileBreakpoint)),
                       selectedIndex: navigationShell.currentIndex,
                       onDestinationSelected: (index) => _onTap(context, index),
-                      trailing: Breakpoint(context).isDesktop()
-                          ? const Expanded(
-                              child: Align(
-                                alignment: Alignment.bottomCenter,
-                                child: SizedBox(width: 220, child: SideBarStatsOverview()),
-                              ),
-                            )
-                          : null,
+                      // Sprint 2: SideBarStatsOverview удалён из nav rail — traffic counters
+                      // перенесены в Настройки → Статистика (не должно захламлять главную).
+                      trailing: null,
                     ),
                   ),
                   Expanded(child: navigationShell),
