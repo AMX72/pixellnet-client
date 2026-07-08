@@ -36,5 +36,12 @@ target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app)
 target_link_libraries(${BINARY_NAME} PRIVATE "dwmapi.lib")
 target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 
+# Force UAC level=requireAdministrator to match the runner.exe.manifest
+# (default CMake adds /MANIFESTUAC:level='asInvoker' which conflicts with our manifest).
+if(MSVC)
+  set_target_properties(${BINARY_NAME} PROPERTIES
+    LINK_FLAGS "/MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\"")
+endif()
+
 # Run the Flutter tool portions of the build. This must not be removed.
 add_dependencies(${BINARY_NAME} flutter_assemble)
