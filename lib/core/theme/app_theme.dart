@@ -16,14 +16,16 @@ class AppTheme {
     final ColorScheme scheme = lightColorScheme ??
         const ColorScheme(
           brightness: Brightness.light,
-          primary: PixellnetColors.lightPrimary,
+          primary: PixellnetColors.lightPrimary,             // коричневый
           onPrimary: PixellnetColors.lightOnPrimary,
           primaryContainer: PixellnetColors.lightPrimaryContainer,
           onPrimaryContainer: PixellnetColors.lightOnPrimaryContainer,
-          secondary: PixellnetColors.lightAccent,
+          secondary: PixellnetColors.lightAccent,            // жёлтый
           onSecondary: PixellnetColors.lightOnAccent,
-          tertiary: PixellnetColors.success,
-          onTertiary: PixellnetColors.onSuccess,
+          tertiary: PixellnetColors.lightTertiary,           // голубой
+          onTertiary: PixellnetColors.lightOnTertiary,
+          tertiaryContainer: PixellnetColors.lightTertiaryContainer,
+          onTertiaryContainer: PixellnetColors.lightOnTertiaryContainer,
           error: PixellnetColors.danger,
           onError: PixellnetColors.onDanger,
           surface: PixellnetColors.lightSurface,
@@ -45,14 +47,16 @@ class AppTheme {
     final ColorScheme scheme = darkColorScheme ??
         const ColorScheme(
           brightness: Brightness.dark,
-          primary: PixellnetColors.darkPrimary,
+          primary: PixellnetColors.darkPrimary,              // коричневый
           onPrimary: PixellnetColors.darkOnPrimary,
           primaryContainer: PixellnetColors.darkPrimaryContainer,
           onPrimaryContainer: PixellnetColors.darkOnPrimaryContainer,
-          secondary: PixellnetColors.darkAccent,
+          secondary: PixellnetColors.darkAccent,             // жёлтый
           onSecondary: PixellnetColors.darkOnAccent,
-          tertiary: PixellnetColors.success,
-          onTertiary: PixellnetColors.onSuccess,
+          tertiary: PixellnetColors.darkTertiary,            // голубой
+          onTertiary: PixellnetColors.darkOnTertiary,
+          tertiaryContainer: PixellnetColors.darkTertiaryContainer,
+          onTertiaryContainer: PixellnetColors.darkOnTertiaryContainer,
           error: PixellnetColors.danger,
           onError: PixellnetColors.onDanger,
           surface: PixellnetColors.darkSurface,
