@@ -69,7 +69,7 @@ class MyAdaptiveLayout extends HookConsumerWidget {
                       extended: Breakpoint(context).isDesktop(),
                       destinations: _navRailDests(_actions(t)),
                       selectedIndex: visibleSelectedIndex,
-                      onDestinationSelected: (visibleIndex) => _onTap(context, _mapVisibleToBranch(visibleIndex)),
+                      onDestinationSelected: (visibleIndex) => _onTap(context, _mapVisibleToBranch(visibleIndex, showProfilesAction)),
                       trailing: null,
                     ),
                   ),
@@ -82,7 +82,7 @@ class MyAdaptiveLayout extends HookConsumerWidget {
                 child: NavigationBar(
                   selectedIndex: visibleSelectedIndex,
                   destinations: _navDests(_actions(t)),
-                  onDestinationSelected: (visibleIndex) => _onTap(context, _mapVisibleToBranch(visibleIndex)),
+                  onDestinationSelected: (visibleIndex) => _onTap(context, _mapVisibleToBranch(visibleIndex, showProfilesAction)),
                 ),
               )
             : null,
@@ -96,8 +96,13 @@ class MyAdaptiveLayout extends HookConsumerWidget {
   }
 
   /// Маппинг видимого индекса → реальный go_router branch index.
-  /// UI: 0=Главная, 1=Настройки. Branches: 0=Home, 1=Profiles, 2=Settings.
-  int _mapVisibleToBranch(int visibleIndex) => visibleIndex == 0 ? 0 : 2;
+  /// UI: 0=Главная, 1=Настройки.
+  /// Branches если showProfilesAction=true: [Home, Profiles, Settings, Logs, About].
+  /// Branches если showProfilesAction=false: [Home, Settings, Logs, About].
+  int _mapVisibleToBranch(int visibleIndex, bool showProfilesAction) {
+    if (visibleIndex == 0) return 0; // Home всегда branch 0
+    return showProfilesAction ? 2 : 1; // Settings: с профилями = 2, без = 1
+  }
 
   /// Sprint 3: sidebar сокращён до 2 пунктов (Главная + Настройки).
   /// «Профили», «Логи», «О программе» вынесены в Настройки → Дополнительно
