@@ -22,6 +22,7 @@ import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.net.UnknownHostException
+import java.util.concurrent.atomic.AtomicBoolean
 
 
 object DefaultNetworkListener {
@@ -31,6 +32,14 @@ object DefaultNetworkListener {
     // while sing-box re-evaluates outbound and completes fresh TLS handshake.
     private const val HANDOVER_WAKELOCK_MS = 8_000L
     private var handoverWakeLock: PowerManager.WakeLock? = null
+
+    // True when we lost a network and are waiting for a new one (airplane mode / WiFi→Cell).
+    // Guards against calling Mobile.wake() on stale actors after VPN revoke.
+    private val isReconnecting = AtomicBoolean(false)
+
+    // Set by BoxService to prevent Mobile.wake() being called after service tear-down.
+    // BoxService.onStartCommand → true; BoxService.stopService (before Mobile.close) → false.
+    var serviceActive = AtomicBoolean(false)
 
     private sealed class NetworkMessage {
         class Start(val key: Any, val listener: (Network?) -> Unit) : NetworkMessage()
@@ -88,10 +97,28 @@ object DefaultNetworkListener {
                         }
 
                     is NetworkMessage.Put -> {
+                        val wasReconnecting = isReconnecting.getAndSet(false)
                         network = message.network
                         pendingRequests.forEach { it.response.complete(message.network) }
                         pendingRequests.clear()
                         listeners.values.forEach { it(network) }
+                        // If we lost a previous network (airplane off, WiFi→Cell transition),
+                        // sing-box may be holding dead sockets. Force outbound re-evaluation
+                        // and acquire WakeLock so CPU stays awake during TLS re-handshake.
+                        if (wasReconnecting && serviceActive.get()) {
+                            GlobalScope.launch(Dispatchers.IO) {
+                                // Double-check after dispatch — service may have stopped
+                                // between the Put processing and coroutine execution.
+                                if (!serviceActive.get()) return@launch
+                                try {
+                                    Mobile.wake()
+                                    Log.d(TAG, "Put/NetworkTransition: Mobile.wake() called after network switch")
+                                } catch (e: Exception) {
+                                    Log.w(TAG, "Put/NetworkTransition: Mobile.wake() failed: ${e.message}")
+                                }
+                            }
+                            acquireHandoverWakeLock()
+                        }
                     }
 
                     is NetworkMessage.Update ->
@@ -105,8 +132,13 @@ object DefaultNetworkListener {
 
                     is NetworkMessage.Lost ->
                         if (network == message.network) {
+                            // Mark reconnecting BEFORE notifying listeners so that if
+                            // onAvailable fires synchronously on the same thread, wasReconnecting
+                            // is already true when Put is processed.
+                            isReconnecting.set(true)
                             network = null
                             listeners.values.forEach { it(null) }
+                            Log.d(TAG, "Lost default network — reconnecting=true, waiting for onAvailable")
                         }
 
                     is NetworkMessage.WarmupReconnect -> {
@@ -117,7 +149,8 @@ object DefaultNetworkListener {
                         }
                         // 2. Wake sing-box so urltest selector re-evaluates outbounds NOW
                         //    instead of waiting for the next 10s interval.
-                        GlobalScope.launch(Dispatchers.IO) {
+                        if (serviceActive.get()) GlobalScope.launch(Dispatchers.IO) {
+                            if (!serviceActive.get()) return@launch
                             try {
                                 Mobile.wake()
                                 Log.d(TAG, "WarmupReconnect: Mobile.wake() called after IP change")

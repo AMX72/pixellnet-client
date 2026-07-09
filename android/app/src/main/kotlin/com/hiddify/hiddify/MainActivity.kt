@@ -132,8 +132,14 @@ class MainActivity : FlutterFragmentActivity(), ServiceConnection.Callback {
 
 
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
+
     override fun onDestroy() {
-        connection.disconnect()
+        runCatching { connection.disconnect() }
+            .onFailure { Log.w(TAG, "onDestroy: disconnect failed: ${it.message}") }
         super.onDestroy()
     }
 

@@ -13,6 +13,8 @@ import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/core/model/region.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
+import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
+import 'package:hiddify/features/activation/notifier/trial_notifier.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hiddify/utils/utils.dart';
@@ -43,6 +45,10 @@ class IntroPage extends HookConsumerWidget with PresLogger {
       locationInfoLoaded = true;
     }
 
+    final trialState = ref.watch(trialStateProvider);
+    final isTrialActivating = trialState is TrialActivating;
+    final trialError = trialState is TrialError ? (trialState).message : null;
+
     Future<void> finishIntro() async {
       if (isStarting.value) return;
       isStarting.value = true;
@@ -54,6 +60,25 @@ class IntroPage extends HookConsumerWidget with PresLogger {
         }
       }
       await ref.read(Preferences.introCompleted.notifier).update(true);
+    }
+
+    Future<void> startTrialAndFinish() async {
+      if (isStarting.value || isTrialActivating) return;
+      // Сначала запустить trial (асинхронно), потом завершить onboarding.
+      // finishIntro обновит introCompleted → роутер перейдёт на Home.
+      // TrialNotifier сам добавит профиль в Hiddify storage.
+      ref.read(trialStateProvider.notifier).startTrial();
+      // Ждём результата
+      await Future.doWhile(() async {
+        await Future.delayed(const Duration(milliseconds: 100));
+        final s = ref.read(trialStateProvider);
+        return s is TrialActivating;
+      });
+      final s = ref.read(trialStateProvider);
+      if (s is TrialActive) {
+        await finishIntro();
+      }
+      // Если TrialError — не завершаем intro, показываем error в UI
     }
 
     return Scaffold(
@@ -110,27 +135,83 @@ class IntroPage extends HookConsumerWidget with PresLogger {
                   else
                     const SizedBox(width: 64),
                   const Spacer(),
-                  FilledButton(
-                    onPressed: currentPage.value < 2
-                        ? () => pageController.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOutCubic,
-                            )
-                        : finishIntro,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(120, 48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  if (currentPage.value < 2)
+                    FilledButton(
+                      onPressed: () => pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
                       ),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(120, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Далее'),
+                    )
+                  else
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (trialError != null) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              trialError,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextButton(
+                                onPressed: () => ref.read(trialStateProvider.notifier).retry(),
+                                child: const Text('Повторить'),
+                              ),
+                              const SizedBox(width: 8),
+                              TextButton(
+                                onPressed: () {
+                                  finishIntro().then((_) {
+                                    ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile();
+                                  });
+                                },
+                                child: const Text('Ввести ключ'),
+                              ),
+                            ],
+                          ),
+                        ] else
+                          FilledButton(
+                            onPressed: isTrialActivating ? null : startTrialAndFinish,
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(240, 52),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: isTrialActivating
+                                ? const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text('Активируем...'),
+                                    ],
+                                  )
+                                : const Text(
+                                    'Попробовать бесплатно 7 дней',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                          ),
+                      ],
                     ),
-                    child: isStarting.value
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(currentPage.value < 2 ? 'Далее' : 'Понятно'),
-                  ),
                 ],
               ),
             ),

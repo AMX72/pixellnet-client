@@ -2,20 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
+import 'package:hiddify/features/activation/notifier/trial_notifier.dart';
 import 'package:hiddify/features/home/widget/connection_button.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-/// PIXELLNET — Главная (Sprint 2 + 4.2).
+/// PIXELLNET — Главная (v0.0.24 — trial-aware).
 ///
-/// Два состояния:
-/// 1. **Есть ключ** (`hasAnyProfile == true`): Connect button + quality indicator
-/// 2. **Нет ключа** (пустое состояние): большая кнопка «Вставить ключ»
-///    с объяснением куда взять ключ (Telegram/почта продавца)
-///
-/// Держим ≤3 focal элементов (Hick-Hyman). Один focal point на состояние.
+/// Состояния:
+/// 1. `hasKey && TrialActive (not expired, trial)` → Connect + badge TRIAL + ссылка «Оплатить»
+/// 2. `hasKey && TrialActive (not expired, paid)` → Connect (чисто)
+/// 3. `hasKey && expired trial` → Paywall модалка (Connect заблокирован)
+/// 4. `!hasKey` → empty state «Вставить ключ» (резервный, не должно быть при нормальном flow)
 class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
 
@@ -24,6 +25,17 @@ class HomePage extends HookConsumerWidget {
     final theme = Theme.of(context);
     final t = ref.watch(translationsProvider).requireValue;
     final hasKey = ref.watch(hasAnyProfileProvider).valueOrNull ?? false;
+    final trialState = ref.watch(trialStateProvider);
+
+    // Показать paywall если trial истёк
+    final showPaywall = trialState is TrialActive && trialState.showPaywall;
+
+    // Пост-фрейм — показываем paywall диалог
+    if (showPaywall) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) _showPaywallDialog(context);
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -49,41 +61,129 @@ class HomePage extends HookConsumerWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
-            child: hasKey ? const _ConnectedBody() : _EmptyKeyBody(ref: ref),
+            child: hasKey
+                ? _ConnectedBody(trialState: trialState)
+                : _EmptyKeyBody(ref: ref),
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showPaywallDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const _PaywallDialog(),
+    );
+  }
+}
+
+/// Состояние — ключ есть: Connect + опционально trial badge.
+class _ConnectedBody extends StatelessWidget {
+  const _ConnectedBody({required this.trialState});
+  final TrialState trialState;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isTrial = trialState is TrialActive && (trialState as TrialActive).isTrial;
+    final daysLeft = trialState is TrialActive ? (trialState as TrialActive).daysLeft : 0;
+
+    return Column(
+      children: [
+        const Spacer(),
+        const ConnectionButton(),
+        const Gap(24),
+        const ActiveProxyDelayIndicator(),
+        const Spacer(),
+        if (isTrial) ...[
+          _TrialBadge(daysLeft: daysLeft, theme: theme),
+          const Gap(8),
+          TextButton(
+            onPressed: () => launchUrl(
+              Uri.parse('https://pixellnet.com/pay'),
+              mode: LaunchMode.externalApplication,
+            ),
+            child: Text(
+              'Оплатить сейчас',
+              style: TextStyle(
+                color: theme.colorScheme.primary,
+                fontSize: 13,
+              ),
+            ),
+          ),
+          const Gap(16),
+        ] else
+          const Gap(96),
+      ],
+    );
+  }
+}
+
+class _TrialBadge extends StatelessWidget {
+  const _TrialBadge({required this.daysLeft, required this.theme});
+  final int daysLeft;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final isUrgent = daysLeft <= 2;
+    final color = isUrgent ? theme.colorScheme.error : const Color(0xFF00BCD4);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: .4)),
+      ),
+      child: Text(
+        daysLeft > 0 ? 'TRIAL · осталось $daysLeft дн.' : 'TRIAL · последний день',
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+          letterSpacing: 0.5,
         ),
       ),
     );
   }
 }
 
-/// Состояние 1 — ключ есть: Connect + quality indicator.
-class _ConnectedBody extends StatelessWidget {
-  const _ConnectedBody();
+/// Paywall диалог — показывается когда trial истёк.
+class _PaywallDialog extends StatelessWidget {
+  const _PaywallDialog();
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        Spacer(),
-        ConnectionButton(),
-        Gap(24),
-        ActiveProxyDelayIndicator(),
-        Spacer(),
-        // Bottom offset per UX Ergonomics agent (Fitts's Law: mouse rests near bottom).
-        Gap(96),
+    return AlertDialog(
+      title: const Text('Триал закончился'),
+      content: const Text(
+        'Продли подписку, чтобы продолжить пользоваться PIXELLNET.\n\n'
+        'Базовый план — 299₽/мес',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Закрыть'),
+        ),
+        FilledButton(
+          onPressed: () {
+            Navigator.pop(context);
+            launchUrl(
+              Uri.parse('https://pixellnet.com/pay'),
+              mode: LaunchMode.externalApplication,
+            );
+          },
+          child: const Text('Продлить за 299₽'),
+        ),
       ],
     );
   }
 }
 
-/// Состояние 2 — ключа нет: empty state с кнопкой «Вставить ключ».
-///
-/// Layout per UX Ergonomics + Linguist:
-/// - Icon 96×96 «vpn_key» на primaryContainer
-/// - Title «Нужен ключ» headlineMedium
-/// - Subtitle «Ключ приходит от продавца в Telegram или на почту»
-/// - FilledButton 240×56 «Вставить ключ» — открывает showAddProfile
+/// Состояние — ключа нет (резервный empty state).
 class _EmptyKeyBody extends StatelessWidget {
   const _EmptyKeyBody({required this.ref});
   final WidgetRef ref;

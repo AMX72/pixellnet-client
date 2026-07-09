@@ -10,6 +10,8 @@ import 'package:hiddify/core/router/go_router/helper/active_breakpoint_notifier.
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/settings/notifier/config_option/config_option_notifier.dart';
 import 'package:hiddify/features/settings/notifier/reset_tunnel/reset_tunnel_notifier.dart';
+import 'package:hiddify/features/updater/update_dialog.dart';
+import 'package:hiddify/features/updater/updater_service.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -74,6 +76,51 @@ class SettingsPage extends HookConsumerWidget {
             subtitle: const Text('Скопируй ключ и нажми — разберёмся сами'),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
+          ),
+          // ── Auto-update toggle ──────────────────────────────────────────────
+          Consumer(
+            builder: (context, ref, _) {
+              final autoUpdate = ref.watch(autoUpdateEnabledProvider);
+              return SwitchListTile(
+                secondary: const Icon(Icons.system_update_outlined),
+                title: const Text('Автообновление'),
+                subtitle: const Text('Проверять и устанавливать новые версии автоматически'),
+                value: autoUpdate,
+                onChanged: (v) =>
+                    ref.read(autoUpdateEnabledProvider.notifier).toggle(v),
+              );
+            },
+          ),
+          // ── Manual check ────────────────────────────────────────────────────
+          Builder(
+            builder: (context) {
+              final version = ref.watch(appInfoProvider).valueOrNull?.presentVersion ?? '';
+              return ListTile(
+                leading: const Icon(Icons.info_outline_rounded),
+                title: const Text('Проверить обновления'),
+                subtitle: version.isNotEmpty ? Text('Версия $version') : null,
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () async {
+                  final info = await UpdaterService.instance
+                      .checkForUpdate(force: true);
+                  if (context.mounted) {
+                    if (info != null) {
+                      showDialog(
+                        context: context,
+                        builder: (_) => UpdateDialog(info: info),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Установлена последняя версия'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  }
+                },
+              );
+            },
           ),
           _SettingsTile(
             title: t.pages.settings.general.title,

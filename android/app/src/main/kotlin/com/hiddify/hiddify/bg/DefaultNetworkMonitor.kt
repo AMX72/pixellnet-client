@@ -54,17 +54,17 @@ object DefaultNetworkMonitor {
             // Fixed: original loop ran all 10 iterations even after success, blocking
             // ConnectivityThread for up to 1 second. Now break on first successful lookup.
             for (times in 0 until 10) {
-                val interfaceIndex: Int = try {
-                    NetworkInterface.getByName(interfaceName)?.index ?: run {
-                        Thread.sleep(100)
-                        continue
-                    }
+                val interfaceIndex: Int? = try {
+                    NetworkInterface.getByName(interfaceName)?.index
                 } catch (e: Exception) {
-                    Thread.sleep(100)
-                    continue
+                    null
                 }
-                listener.updateDefaultInterface(interfaceName, interfaceIndex, false, false)
-                break // success — don't repeat
+                if (interfaceIndex == null) {
+                    Thread.sleep(100)
+                } else {
+                    listener.updateDefaultInterface(interfaceName, interfaceIndex, false, false)
+                    break
+                }
             }
         } else {
             listener.updateDefaultInterface("", -1, false, false)

@@ -24,6 +24,7 @@ import 'package:hiddify/features/profile/data/profile_data_providers.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/system_tray/notifier/system_tray_notifier.dart';
+import 'package:hiddify/features/updater/updater_service.dart';
 import 'package:hiddify/features/window/notifier/window_notifier.dart';
 import 'package:hiddify/hiddifycore/hiddify_core_service_provider.dart';
 import 'package:hiddify/riverpod_observer.dart';
@@ -134,6 +135,17 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async
 
   if (!kIsWeb) {
     FlutterNativeSplash.remove();
+  }
+
+  // Auto-update check — запускаем после первого кадра, не блокируем UI
+  if (PlatformUtils.isAndroid) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final autoEnabled = container.read(autoUpdateEnabledProvider);
+      if (!autoEnabled) return;
+      // fire-and-forget: диалог покажется через navigatorKey или ignoreд если context недоступен
+      await UpdaterService.instance.checkForUpdate();
+      // Диалог показывается из SettingsPage «Проверить обновления» или через updateInfoProvider
+    });
   }
   // SentryFlutter.s(DateTime.now().toUtc());
 }

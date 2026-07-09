@@ -173,6 +173,19 @@ class BoxService(
             }
 
             DefaultNetworkMonitor.start()
+            // Subscribe to network loss/restore for notification updates.
+            // Key "box_notification" is separate from DefaultNetworkMonitor's key.
+            DefaultNetworkListener.start("box_notification") { network ->
+                if (status.value == Status.Started || status.value == Status.Starting) {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        if (network == null) {
+                            notification.show(activeProfileName, R.string.status_reconnecting)
+                        } else {
+                            notification.show(activeProfileName, R.string.status_started)
+                        }
+                    }
+                }
+            }
             Libbox.setMemoryLimit(!Settings.disableMemoryLimit)
             val newService = try {
                 Mobile.setup(
@@ -279,6 +292,9 @@ class BoxService(
 
     private fun stopService() {
         if (status.value == Status.Stopped) return
+        // Signal before any async work so Mobile.wake() guards in DefaultNetworkListener
+        // see the false value and skip wake calls during tear-down.
+        DefaultNetworkListener.serviceActive.set(false)
         status.value = Status.Stopping
         if (receiverRegistered) {
             service.unregisterReceiver(receiver)
@@ -303,6 +319,7 @@ class BoxService(
 
 //            boxService = null
 //            Libbox.registerLocalDNSTransport(null)
+            DefaultNetworkListener.stop("box_notification")
             DefaultNetworkMonitor.stop()
             wifiLock?.let { if (it.isHeld) it.release() }
 
@@ -368,6 +385,7 @@ class BoxService(
             }
         }
 
+        DefaultNetworkListener.serviceActive.set(true)
         GlobalScope.launch(Dispatchers.IO) {
             Settings.startedByUser = true
             initialize()

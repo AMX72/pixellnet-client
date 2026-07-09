@@ -129,3 +129,25 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') }}
+
+      - name: Mirror arm64 APK to pixellnet.com
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          SSH_KEY: ${{ secrets.NETCUP_V2RAY_SSH_KEY }}
+        run: |
+          ARM64_APK=$(ls out/pixellnet-${{ steps.ver.outputs.version }}-*arm64*.apk | head -1)
+          if [ -z "$ARM64_APK" ]; then
+            echo "arm64 APK not found, skipping mirror"
+            exit 0
+          fi
+          echo "$SSH_KEY" > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+          # Upload latest (overwrites) and versioned copy
+          scp -o StrictHostKeyChecking=no -i /tmp/deploy_key \
+            "$ARM64_APK" \
+            root@159.195.27.39:/var/www/pixellnet-downloads/pixellnet-latest-arm64.apk
+          scp -o StrictHostKeyChecking=no -i /tmp/deploy_key \
+            "$ARM64_APK" \
+            "root@159.195.27.39:/var/www/pixellnet-downloads/pixellnet-${{ steps.ver.outputs.version }}-arm64.apk"
+          rm -f /tmp/deploy_key
+          echo "Mirrored $ARM64_APK to pixellnet.com/download/"

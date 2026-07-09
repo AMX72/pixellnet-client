@@ -4,4 +4,5 @@
     <string name="quick_toggle">Toggle</string>
     <string name="status_starting">Service starting…</string>
     <string name="status_started">Service started</string>
+    <string name="status_reconnecting">Reconnecting…</string>
 </resources>
