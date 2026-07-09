@@ -7,6 +7,8 @@ import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/failures.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/widget/adaptive_icon.dart';
+import 'package:flutter/services.dart';
+import 'package:hiddify/features/log/data/diagnostic_uploader.dart';
 import 'package:hiddify/features/log/data/log_data_providers.dart';
 import 'package:hiddify/features/log/model/log_level.dart';
 import 'package:hiddify/features/log/overview/logs_overview_notifier.dart';
@@ -28,9 +30,24 @@ class LogsPage extends HookConsumerWidget with PresLogger {
 
     final filterController = useTextEditingController(text: state.filter);
 
-    // v0.0.33: убран `debug ||` gate — юзер должен всегда мочь поделиться логами
-    // для support. Раньше кнопка была скрыта на Android в release-build.
+    // v0.0.34: убран `debug ||` gate + добавлен «Отправить разработчику»
+    // (uploads box.log + app.log + метаданные на pixellnet.com/api/diagnostics/upload
+    // и возвращает короткий код `A7K2P` для отправки в поддержку).
     final List<PopupMenuEntry> popupButtons = [
+      PopupMenuItem(
+        child: const Text('Отправить разработчику'),
+        onTap: () async {
+          // showDialog не работает если вызван изнутри PopupMenuItem onTap —
+          // используем WidgetsBinding pushToFront чтобы UI успел закрыть menu.
+          Future.delayed(const Duration(milliseconds: 100), () async {
+            if (!context.mounted) return;
+            final code = await _uploadDiagnostic(context);
+            if (code != null && context.mounted) {
+              _showDiagCodeDialog(context, code);
+            }
+          });
+        },
+      ),
       PopupMenuItem(
         child: Text(t.pages.logs.shareCoreLogs),
         onTap: () async {
@@ -192,4 +209,85 @@ class LogsPage extends HookConsumerWidget with PresLogger {
 String extractMessage(String message) {
   final parts = message.split(' ');
   return parts.length <= 2 ? parts.last : parts.sublist(2).join(' ');
+}
+
+/// Возвращает 5-символьный код (напр. `A7K2P`) или null при ошибке.
+Future<String?> _uploadDiagnostic(BuildContext context) async {
+  final messenger = ScaffoldMessenger.of(context);
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const AlertDialog(
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text('Отправляем логи...'),
+        ],
+      ),
+    ),
+  );
+  try {
+    final code = await DiagnosticUploader.instance.uploadDiagnostic();
+    if (context.mounted) Navigator.pop(context);
+    return code;
+  } catch (e) {
+    if (context.mounted) Navigator.pop(context);
+    messenger.showSnackBar(SnackBar(
+      content: Text('Ошибка: ${e.toString().replaceFirst('Exception: ', '')}'),
+      backgroundColor: Colors.red.shade900,
+    ));
+    return null;
+  }
+}
+
+void _showDiagCodeDialog(BuildContext context, String code) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Логи отправлены'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Отдай разработчику этот код:'),
+          const SizedBox(height: 16),
+          SelectableText(
+            code,
+            style: const TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 4,
+              fontFamily: 'monospace',
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Разработчик посмотрит логи на pixellnet.com/diag/{КОД} '
+            'и найдёт причину проблемы.',
+            style: TextStyle(fontSize: 13),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Clipboard.setData(ClipboardData(text: code));
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Код скопирован'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          },
+          child: const Text('Скопировать'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('OK'),
+        ),
+      ],
+    ),
+  );
 }
