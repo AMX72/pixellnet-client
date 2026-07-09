@@ -1,0 +1,133 @@
+name: Build iOS
+
+# iOS build требует Apple Developer Program ($99/год).
+# Пока deferred: workflow можно запустить только вручную (workflow_dispatch),
+# когда получим Apple Dev + добавим secrets в GH.
+#
+# Автоматический билд на push tag НЕ включён — иначе сгорит квота на macos runners.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 0.1.0)'
+        required: false
+        default: 'dev'
+
+concurrency:
+  group: build-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Flutter 3.38.5
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.5'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache pub + pods
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            ios/Pods
+          key: ios-${{ hashFiles('pubspec.lock', 'ios/Podfile.lock') }}
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ -n "${{ inputs.version }}" ] && [ "${{ inputs.version }}" != "dev" ]; then
+            V="${{ inputs.version }}"
+          else
+            V="dev-${{ github.run_number }}"
+          fi
+          echo "version=$V" >> $GITHUB_OUTPUT
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Generate slang + codegen
+        run: |
+          dart run slang
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Setup Apple certificates
+        if: env.APPLE_DEV_ENABLED == 'true'
+        env:
+          APPLE_DEV_ENABLED: ${{ secrets.APPLE_DEV_ENABLED }}
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.APPLE_P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.APPLE_BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
+      - name: Flutter build iOS release
+        run: |
+          flutter build ios --release --no-codesign \
+            --build-number=${{ github.run_number }} \
+            --build-name=${{ steps.ver.outputs.version }}
+
+      - name: Upload artifact (unsigned .app)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixellnet-ios-unsigned
+          path: build/ios/iphoneos/Runner.app
+          retention-days: 30
+
+      # Дальше — Xcode archive + TestFlight upload через fastlane pilot.
+      # Раскомментировать когда есть Apple Dev + fastlane setup.
+      #
+      # - name: Xcode archive
+      #   run: |
+      #     cd ios
+      #     xcodebuild -workspace Runner.xcworkspace -scheme Runner \
+      #       -sdk iphoneos -configuration Release archive \
+      #       -archivePath $RUNNER_TEMP/Runner.xcarchive
+      #
+      # - name: Export IPA
+      #   run: |
+      #     cd ios
+      #     xcodebuild -exportArchive \
+      #       -archivePath $RUNNER_TEMP/Runner.xcarchive \
+      #       -exportPath $RUNNER_TEMP/ipa \
+      #       -exportOptionsPlist exportOptions.plist
+      #
+      # - name: Upload to TestFlight (fastlane pilot)
+      #   env:
+      #     APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+      #     APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      #     APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      #   run: |
+      #     gem install fastlane
+      #     fastlane pilot upload \
+      #       --ipa $RUNNER_TEMP/ipa/Runner.ipa \
+      #       --skip_waiting_for_build_processing true
