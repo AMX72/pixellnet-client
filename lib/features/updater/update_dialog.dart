@@ -67,14 +67,34 @@ class _UpdateDialogState extends State<UpdateDialog> {
           onPressed: _installing ? null : () => Navigator.pop(context),
           child: Text(_error != null ? 'Закрыть' : 'Позже'),
         ),
-        FilledButton(
-          onPressed: _installing ? null : _startInstall,
-          child: Text(_installing
-              ? (_progress == null ? 'Загрузка...' : '${(_progress! * 100).toInt()}%')
-              : (_error != null ? 'Повторить' : 'Установить')),
-        ),
+        if (_needsPermission)
+          FilledButton(
+            onPressed: _installing ? null : _openSettings,
+            child: const Text('Открыть настройки'),
+          )
+        else
+          FilledButton(
+            onPressed: _installing ? null : _startInstall,
+            child: Text(_installing
+                ? (_progress == null
+                    ? 'Загрузка...'
+                    : '${(_progress! * 100).toInt()}%')
+                : (_error != null ? 'Повторить' : 'Установить')),
+          ),
       ],
     );
+  }
+
+  bool get _needsPermission =>
+      _error != null && _error!.contains('Разреши установку');
+
+  Future<void> _openSettings() async {
+    await openInstallUnknownAppsSettings();
+    if (mounted) {
+      setState(() {
+        _error = 'Разреши установку → вернись → Повторить';
+      });
+    }
   }
 
   Future<void> _startInstall() async {

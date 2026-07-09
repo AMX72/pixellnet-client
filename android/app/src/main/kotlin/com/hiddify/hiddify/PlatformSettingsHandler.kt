@@ -43,6 +43,8 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
             RequestIgnoreBatteryOptimizations("request_ignore_battery_optimizations"),
             GetInstalledPackages("get_installed_packages"),
             GetPackagesIcon("get_package_icon"),
+            CanRequestPackageInstalls("can_request_package_installs"),
+            OpenInstallUnknownAppsSettings("open_install_unknown_apps_settings"),
         }
     }
 
@@ -118,6 +120,32 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
                 )
                 ignoreRequestResult = result
                 activity?.startActivityForResult(intent, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+            }
+
+            Trigger.CanRequestPackageInstalls.method -> {
+                result.runCatching {
+                    success(
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            Application.application.packageManager.canRequestPackageInstalls()
+                        } else {
+                            true
+                        }
+                    )
+                }
+            }
+
+            Trigger.OpenInstallUnknownAppsSettings.method -> {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    return result.success(true)
+                }
+                runCatching {
+                    val intent = Intent(
+                        android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                        Uri.parse("package:${Application.application.packageName}")
+                    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    (activity ?: Application.application).startActivity(intent)
+                    result.success(true)
+                }.onFailure { result.error("OPEN_SETTINGS_FAILED", it.message, null) }
             }
 
             Trigger.GetInstalledPackages.method -> {

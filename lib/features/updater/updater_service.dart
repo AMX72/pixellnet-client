@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:open_file/open_file.dart';
@@ -9,6 +10,36 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/// Thrown when Android REQUEST_INSTALL_PACKAGES permission is missing.
+/// UI catches this specifically to show «Открыть настройки» button.
+class InstallPermissionDeniedException implements Exception {
+  @override
+  String toString() =>
+      'Разреши установку приложений из этого источника в настройках Android';
+}
+
+const _platformChannel = MethodChannel('com.hiddify.app/platform');
+
+Future<bool> _canRequestPackageInstalls() async {
+  if (!Platform.isAndroid) return true;
+  try {
+    return (await _platformChannel
+            .invokeMethod<bool>('can_request_package_installs')) ??
+        false;
+  } catch (_) {
+    return false;
+  }
+}
+
+Future<void> openInstallUnknownAppsSettings() async {
+  if (!Platform.isAndroid) return;
+  try {
+    await _platformChannel.invokeMethod('open_install_unknown_apps_settings');
+  } catch (e) {
+    if (kDebugMode) debugPrint('[Updater] openSettings failed: $e');
+  }
+}
 
 const _kGithubRepo = 'AMX72/pixellnet-client';
 const _kPrefAutoUpdate = 'pixellnet.updater.auto_update_enabled';
@@ -142,6 +173,12 @@ class UpdaterService {
     final file = File('${downloadDir.path}/pixellnet-${info.version}.apk');
     if (await file.exists()) {
       await file.delete();
+    }
+
+    // Проверяем runtime permission REQUEST_INSTALL_PACKAGES (Android 8+).
+    // Если нет — фейлимся заранее, не скачивая 119 МБ впустую.
+    if (!await _canRequestPackageInstalls()) {
+      throw InstallPermissionDeniedException();
     }
 
     final client = http.Client();
