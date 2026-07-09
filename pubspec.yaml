@@ -48,7 +48,7 @@ dependencies:
   screen_retriever: ^0.2.0
 
   package_info_plus: ^8.1.0
-  device_info_plus: ^10.1.0
+  device_info_plus: ^11.3.2
   pub_semver: ^2.1.4
   open_file: ^3.3.2
   crypto: ^3.0.3
