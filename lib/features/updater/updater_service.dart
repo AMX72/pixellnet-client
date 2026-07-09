@@ -136,6 +136,12 @@ class UpdaterService {
 
       if (apkUrl == null) return null;
 
+      // v0.0.33: заменяем GitHub URL на pixellnet.com/download mirror.
+      // Причина: Yota/РФ операторы обрывают download release-assets.githubusercontent.com
+      // с SocketException errno 103. Наш mirror через Cloudflare + Netcup стабильнее.
+      final mirrorUrl =
+          'https://pixellnet.com/download/pixellnet-$tagName-arm64.apk';
+
       final packageInfo = await PackageInfo.fromPlatform();
       final current = Version.parse(packageInfo.version.split('+').first);
       final latest = Version.parse(tagName);
@@ -143,7 +149,7 @@ class UpdaterService {
       if (latest > current) {
         return UpdateInfo(
           version: tagName,
-          downloadUrl: apkUrl,
+          downloadUrl: mirrorUrl,
           changelog: body,
         );
       }
@@ -181,29 +187,80 @@ class UpdaterService {
       throw InstallPermissionDeniedException();
     }
 
-    final client = http.Client();
-    try {
-      final request = http.Request('GET', Uri.parse(info.downloadUrl));
-      final response = await client.send(request).timeout(
-            const Duration(seconds: 60),
-            onTimeout: () =>
-                throw Exception('Таймаут при подключении к серверу обновлений'),
-          );
-      if (response.statusCode != 200) {
-        throw Exception('HTTP ${response.statusCode} от сервера обновлений');
-      }
-      final total = response.contentLength ?? 0;
-      int received = 0;
+    // v0.0.33: retry с Range headers если Yota/CGNAT рвёт stream.
+    // errno 103 «Software caused connection abort» = TCP RST от middlebox.
+    int totalSize = 0;
+    int received = 0;
+    for (int attempt = 0; attempt < 3; attempt++) {
+      final client = http.Client();
+      try {
+        final headers = <String, String>{};
+        if (received > 0) {
+          headers['Range'] = 'bytes=$received-';
+        }
+        final request = http.Request('GET', Uri.parse(info.downloadUrl))
+          ..headers.addAll(headers);
+        final response = await client.send(request).timeout(
+              const Duration(seconds: 30),
+              onTimeout: () =>
+                  throw Exception('Таймаут подключения к серверу обновлений'),
+            );
 
-      final sink = file.openWrite();
-      await response.stream.map((chunk) {
-        received += chunk.length;
-        if (total > 0) onProgress?.call(received / total);
-        return chunk;
-      }).pipe(sink);
-      await sink.close();
-    } finally {
-      client.close();
+        if (received == 0) {
+          if (response.statusCode != 200) {
+            throw Exception('HTTP ${response.statusCode} от сервера');
+          }
+          totalSize = response.contentLength ?? 0;
+        } else {
+          if (response.statusCode != 206) {
+            // Server не поддерживает Range → перекачиваем с нуля
+            received = 0;
+            if (await file.exists()) await file.delete();
+            continue;
+          }
+        }
+
+        final sink = file.openWrite(mode: received > 0 ? FileMode.append : FileMode.write);
+        try {
+          await response.stream.map((chunk) {
+            received += chunk.length;
+            if (totalSize > 0) onProgress?.call(received / totalSize);
+            return chunk;
+          }).pipe(sink);
+        } finally {
+          await sink.close();
+        }
+
+        // Verify size — если не докачали, следующая итерация докачает через Range.
+        final actual = await file.length();
+        if (totalSize > 0 && actual < totalSize) {
+          received = actual;
+          continue;
+        }
+        break; // success
+      } on Exception catch (e) {
+        // Обрыв стрима — сохраняем позицию, retry с Range.
+        received = await file.exists() ? await file.length() : 0;
+        if (attempt == 2) {
+          rethrow;
+        }
+        await Future.delayed(const Duration(seconds: 2));
+      } finally {
+        client.close();
+      }
+    }
+
+    // Финальная проверка размера — если APK truncated, install даст
+    // «Приложение не установлено, конфликтует с другим пакетом».
+    final actualSize = await file.length();
+    if (totalSize > 0 && actualSize != totalSize) {
+      await file.delete();
+      throw Exception('Скачано $actualSize байт из $totalSize. Файл повреждён, попробуй снова.');
+    }
+    if (actualSize < 10 * 1024 * 1024) {
+      // < 10 МБ = точно не наш APK (~120 МБ)
+      await file.delete();
+      throw Exception('Скачанный файл слишком мал ($actualSize байт). Проверь интернет.');
     }
 
     final result = await OpenFile.open(file.path, type: 'application/vnd.android.package-archive');

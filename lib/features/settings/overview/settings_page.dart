@@ -122,6 +122,14 @@ class SettingsPage extends HookConsumerWidget {
               );
             },
           ),
+          // v0.0.33: Диагностика — прямой доступ к логам без dev-menu (для support).
+          ListTile(
+            leading: const Icon(Icons.bug_report_outlined),
+            title: const Text('Диагностика'),
+            subtitle: const Text('Логи для поддержки — открой и поделись если что-то не работает'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/logs'),
+          ),
           _SettingsTile(
             title: t.pages.settings.general.title,
             icon: Icons.tune_rounded,

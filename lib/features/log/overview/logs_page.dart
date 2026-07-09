@@ -28,28 +28,28 @@ class LogsPage extends HookConsumerWidget with PresLogger {
 
     final filterController = useTextEditingController(text: state.filter);
 
-    final List<PopupMenuEntry> popupButtons = debug || PlatformUtils.isDesktop
-        ? [
-            PopupMenuItem(
-              child: Text(t.pages.logs.shareCoreLogs),
-              onTap: () async {
-                await UriUtils.tryShareOrLaunchFile(
-                  Uri.parse(pathResolver.coreFile().path),
-                  fileOrDir: pathResolver.directory.uri,
-                );
-              },
-            ),
-            PopupMenuItem(
-              child: Text(t.pages.logs.shareAppLogs),
-              onTap: () async {
-                await UriUtils.tryShareOrLaunchFile(
-                  Uri.parse(pathResolver.appFile().path),
-                  fileOrDir: pathResolver.directory.uri,
-                );
-              },
-            ),
-          ]
-        : [];
+    // v0.0.33: убран `debug ||` gate — юзер должен всегда мочь поделиться логами
+    // для support. Раньше кнопка была скрыта на Android в release-build.
+    final List<PopupMenuEntry> popupButtons = [
+      PopupMenuItem(
+        child: Text(t.pages.logs.shareCoreLogs),
+        onTap: () async {
+          await UriUtils.tryShareOrLaunchFile(
+            Uri.parse(pathResolver.coreFile().path),
+            fileOrDir: pathResolver.directory.uri,
+          );
+        },
+      ),
+      PopupMenuItem(
+        child: Text(t.pages.logs.shareAppLogs),
+        onTap: () async {
+          await UriUtils.tryShareOrLaunchFile(
+            Uri.parse(pathResolver.appFile().path),
+            fileOrDir: pathResolver.directory.uri,
+          );
+        },
+      ),
+    ];
 
     return Scaffold(
       appBar: AppBar(
