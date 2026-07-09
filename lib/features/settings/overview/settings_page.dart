@@ -66,6 +66,15 @@ class SettingsPage extends HookConsumerWidget {
         children: [
           // ═══════ Уровень 1 — базовые ═══════
           _SectionHeader(text: 'Основные'),
+          // Sprint 4.2: «Вставить ключ» поднят из «Дополнительно» в Уровень 1
+          // (design consilium: редкая, но важная операция для домохозяйки — не прятать)
+          ListTile(
+            leading: const Icon(Icons.vpn_key_rounded),
+            title: const Text('Вставить ключ'),
+            subtitle: const Text('Скопируй ключ и нажми — разберёмся сами'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
+          ),
           _SettingsTile(
             title: t.pages.settings.general.title,
             icon: Icons.tune_rounded,
@@ -81,13 +90,6 @@ class SettingsPage extends HookConsumerWidget {
               title: const Text('Дополнительно'),
               childrenPadding: const EdgeInsets.only(left: 8),
               children: [
-                ListTile(
-                  leading: const Icon(Icons.vpn_key_outlined),
-                  title: const Text('Вставить ключ'),
-                  subtitle: const Text('Импорт подписки из буфера обмена или ссылки'),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
-                ),
                 _SettingsTile(
                   title: t.pages.logs.title,
                   icon: Icons.description_outlined,
