@@ -57,12 +57,6 @@ class BoxService(
     companion object {
         private const val TAG = "A/BoxService"
 
-        // v0.0.31: shared flag — Flutter MethodHandler устанавливает true после Mobile.setup.
-        // BoxService.startService проверяет и пропускает второй setup чтобы избежать
-        // «createService null» на MIUI (двойной setup в Go runtime → null).
-        @JvmField
-        var mobileSetupDone = false
-
         private var initializeOnce = false
         private lateinit var workingDir: File
         private fun initialize() {
@@ -193,27 +187,25 @@ class BoxService(
                 }
             }
             Libbox.setMemoryLimit(!Settings.disableMemoryLimit)
-            // v0.0.31: если Flutter MethodHandler.Trigger.Setup уже вызвал Mobile.setup,
-            // ПРОПУСКАЕМ второй setup. Двойной setup в Go runtime → null → «createService null».
-            // platformInterface для VpnService передаётся через отдельные API (не setup).
-            if (!mobileSetupDone) {
-                try {
-                    Mobile.setup(
-                        SetupOptions().also {
-                            it.basePath = Settings.baseDir
-                            it.workingDir = Settings.workingDir
-                            it.tempDir = Settings.tempDir
-                            it.fixAndroidStack = com.hiddify.hiddify.bg.Bugs.fixAndroidStack
-                            it.mode=4L
-                            it.listen= "127.0.0.1:${Settings.grpcServiceModePort}"
-                            it.secret=""
-                            it.debug = Settings.debugMode
-                        },platformInterface)
-                    mobileSetupDone = true
-                } catch (e: Exception) {
-                    stopAndAlert(Alert.CreateService, e.message)
-                    return
-                }
+            // v0.0.32: восстановлено оригинальное поведение upstream Hiddify —
+            // всегда вызываем Mobile.setup с реальным platformInterface. Двойной setup
+            // с Flutter (null platformInterface) НЕ ломает Go runtime (гипотеза агента
+            // была неверной — v0.0.22 работал именно так).
+            val newService = try {
+                Mobile.setup(
+                    SetupOptions().also {
+                        it.basePath = Settings.baseDir
+                        it.workingDir = Settings.workingDir
+                        it.tempDir = Settings.tempDir
+                        it.fixAndroidStack = com.hiddify.hiddify.bg.Bugs.fixAndroidStack
+                        it.mode=4L
+                        it.listen= "127.0.0.1:${Settings.grpcServiceModePort}"
+                        it.secret=""
+                        it.debug = Settings.debugMode
+                    },platformInterface)
+            } catch (e: Exception) {
+                stopAndAlert(Alert.CreateService, e.message)
+                return
             }
             status.postValue(Status.Started)
 
@@ -322,9 +314,6 @@ class BoxService(
             runCatching { DefaultNetworkMonitor.stop() }
             wifiLock?.let { if (it.isHeld) runCatching { it.release() } }
             Settings.startedByUser = false
-            // v0.0.31: сбросить mobileSetupDone чтобы следующий startService
-            // сделал fresh Mobile.setup (после Mobile.close состояние стерто).
-            mobileSetupDone = false
             runCatching { Mobile.close(4L) }
         }
         status.value = Status.Stopped

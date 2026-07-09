@@ -100,7 +100,6 @@ class MethodHandler(private val scope: CoroutineScope) : FlutterPlugin,
                                     it.secret = ""
                                     it.debug = Settings.debugMode
                                 }, null)
-                            com.hiddify.hiddify.bg.BoxService.mobileSetupDone = true
                             Libbox.redirectStderr(File(Settings.workingDir, "stderr2.log").path)
                             success("")
                         }.onFailure {
