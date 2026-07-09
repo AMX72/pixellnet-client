@@ -187,24 +187,37 @@ class BoxService(
                 }
             }
             Libbox.setMemoryLimit(!Settings.disableMemoryLimit)
-            val newService = try {
-                Mobile.setup(
-                    SetupOptions().also {
-                        it.basePath = Settings.baseDir
-                        it.workingDir = Settings.workingDir
-                        it.tempDir = Settings.tempDir
-                        it.fixAndroidStack = com.hiddify.hiddify.bg.Bugs.fixAndroidStack
-                        it.mode=4L//mode.toLong()
-                        it.listen= "127.0.0.1:${Settings.grpcServiceModePort}"
-                        it.secret=""
-                        it.debug = Settings.debugMode
-                    },platformInterface)
-
-
-//                Libbox.newService(content,platformInterface)
-
-            } catch (e: Exception) {
-                stopAndAlert(Alert.CreateService, e.message)
+            // Force-close any stale Mobile state before setup (guards against
+            // "createService null" on rapid restart after network change).
+            runCatching { Mobile.close(4L) }
+            var setupOk = false
+            var lastErr: Exception? = null
+            repeat(3) { attempt ->
+                if (setupOk) return@repeat
+                try {
+                    Mobile.setup(
+                        SetupOptions().also {
+                            it.basePath = Settings.baseDir
+                            it.workingDir = Settings.workingDir
+                            it.tempDir = Settings.tempDir
+                            it.fixAndroidStack = com.hiddify.hiddify.bg.Bugs.fixAndroidStack
+                            it.mode=4L//mode.toLong()
+                            it.listen= "127.0.0.1:${Settings.grpcServiceModePort}"
+                            it.secret=""
+                            it.debug = Settings.debugMode
+                        },platformInterface)
+                    setupOk = true
+                } catch (e: Exception) {
+                    lastErr = e
+                    if (attempt < 2) {
+                        runCatching { Mobile.close(4L) }
+                        kotlinx.coroutines.delay(500L)
+                    }
+                }
+            }
+            if (!setupOk) {
+                val msg = lastErr?.message ?: lastErr?.javaClass?.simpleName ?: "Mobile.setup failed after 3 attempts"
+                stopAndAlert(Alert.CreateService, msg)
                 return
             }
             status.postValue(Status.Started)
@@ -301,41 +314,24 @@ class BoxService(
             receiverRegistered = false
         }
         notification.close()
-        GlobalScope.launch(Dispatchers.IO) {
+        // Run cleanup synchronously via runBlocking to guarantee Mobile.close(4L)
+        // completes before any subsequent startService() attempts Mobile.setup().
+        // Prevents "createService - null" on rapid restart after network change.
+        runBlocking(Dispatchers.IO) {
             val pfd = fileDescriptor
             if (pfd != null) {
-                pfd.close()
+                runCatching { pfd.close() }
                 fileDescriptor = null
             }
-//            commandServer?.setService(null)
-//            boxService?.apply {
-//                runCatching {
-//                    close()
-//                }.onFailure {
-//                    writeLog("service: error when closing: $it")
-//                }
-//                //Seq.destroyRef(refnum)
-//            }
-
-//            boxService = null
-//            Libbox.registerLocalDNSTransport(null)
-            DefaultNetworkListener.stop("box_notification")
-            DefaultNetworkMonitor.stop()
-            wifiLock?.let { if (it.isHeld) it.release() }
-
-//            commandServer?.apply {
-//                close()
-//                Seq.destroyRef(refnum)
-//            }
-//            commandServer = null
+            runCatching { DefaultNetworkListener.stop("box_notification") }
+            runCatching { DefaultNetworkMonitor.stop() }
+            wifiLock?.let { if (it.isHeld) runCatching { it.release() } }
             Settings.startedByUser = false
-            withContext(Dispatchers.Main) {
-                Mobile.close(4L)
-                status.value = Status.Stopped
-                service.stopSelf()
-            }
-            notification.close()
+            runCatching { Mobile.close(4L) }
         }
+        status.value = Status.Stopped
+        service.stopSelf()
+        notification.close()
     }
 
     private suspend fun stopAndAlert(type: Alert, message: String? = null) {
