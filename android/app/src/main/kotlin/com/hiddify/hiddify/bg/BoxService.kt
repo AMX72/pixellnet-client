@@ -187,37 +187,24 @@ class BoxService(
                 }
             }
             Libbox.setMemoryLimit(!Settings.disableMemoryLimit)
-            // Force-close any stale Mobile state before setup (guards against
-            // "createService null" on rapid restart after network change).
-            runCatching { Mobile.close(4L) }
-            var setupOk = false
-            var lastErr: Exception? = null
-            repeat(3) { attempt ->
-                if (setupOk) return@repeat
-                try {
-                    Mobile.setup(
-                        SetupOptions().also {
-                            it.basePath = Settings.baseDir
-                            it.workingDir = Settings.workingDir
-                            it.tempDir = Settings.tempDir
-                            it.fixAndroidStack = com.hiddify.hiddify.bg.Bugs.fixAndroidStack
-                            it.mode=4L//mode.toLong()
-                            it.listen= "127.0.0.1:${Settings.grpcServiceModePort}"
-                            it.secret=""
-                            it.debug = Settings.debugMode
-                        },platformInterface)
-                    setupOk = true
-                } catch (e: Exception) {
-                    lastErr = e
-                    if (attempt < 2) {
-                        runCatching { Mobile.close(4L) }
-                        kotlinx.coroutines.delay(500L)
-                    }
-                }
-            }
-            if (!setupOk) {
-                val msg = lastErr?.message ?: lastErr?.javaClass?.simpleName ?: "Mobile.setup failed after 3 attempts"
-                stopAndAlert(Alert.CreateService, msg)
+            // Restore original behavior: Mobile.setup on fresh state.
+            // NOTE: не вызывать Mobile.close(4L) перед setup — ломает fresh install (state
+            // от MethodHandler.Trigger.Setup уже настроил mode). stopService теперь
+            // синхронный (runBlocking), так что race со stale state не возникает.
+            val newService = try {
+                Mobile.setup(
+                    SetupOptions().also {
+                        it.basePath = Settings.baseDir
+                        it.workingDir = Settings.workingDir
+                        it.tempDir = Settings.tempDir
+                        it.fixAndroidStack = com.hiddify.hiddify.bg.Bugs.fixAndroidStack
+                        it.mode=4L
+                        it.listen= "127.0.0.1:${Settings.grpcServiceModePort}"
+                        it.secret=""
+                        it.debug = Settings.debugMode
+                    },platformInterface)
+            } catch (e: Exception) {
+                stopAndAlert(Alert.CreateService, e.message)
                 return
             }
             status.postValue(Status.Started)
@@ -365,21 +352,11 @@ class BoxService(
             receiverRegistered = true
         }
 
-        // Request battery optimization exemption so system doesn't kill the VPN service
-        // when the device is idle or during cell handoff (BS change / CGNAT IP reassignment).
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val pm = service.getSystemService(Context.POWER_SERVICE) as PowerManager
-            if (!pm.isIgnoringBatteryOptimizations(service.packageName)) {
-                runCatching {
-                    service.startActivity(
-                        android.content.Intent(
-                            android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                            android.net.Uri.parse("package:${service.packageName}")
-                        ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                    )
-                }
-            }
-        }
+        // NOTE: убран автоматический запрос REQUEST_IGNORE_BATTERY_OPTIMIZATIONS —
+        // MIUI/Xiaomi перехватывает этот intent и показывает свой экран «Контроль
+        // фоновой активности», что путает юзера. Battery optimization exemption теперь
+        // запрашивается через Настройки в Flutter слое (PlatformSettingsHandler),
+        // только по явному действию юзера, с объяснением зачем.
 
         DefaultNetworkListener.serviceActive.set(true)
         GlobalScope.launch(Dispatchers.IO) {
