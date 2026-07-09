@@ -124,27 +124,54 @@ class UpdaterService {
   }
 
   /// Скачивает APK и запускает Android installer.
+  /// Кидает Exception если download / open провалились — UI показывает ошибку.
   Future<void> downloadAndInstall(
     UpdateInfo info, {
     void Function(double progress)? onProgress,
   }) async {
+    // Use app-specific external cache directory — не требует MANAGE_EXTERNAL_STORAGE.
+    // FileProvider (см. AndroidManifest) уже знает про external-cache-path.
     final dir = await getExternalStorageDirectory();
-    final file = File(
-        '${dir!.path}/Download/pixellnet-update-${info.version}.apk');
+    if (dir == null) {
+      throw Exception('Не удалось получить директорию для загрузки');
+    }
+    final downloadDir = Directory('${dir.path}/updates');
+    if (!await downloadDir.exists()) {
+      await downloadDir.create(recursive: true);
+    }
+    final file = File('${downloadDir.path}/pixellnet-${info.version}.apk');
+    if (await file.exists()) {
+      await file.delete();
+    }
 
-    final request = http.Request('GET', Uri.parse(info.downloadUrl));
-    final response = await http.Client().send(request);
-    final total = response.contentLength ?? 0;
-    int received = 0;
+    final client = http.Client();
+    try {
+      final request = http.Request('GET', Uri.parse(info.downloadUrl));
+      final response = await client.send(request).timeout(
+            const Duration(seconds: 60),
+            onTimeout: () =>
+                throw Exception('Таймаут при подключении к серверу обновлений'),
+          );
+      if (response.statusCode != 200) {
+        throw Exception('HTTP ${response.statusCode} от сервера обновлений');
+      }
+      final total = response.contentLength ?? 0;
+      int received = 0;
 
-    final sink = file.openWrite();
-    await response.stream.map((chunk) {
-      received += chunk.length;
-      if (total > 0) onProgress?.call(received / total);
-      return chunk;
-    }).pipe(sink);
-    await sink.close();
+      final sink = file.openWrite();
+      await response.stream.map((chunk) {
+        received += chunk.length;
+        if (total > 0) onProgress?.call(received / total);
+        return chunk;
+      }).pipe(sink);
+      await sink.close();
+    } finally {
+      client.close();
+    }
 
-    await OpenFile.open(file.path);
+    final result = await OpenFile.open(file.path, type: 'application/vnd.android.package-archive');
+    if (result.type != ResultType.done) {
+      throw Exception('Не удалось открыть установщик: ${result.message}');
+    }
   }
 }
