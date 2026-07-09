@@ -2,24 +2,36 @@ package com.hiddify.hiddify.bg
 
 import android.annotation.TargetApi
 import android.net.ConnectivityManager
+import android.net.LinkProperties
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
+import android.util.Log
 import com.hiddify.hiddify.Application
+import com.hiddify.core.mobile.Mobile
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.net.UnknownHostException
 
 
 object DefaultNetworkListener {
+    private const val TAG = "DefaultNetworkListener"
+
+    // WakeLock held for HANDOVER_WAKELOCK_MS after IP change so CPU doesn't sleep
+    // while sing-box re-evaluates outbound and completes fresh TLS handshake.
+    private const val HANDOVER_WAKELOCK_MS = 8_000L
+    private var handoverWakeLock: PowerManager.WakeLock? = null
+
     private sealed class NetworkMessage {
         class Start(val key: Any, val listener: (Network?) -> Unit) : NetworkMessage()
 
@@ -34,6 +46,10 @@ object DefaultNetworkListener {
         class Update(val network: Network) : NetworkMessage()
 
         class Lost(val network: Network) : NetworkMessage()
+
+        // Fired on CGNAT/BS handoff: same Network object, IP changed in LinkProperties.
+        // Triggers Mobile.wake() to force sing-box outbound re-evaluation immediately.
+        class WarmupReconnect(val network: Network) : NetworkMessage()
     }
 
     @OptIn(DelicateCoroutinesApi::class, ObsoleteCoroutinesApi::class)
@@ -92,6 +108,26 @@ object DefaultNetworkListener {
                             network = null
                             listeners.values.forEach { it(null) }
                         }
+
+                    is NetworkMessage.WarmupReconnect -> {
+                        // IP changed on same Network (BS handoff / CGNAT reassign).
+                        // 1. Notify listeners so sing-box rebinds interface immediately.
+                        if (network == message.network) {
+                            listeners.values.forEach { it(network) }
+                        }
+                        // 2. Wake sing-box so urltest selector re-evaluates outbounds NOW
+                        //    instead of waiting for the next 10s interval.
+                        GlobalScope.launch(Dispatchers.IO) {
+                            try {
+                                Mobile.wake()
+                                Log.d(TAG, "WarmupReconnect: Mobile.wake() called after IP change")
+                            } catch (e: Exception) {
+                                Log.w(TAG, "WarmupReconnect: Mobile.wake() failed: ${e.message}")
+                            }
+                        }
+                        // 3. Acquire partial WakeLock so CPU doesn't sleep during handshake.
+                        acquireHandoverWakeLock()
+                    }
                 }
             }
         }
@@ -118,6 +154,10 @@ object DefaultNetworkListener {
 
     // NB: this runs in ConnectivityThread, and this behavior cannot be changed until API 26
     private object Callback : ConnectivityManager.NetworkCallback() {
+        // Track last known link addresses per network to detect CGNAT IP change (BS handoff).
+        // onLost is NOT called when the carrier reassigns IP — only onLinkPropertiesChanged fires.
+        private val lastLinkAddresses = mutableMapOf<Network, Set<String>>()
+
         override fun onAvailable(network: Network) = runBlocking {
             networkActor.send(
                 NetworkMessage.Put(
@@ -131,12 +171,50 @@ object DefaultNetworkListener {
             runBlocking { networkActor.send(NetworkMessage.Update(network)) }
         }
 
+        override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
+            // Detect CGNAT IP change: same Network object, different LinkAddresses.
+            // This fires on BS handoff without onLost/onAvailable cycle.
+            val currentAddresses = linkProperties.linkAddresses.map { it.address.hostAddress }.toSet()
+            val previous = lastLinkAddresses[network]
+            if (previous != null && previous != currentAddresses) {
+                Log.d(TAG, "IP change detected on BS handoff: $previous -> $currentAddresses")
+                // WarmupReconnect: notify listeners + Mobile.wake() + WakeLock.
+                // Replaces plain Update() which only notified listeners without waking sing-box.
+                runBlocking { networkActor.send(NetworkMessage.WarmupReconnect(network)) }
+            }
+            lastLinkAddresses[network] = currentAddresses
+        }
+
         override fun onLost(network: Network) = runBlocking {
+            lastLinkAddresses.remove(network)
             networkActor.send(
                 NetworkMessage.Lost(
                     network,
                 ),
             )
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun acquireHandoverWakeLock() {
+        // Release any existing lock first (edge case: two rapid handoffs).
+        handoverWakeLock?.release()
+        handoverWakeLock = null
+        val pm = Application.application.getSystemService(android.content.Context.POWER_SERVICE) as? PowerManager
+            ?: return
+        val wl = pm.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "pixellnet:handover"
+        ).also {
+            it.setReferenceCounted(false)
+            it.acquire(HANDOVER_WAKELOCK_MS)
+        }
+        handoverWakeLock = wl
+        Log.d(TAG, "Handover WakeLock acquired for ${HANDOVER_WAKELOCK_MS}ms")
+        // Auto-release after timeout (acquire(timeout) already does this, but keep reference clean).
+        GlobalScope.launch(Dispatchers.IO) {
+            kotlinx.coroutines.delay(HANDOVER_WAKELOCK_MS + 500)
+            handoverWakeLock = null
         }
     }
 

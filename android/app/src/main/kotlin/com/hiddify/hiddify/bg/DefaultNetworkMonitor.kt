@@ -51,15 +51,20 @@ object DefaultNetworkMonitor {
         if (newNetwork != null) {
             val interfaceName =
                 (Application.connectivity.getLinkProperties(newNetwork) ?: return).interfaceName
+            // Fixed: original loop ran all 10 iterations even after success, blocking
+            // ConnectivityThread for up to 1 second. Now break on first successful lookup.
             for (times in 0 until 10) {
-                var interfaceIndex: Int
-                try {
-                    interfaceIndex = NetworkInterface.getByName(interfaceName).index
+                val interfaceIndex: Int = try {
+                    NetworkInterface.getByName(interfaceName)?.index ?: run {
+                        Thread.sleep(100)
+                        continue
+                    }
                 } catch (e: Exception) {
                     Thread.sleep(100)
                     continue
                 }
                 listener.updateDefaultInterface(interfaceName, interfaceIndex, false, false)
+                break // success — don't repeat
             }
         } else {
             listener.updateDefaultInterface("", -1, false, false)

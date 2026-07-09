@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
@@ -111,6 +112,18 @@ class BoxService(
 
     var fileDescriptor: ParcelFileDescriptor? = null
 
+    // HIGH_PERF WifiLock keeps radio in full-power mode, preventing 300-500ms radio
+    // wake latency when a packet arrives after the radio dozed between BS handoffs.
+    @Suppress("DEPRECATION")
+    private val wifiLock: WifiManager.WifiLock? by lazy {
+        runCatching {
+            Application.wifiManager.createWifiLock(
+                WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+                "pixellnet:vpn_wifi"
+            )
+        }.getOrNull()
+    }
+
     private val status = MutableLiveData(Status.Stopped)
     private val binder = ServiceBinder(status)
     private val notification = ServiceNotification(status, service)
@@ -194,6 +207,10 @@ class BoxService(
 //            boxService = newService
 //            commandServer?.setService(boxService)
 
+
+            // Acquire HIGH_PERF WifiLock: keeps WiFi radio active during BS handoff,
+            // eliminates 300-500ms radio wake-up penalty on first packet after handover.
+            wifiLock?.let { if (!it.isHeld) it.acquire() }
 
             withContext(Dispatchers.Main) {
                 notification.show(activeProfileName, R.string.status_started)
@@ -287,6 +304,7 @@ class BoxService(
 //            boxService = null
 //            Libbox.registerLocalDNSTransport(null)
             DefaultNetworkMonitor.stop()
+            wifiLock?.let { if (it.isHeld) it.release() }
 
 //            commandServer?.apply {
 //                close()
@@ -321,7 +339,7 @@ class BoxService(
     @OptIn(DelicateCoroutinesApi::class)
     @Suppress("SameReturnValue")
     internal fun onStartCommand(): Int {
-        if (status.value != Status.Stopped) return Service.START_NOT_STICKY
+        if (status.value != Status.Stopped) return Service.START_STICKY
         status.value = Status.Starting
 
         if (!receiverRegistered) {
@@ -332,6 +350,22 @@ class BoxService(
                 }
             }, ContextCompat.RECEIVER_NOT_EXPORTED)
             receiverRegistered = true
+        }
+
+        // Request battery optimization exemption so system doesn't kill the VPN service
+        // when the device is idle or during cell handoff (BS change / CGNAT IP reassignment).
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val pm = service.getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(service.packageName)) {
+                runCatching {
+                    service.startActivity(
+                        android.content.Intent(
+                            android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                            android.net.Uri.parse("package:${service.packageName}")
+                        ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
+                }
+            }
         }
 
         GlobalScope.launch(Dispatchers.IO) {
@@ -345,7 +379,7 @@ class BoxService(
 //            }
             startService()
         }
-        return Service.START_NOT_STICKY
+        return Service.START_STICKY
     }
 
     fun onBind(intent: Intent): IBinder {
