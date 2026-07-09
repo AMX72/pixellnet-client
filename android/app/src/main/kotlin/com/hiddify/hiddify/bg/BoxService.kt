@@ -339,6 +339,11 @@ class BoxService(
     @OptIn(DelicateCoroutinesApi::class)
     @Suppress("SameReturnValue")
     internal fun onStartCommand(): Int {
+        // HIGH FIX (Android audit): также блокируем при Stopping чтобы не
+        // допустить второй Mobile.setup пока идёт runBlocking { Mobile.close }
+        if (status.value == Status.Starting || status.value == Status.Stopping) {
+            return Service.START_STICKY
+        }
         if (status.value != Status.Stopped) return Service.START_STICKY
         status.value = Status.Starting
 

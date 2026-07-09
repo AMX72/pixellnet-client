@@ -1,5 +1,25 @@
 # Changelog
 
+## Code Review 2026-07-09 (v0.0.22–v0.0.28)
+
+### CRITICAL (блокируют production)
+- `useMockActivationApi = true` захардкожен в `activation_api.dart:11` — все юзеры получают mock sub_url, монетизация обходится
+- `app_version: "0.0.24"` захардкожена в HTTP-запросе `activation_api.dart:122` — не обновляется при релизе
+- Race condition: `serviceActive.set(true)` + `GlobalScope.launch { startService() }` в `BoxService.kt:361–371` — тот же класс бага что в v0.0.26
+
+### HIGH
+- `_addProfile` в `trial_notifier.dart` проглатывает все ошибки через `catch (_) {}` — юзер в TrialActive без VPN без объяснения
+- `downloadAndInstall`: `sink` не закрывается при ошибке стрима (`updater_service.dart`) — resource leak + corrupted APK
+- CI: `StrictHostKeyChecking=no` без host pinning — MITM-вектор при деплое APK
+- v0.0.24 — 907 строк в одном коммите, 4 несвязанных фичи — нарушает single-responsibility коммита
+
+### MEDIUM
+- `GlobalScope.launch` в BoxService (2 места) — не отменяется при onDestroy, нужен serviceScope
+- `_kMockSubUrl` — реальный рабочий sub_url в публичном репо
+- Нет ни одного unit-теста для TrialNotifier/UpdaterService/ActivationApi
+
+### Оценка: 5/10 — не готово к production до фикса CRITICAL пунктов
+
 ## [0.16.0.dev] - 2024-2-18
 
 ### New Features and Improvements

@@ -6,6 +6,7 @@ import 'package:hiddify/features/activation/notifier/trial_notifier.dart';
 import 'package:hiddify/features/home/widget/connection_button.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
+import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,15 +28,16 @@ class HomePage extends HookConsumerWidget {
     final hasKey = ref.watch(hasAnyProfileProvider).valueOrNull ?? false;
     final trialState = ref.watch(trialStateProvider);
 
-    // Показать paywall если trial истёк
-    final showPaywall = trialState is TrialActive && trialState.showPaywall;
-
-    // Пост-фрейм — показываем paywall диалог
-    if (showPaywall) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) _showPaywallDialog(context);
-      });
-    }
+    // HIGH FIX (Flutter audit): paywall через ref.listen — срабатывает при
+    // СМЕНЕ состояния, а не на каждый rebuild. addPostFrameCallback внутри
+    // build() открывал новые диалоги при rotation/theme change → стек модалок.
+    ref.listen<TrialState>(trialStateProvider, (previous, next) {
+      final prevShow = previous is TrialActive && previous.showPaywall;
+      final nextShow = next is TrialActive && next.showPaywall;
+      if (!prevShow && nextShow && context.mounted) {
+        _showPaywallDialog(context);
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -129,7 +131,9 @@ class _TrialBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUrgent = daysLeft <= 2;
-    final color = isUrgent ? theme.colorScheme.error : const Color(0xFF00BCD4);
+    // MEDIUM FIX (Flutter audit): было Color(0xFF00BCD4) (Material cyan,
+    // старый Hiddify), не в палитре v3. Заменяем на darkTertiary (dusty blue).
+    final color = isUrgent ? theme.colorScheme.error : PixellnetColors.darkTertiary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
