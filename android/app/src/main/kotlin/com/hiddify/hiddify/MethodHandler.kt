@@ -74,12 +74,9 @@ class MethodHandler(private val scope: CoroutineScope) : FlutterPlugin,
             }
 
             Trigger.Setup.method -> {
-                // CRITICAL FIX (Android audit 2026-07-09):
-                // Trigger.Setup только записывает Settings.*, БЕЗ Mobile.setup().
-                // Раньше Flutter → Mobile.setup(platformInterface=null) при старте,
-                // затем BoxService.startService → Mobile.setup(platformInterface),
-                // второй вызов возвращал null → «createService - null» на MIUI/др.
-                // Теперь Mobile.setup вызывается ТОЛЬКО из BoxService.startService.
+                // v0.0.31: восстановлен Mobile.setup для Flutter gRPC клиента (иначе
+                // gRPC Error code 14 UNAVAILABLE при активации trial).
+                // Двойной setup fix через грамотный alreadySetup guard в BoxService.
                 GlobalScope.launch {
                     result.runCatching {
                         val args = call.arguments as Map<*, *>
@@ -92,6 +89,18 @@ class MethodHandler(private val scope: CoroutineScope) : FlutterPlugin,
                         Settings.grpcServiceModePort = grpcPort
                         Log.d("debugmode","${Settings.debugMode}")
                         runCatching {
+                            Mobile.setup(
+                                SetupOptions().also {
+                                    it.basePath = Settings.baseDir
+                                    it.workingDir = Settings.workingDir
+                                    it.tempDir = Settings.tempDir
+                                    it.fixAndroidStack = Bugs.fixAndroidStack
+                                    it.mode = mode.toLong()
+                                    it.listen = "127.0.0.1:$grpcPort"
+                                    it.secret = ""
+                                    it.debug = Settings.debugMode
+                                }, null)
+                            com.hiddify.hiddify.bg.BoxService.mobileSetupDone = true
                             Libbox.redirectStderr(File(Settings.workingDir, "stderr2.log").path)
                             success("")
                         }.onFailure {
