@@ -75,6 +75,15 @@ jobs:
       - name: Generate freezed/drift/riverpod/mappable code
         run: dart run build_runner build --delete-conflicting-outputs
 
+      - name: Download prebuilt hiddify-core Android libbox.aar
+        run: |
+          curl -fL -o /tmp/hiddify-lib-android.tar.gz \
+            https://github.com/hiddify/hiddify-core/releases/download/v4.1.0/hiddify-lib-android.tar.gz
+          mkdir -p android/app/libs
+          tar -xzf /tmp/hiddify-lib-android.tar.gz -C android/app/libs
+          ls -la android/app/libs
+          rm /tmp/hiddify-lib-android.tar.gz
+
       - name: Decode keystore (if present)
         id: keystore
         env:
