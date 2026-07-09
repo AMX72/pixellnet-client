@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/router/go_router/helper/active_breakpoint_notifier.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
@@ -80,6 +81,13 @@ class SettingsPage extends HookConsumerWidget {
               title: const Text('Дополнительно'),
               childrenPadding: const EdgeInsets.only(left: 8),
               children: [
+                ListTile(
+                  leading: const Icon(Icons.vpn_key_outlined),
+                  title: const Text('Вставить ключ'),
+                  subtitle: const Text('Импорт подписки из буфера обмена или ссылки'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
+                ),
                 _SettingsTile(
                   title: t.pages.logs.title,
                   icon: Icons.description_outlined,
