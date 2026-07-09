@@ -187,10 +187,15 @@ class BoxService(
                 }
             }
             Libbox.setMemoryLimit(!Settings.disableMemoryLimit)
-            // v0.0.32: восстановлено оригинальное поведение upstream Hiddify —
-            // всегда вызываем Mobile.setup с реальным platformInterface. Двойной setup
-            // с Flutter (null platformInterface) НЕ ломает Go runtime (гипотеза агента
-            // была неверной — v0.0.22 работал именно так).
+            // v0.0.35 CRITICAL FIX (verified через adb logcat):
+            // Alert.CreateService message="port 17078 is already in use" — коллизия
+            // с Flutter's Mobile.setup(port=17078) из Trigger.Setup. Design upstream
+            // Hiddify: portFront=17078 для Flutter monitoring, portBack=17079 для VPN
+            // tunnel. Раньше BoxService использовал Settings.grpcServiceModePort который
+            // Trigger.Start должен был обновить до 17079, но по timing race это
+            // происходило не всегда (или Setup перезаписывал обратно на 17078).
+            // Hardcoded 17079 = никакой race conditions.
+            val backendPort = 17079
             val newService = try {
                 Mobile.setup(
                     SetupOptions().also {
@@ -199,7 +204,7 @@ class BoxService(
                         it.tempDir = Settings.tempDir
                         it.fixAndroidStack = com.hiddify.hiddify.bg.Bugs.fixAndroidStack
                         it.mode=4L
-                        it.listen= "127.0.0.1:${Settings.grpcServiceModePort}"
+                        it.listen= "127.0.0.1:$backendPort"
                         it.secret=""
                         it.debug = Settings.debugMode
                     },platformInterface)
