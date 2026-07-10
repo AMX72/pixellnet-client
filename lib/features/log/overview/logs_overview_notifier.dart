@@ -46,9 +46,18 @@ class LogsOverviewNotifier extends _$LogsOverviewNotifier with AppLogger {
     loggy.debug("adding listeners");
     ref.watch(coreRestartSignalProvider);
     await _listener?.cancel();
-    _listener = ref
-        .read(logRepositoryProvider)
-        .requireValue
+
+    // v0.0.45: guard — logRepository может быть в AsyncError при первом старте
+    // (нет прав на workingDir, sing-box не инициализирован).
+    // Вместо краша — показываем пустое состояние.
+    final repoAsync = ref.read(logRepositoryProvider);
+    if (repoAsync is! AsyncData) {
+      state = state.copyWith(logs: const AsyncData([]));
+      return;
+    }
+
+    try {
+      _listener = repoAsync.value
         .watchLogs()
         .throttle((_) => Stream.value(_listener?.isPaused ?? false), leading: false, trailing: true)
         .throttleTime(const Duration(milliseconds: 250), leading: false, trailing: true)
@@ -65,6 +74,10 @@ class LogsOverviewNotifier extends _$LogsOverviewNotifier with AppLogger {
           );
         })
         .listen((event) {});
+    } catch (e, st) {
+      loggy.warning("failed to init log listener", e, st);
+      state = state.copyWith(logs: const AsyncData([]));
+    }
   }
 
   Iterable<LogEntity> _logs = [];

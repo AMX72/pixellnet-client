@@ -26,7 +26,8 @@ class GeneralPage extends HookConsumerWidget {
         children: [
           const LocalePrefTile(),
           const ThemeModePrefTile(),
-          const EnableAnalyticsPrefTile(),
+          // v0.0.45: удалён EnableAnalyticsPrefTile — Hiddify-остаток который
+          // мог слать данные на upstream Hiddify endpoint. 152-ФЗ риск.
           SwitchListTile.adaptive(
             title: Text(t.pages.settings.general.autoIpCheck),
             value: ref.watch(Preferences.autoCheckIp),

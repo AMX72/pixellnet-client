@@ -3,16 +3,16 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
+import 'package:hiddify/features/log/data/log_data_providers.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'log_rotation_service.g.dart';
 
-/// v0.0.37: Log rotation — проверяет размер app.log при старте и каждые 10 мин.
-/// При превышении лимита (из logSizeLimitNotifierProvider) усекает старую половину.
-///
-/// Запускается через [LogRotationService.start] из bootstrap.dart.
+/// v0.0.45 fix: использует [logPathResolverProvider] вместо getExternalStorageDirectory().
+/// Прежде ротация проверяла Android/data/.../ (external), но hiddify-core пишет
+/// app.log + box.log во внутренний рабочий каталог (appDirectoriesProvider.workingDir).
+/// Теперь пути синхронизированы — ротация срабатывает корректно.
 class LogRotationService {
   LogRotationService._();
   static final instance = LogRotationService._();
@@ -36,17 +36,22 @@ class LogRotationService {
       final limitMb = ref.read(logSizeLimitNotifierProvider);
       final limitBytes = limitMb * 1024 * 1024;
 
-      final dir = await getExternalStorageDirectory();
-      final workingDir = dir?.path ?? '/tmp';
+      // v0.0.45 fix: берём workingDir через logPathResolverProvider
+      // — тот же путь что hiddify-core использует для записи логов.
+      final resolver = ref.read(logPathResolverProvider);
 
-      for (final name in ['app.log', 'box.log']) {
-        final file = File('$workingDir/$name');
+      final filesToCheck = [
+        resolver.appFile(),
+        resolver.coreFile(),
+      ];
+
+      for (final file in filesToCheck) {
         if (!await file.exists()) continue;
         final size = await file.length();
         if (size > limitBytes) {
           await _truncateOldHalf(file, size);
           if (kDebugMode) {
-            debugPrint('[LogRotation] rotated $name: was ${size ~/ 1024} KB');
+            debugPrint('[LogRotation] rotated ${file.path}: was ${size ~/ 1024} KB');
           }
         }
       }
