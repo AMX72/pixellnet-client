@@ -103,7 +103,8 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
-          # v0.0.42: 2 flavors — prod (публичный APK) + admin (superadmin с chat).
+          # v0.0.43: только prod flavor (admin билдится отдельным workflow_dispatch).
+          # Двойной билд в v0.0.42 таймаутил runner.
           flutter build apk --release \
             --flavor prod \
             --split-per-abi \
@@ -114,19 +115,6 @@ jobs:
             base=$(basename "$f")
             clean=$(echo "$base" | sed 's/app-prod-/app-/')
             cp "$f" "out/pixellnet-${{ steps.ver.outputs.version }}-${clean}"
-          done
-
-          # Admin flavor build (SUPERADMIN=true через dart-define)
-          flutter build apk --release \
-            --flavor admin \
-            --split-per-abi \
-            --dart-define=SUPERADMIN=true \
-            --build-number=${{ github.run_number }} \
-            --build-name=${{ steps.ver.outputs.version }}
-          for f in build/app/outputs/flutter-apk/*admin*.apk; do
-            base=$(basename "$f")
-            clean=$(echo "$base" | sed 's/app-admin-/app-admin-/')
-            cp "$f" "out/pixellnet-admin-${{ steps.ver.outputs.version }}-${clean}"
           done
           ls -la out/
 
