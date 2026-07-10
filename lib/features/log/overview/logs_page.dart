@@ -7,7 +7,6 @@ import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/failures.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/core/widget/adaptive_icon.dart';
-import 'package:flutter/services.dart';
 import 'package:hiddify/features/log/data/diagnostic_uploader.dart';
 import 'package:hiddify/features/log/data/log_data_providers.dart';
 import 'package:hiddify/features/log/model/log_level.dart';
@@ -30,24 +29,10 @@ class LogsPage extends HookConsumerWidget with PresLogger {
 
     final filterController = useTextEditingController(text: state.filter);
 
-    // v0.0.34: убран `debug ||` gate + добавлен «Отправить разработчику»
-    // (uploads box.log + app.log + метаданные на pixellnet.com/api/diagnostics/upload
-    // и возвращает короткий код `A7K2P` для отправки в поддержку).
+    // v0.0.37: кнопка «Отправить» вынесена в FAB (prominent CTA).
+    // Код больше не показывается юзеру — только сообщение об успехе.
+    // В PopupMenu остались только share-файлы (для advanced users).
     final List<PopupMenuEntry> popupButtons = [
-      PopupMenuItem(
-        child: const Text('Отправить разработчику'),
-        onTap: () async {
-          // showDialog не работает если вызван изнутри PopupMenuItem onTap —
-          // используем WidgetsBinding pushToFront чтобы UI успел закрыть menu.
-          Future.delayed(const Duration(milliseconds: 100), () async {
-            if (!context.mounted) return;
-            final code = await _uploadDiagnostic(context);
-            if (code != null && context.mounted) {
-              _showDiagCodeDialog(context, code);
-            }
-          });
-        },
-      ),
       PopupMenuItem(
         child: Text(t.pages.logs.shareCoreLogs),
         onTap: () async {
@@ -69,6 +54,18 @@ class LogsPage extends HookConsumerWidget with PresLogger {
     ];
 
     return Scaffold(
+      // v0.0.37: FAB — основная CTA «Отправить разработчику».
+      // Prominent, всегда видна, не спрятана в ⋮ меню.
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final code = await _uploadDiagnostic(context);
+          if (code != null && context.mounted) {
+            _showDiagSentDialog(context);
+          }
+        },
+        icon: const Icon(Icons.send_rounded),
+        label: const Text('Отправить разработчику'),
+      ),
       appBar: AppBar(
         title: Text(t.pages.logs.title),
         actions: [
@@ -211,8 +208,37 @@ String extractMessage(String message) {
   return parts.length <= 2 ? parts.last : parts.sublist(2).join(' ');
 }
 
-/// Возвращает 5-символьный код (напр. `A7K2P`) или null при ошибке.
+/// v0.0.37: consent AlertDialog ПЕРЕД upload (privacy-safe).
+/// Возвращает 5-символьный код или null при отказе / ошибке.
 Future<String?> _uploadDiagnostic(BuildContext context) async {
+  // Шаг 1 — явный consent юзера.
+  final consent = await showDialog<bool>(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Отправить логи разработчику?'),
+      content: const Text(
+        'Диагностический журнал (события приложения, состояние VPN, '
+        'ошибки, модель устройства) будет отправлен на сервер разработчика '
+        'для устранения неисправностей.\n\n'
+        'Журнал НЕ содержит адресов посещённых сайтов и содержимого трафика.\n\n'
+        'Хранится до 30 дней, после чего автоматически удаляется.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Отмена'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Отправить'),
+        ),
+      ],
+    ),
+  );
+  if (consent != true) return null;
+
+  // Шаг 2 — сам upload с progress spinner.
+  if (!context.mounted) return null;
   final messenger = ScaffoldMessenger.of(context);
   showDialog(
     context: context,
@@ -242,50 +268,20 @@ Future<String?> _uploadDiagnostic(BuildContext context) async {
   }
 }
 
-void _showDiagCodeDialog(BuildContext context, String code) {
+/// v0.0.37: показываем юзеру friendly-сообщение вместо кода.
+/// Код генерируется на сервере и хранится для нас — юзеру его знать не нужно.
+void _showDiagSentDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (_) => AlertDialog(
       title: const Text('Логи отправлены'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Отдай разработчику этот код:'),
-          const SizedBox(height: 16),
-          SelectableText(
-            code,
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 4,
-              fontFamily: 'monospace',
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Разработчик посмотрит логи на pixellnet.com/diag/{КОД} '
-            'и найдёт причину проблемы.',
-            style: TextStyle(fontSize: 13),
-          ),
-        ],
+      content: const Text(
+        'Логи отправлены. Мы приступили к анализу — ответим в TG-канале в течение 24 часов.',
       ),
       actions: [
-        TextButton(
-          onPressed: () {
-            Clipboard.setData(ClipboardData(text: code));
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Код скопирован'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          },
-          child: const Text('Скопировать'),
-        ),
         FilledButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('OK'),
+          child: const Text('Понятно'),
         ),
       ],
     ),

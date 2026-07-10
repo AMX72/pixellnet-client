@@ -1,5 +1,47 @@
 # Changelog
 
+## v0.0.37 — 2026-07-09 (Flutter UX: verbose logging, log send UX, superadmin, auto-update visibility)
+
+### Pkt 1 — Verbose Logging + Log Rotation
+- **NEW** `lib/features/log/data/log_rotation_service.dart` — `LogRotationService` singleton + `logRotationServiceProvider` (Riverpod keepAlive). Проверяет app.log + box.log при старте и каждые 10 мин. При превышении лимита (из `logSizeLimitNotifierProvider`) усекает старую половину файла (UTF-8-safe). Добавляет маркер `... (старые логи удалены при ротации ...)` в начало остатка.
+- **PATCH** `lib/bootstrap.dart` — `container.read(logRotationServiceProvider)` инициализируется после `logRepositoryProvider` на Android. Fire-and-forget, не блокирует UI.
+- `VerboseLoggingNotifier` и `LogSizeLimitNotifier` были добавлены в `general_preferences.dart` в этом же v0.0.37 раунде. Toggle в `settings_page.dart` уже был на месте.
+
+### Pkt 2 — Send Logs UX: FAB + friendly message
+- **PATCH** `lib/features/log/overview/logs_page.dart`:
+  - Кнопка «Отправить разработчику» вынесена из PopupMenu в `FloatingActionButton.extended` — всегда видна.
+  - `_showDiagCodeDialog` заменена на `_showDiagSentDialog` — юзер видит «Логи отправлены. Мы приступили к анализу — ответим в TG-канале в течение 24 часов». Код генерируется на сервере для нас, но не показывается юзеру.
+  - В PopupMenu ⋮ остались только «Поделиться логами» файлы (для advanced).
+  - Убран неиспользуемый `import 'package:flutter/services.dart'`.
+
+### Pkt 4 — Superadmin flavor (Flutter часть)
+- **NEW** `lib/core/superadmin.dart` — `const bool kSuperAdminBuild = bool.fromEnvironment('SUPERADMIN', defaultValue: false)`. Dart-define передаётся через `flutter build apk --dart-define=SUPERADMIN=true` или product flavor `admin` в Gradle.
+- **NEW** `lib/features/developer/developer_chat_page.dart` — mock UI: список сообщений + input + send + mock 2s ответ. WebSocket-логика следующий раунд.
+- **PATCH** `lib/core/router/go_router/routing_config_notifier.dart` — при `kSuperAdminBuild=true` добавляется `StatefulShellBranch` с route `/developer` → `DeveloperChatPage`. `getNameOfBranch`/`getIndexOfBranch` обновлены.
+- **PATCH** `lib/core/router/adaptive_layout/my_adaptive_layout.dart` — при `kSuperAdminBuild` в `_actions()` добавляется третий пункт «Разработчик» (иконка `developer_mode_rounded`). `visibleSelectedIndex` и `_mapVisibleToBranch` учитывают developer branch.
+- Gradle product flavor `admin` — задача для `agent-hiddify-android`.
+
+### Pkt 6 — Auto-update: более заметный блок
+- **PATCH** `lib/features/settings/overview/settings_page.dart` — блок «Автообновление» + «Проверить обновления» обёрнуты в `Card` с outlined border. Subtitle расширен до 3 строк с объяснением для домохозяйки («Приложение само проверяет... просто подтверди установку»). Иконка `system_update_rounded` вместо `outlined`.
+
+### Файлы затронуты
+- NEW: `lib/features/log/data/log_rotation_service.dart`
+- NEW: `lib/core/superadmin.dart`
+- NEW: `lib/features/developer/developer_chat_page.dart`
+- PATCH: `lib/bootstrap.dart`
+- PATCH: `lib/features/log/overview/logs_page.dart`
+- PATCH: `lib/core/router/go_router/routing_config_notifier.dart`
+- PATCH: `lib/core/router/adaptive_layout/my_adaptive_layout.dart`
+- PATCH: `lib/features/settings/overview/settings_page.dart`
+
+### Что осталось на следующий раунд
+- `log_rotation_service.g.dart` — нужен `dart run build_runner build` (riverpod_annotation codegen для `@Riverpod`)
+- WebSocket-логика для `DeveloperChatPage` (сейчас mock stream)
+- Gradle product flavor `admin` — `agent-hiddify-android`
+- LoggyPrinter DEBUG level при verbose=true — отдельная задача для `lib/core/logger/`
+
+---
+
 ## Code Review 2026-07-09 (v0.0.22–v0.0.28)
 
 ### CRITICAL (блокируют production)

@@ -158,6 +158,12 @@ object Settings {
         get() = preferences.getBoolean(SettingsKey.START_CORE_ON_STARTING_SERVICE, false)
         set(value) = preferences.edit().putBoolean(SettingsKey.START_CORE_ON_STARTING_SERVICE, value).apply()
 
+    // Verbose native logging — controlled by Flutter Settings.verboseLogging preference.
+    // When true: BoxService, DefaultNetworkListener, MethodHandler, VPNService log all
+    // lifecycle events at Log.d level. Persisted so BoxService started via START_STICKY
+    // (without Flutter process) keeps the correct flag.
+    @Volatile
+    var verboseLogging: Boolean = false
 
 }
 

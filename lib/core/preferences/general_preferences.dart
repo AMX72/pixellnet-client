@@ -134,3 +134,43 @@ class DebugModeNotifier extends _$DebugModeNotifier {
     return _pref.write(value);
   }
 }
+
+/// v0.0.37: полное verbose логирование всех событий (network transitions,
+/// Mobile.setup/close, VpnService lifecycle, gRPC events, Flutter provider
+/// state changes). Значительно увеличивает размер box.log/app.log — включать
+/// только для дебага. Default: OFF.
+@Riverpod(keepAlive: true)
+class VerboseLoggingNotifier extends _$VerboseLoggingNotifier {
+  late final _pref = PreferencesEntry(
+    preferences: ref.watch(sharedPreferencesProvider).requireValue,
+    key: "verbose_logging_enabled",
+    defaultValue: false,
+  );
+
+  @override
+  bool build() => _pref.read();
+
+  Future<void> update(bool value) {
+    state = value;
+    return _pref.write(value);
+  }
+}
+
+/// v0.0.37: максимальный размер лог-файла в МБ. При достижении лимита
+/// старая половина файла удаляется. Options: 10, 50, 100, 200 MB.
+@Riverpod(keepAlive: true)
+class LogSizeLimitNotifier extends _$LogSizeLimitNotifier {
+  late final _pref = PreferencesEntry(
+    preferences: ref.watch(sharedPreferencesProvider).requireValue,
+    key: "log_size_limit_mb",
+    defaultValue: 50,
+  );
+
+  @override
+  int build() => _pref.read();
+
+  Future<void> update(int value) {
+    state = value;
+    return _pref.write(value);
+  }
+}

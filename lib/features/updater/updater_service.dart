@@ -92,6 +92,9 @@ class UpdaterService {
 
   /// Возвращает [UpdateInfo] если доступна новая версия, иначе null.
   /// Throttled: пропускает сетевой вызов если проверка была менее 4 часов назад.
+  ///
+  /// v0.0.37: сначала пробует pixellnet.com/updates.json (superadmin rollout
+  /// channel), fallback на GitHub API если rollout ещё не опубликован.
   Future<UpdateInfo?> checkForUpdate({bool force = false}) async {
     if (!Platform.isAndroid) return null;
 
@@ -100,6 +103,13 @@ class UpdaterService {
     final now = DateTime.now().millisecondsSinceEpoch;
 
     if (!force && (now - lastCheck) < _kCheckIntervalMs) return null;
+
+    // v0.0.37: Try pixellnet.com/updates.json first (rollout channel).
+    final rolloutInfo = await _checkRolloutManifest();
+    if (rolloutInfo != null) {
+      await prefs.setInt(_kPrefLastCheck, now);
+      return rolloutInfo;
+    }
 
     try {
       final response = await http
@@ -156,6 +166,39 @@ class UpdaterService {
       return null;
     } catch (e) {
       if (kDebugMode) debugPrint('[UpdaterService] checkForUpdate error: $e');
+      return null;
+    }
+  }
+
+  /// v0.0.37: rollout manifest check — superadmin promotes version via
+  /// /api/admin/rollout/apply, users pull latest via /updates.json.
+  /// Returns UpdateInfo if newer than current, null otherwise (fallback to GH).
+  Future<UpdateInfo?> _checkRolloutManifest() async {
+    try {
+      final response = await http
+          .get(Uri.parse('https://pixellnet.com/updates.json?channel=stable'))
+          .timeout(const Duration(seconds: 8));
+      if (response.statusCode != 200) return null;
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final version = (data['version'] as String).replaceFirst('v', '');
+      final apkUrl = data['apk_url'] as String;
+      final changelog = data['changelog'] as String? ?? '';
+
+      final packageInfo = await PackageInfo.fromPlatform();
+      final current = Version.parse(packageInfo.version.split('+').first);
+      final latest = Version.parse(version);
+
+      if (latest > current) {
+        return UpdateInfo(
+          version: version,
+          downloadUrl: apkUrl,
+          changelog: changelog,
+        );
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Updater] rollout manifest check failed: $e');
       return null;
     }
   }

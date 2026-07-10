@@ -12,6 +12,7 @@ import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
 import com.hiddify.hiddify.Application
+import com.hiddify.hiddify.Settings
 import com.hiddify.core.mobile.Mobile
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -27,6 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 object DefaultNetworkListener {
     private const val TAG = "DefaultNetworkListener"
+    private val verbose get() = Settings.verboseLogging
 
     // WakeLock held for HANDOVER_WAKELOCK_MS after IP change so CPU doesn't sleep
     // while sing-box re-evaluates outbound and completes fresh TLS handshake.
@@ -99,6 +101,7 @@ object DefaultNetworkListener {
                     is NetworkMessage.Put -> {
                         val wasReconnecting = isReconnecting.getAndSet(false)
                         network = message.network
+                        if (verbose) Log.d(TAG, "onAvailable — network=${message.network} wasReconnecting=$wasReconnecting serviceActive=${serviceActive.get()} listeners=${listeners.size}")
                         pendingRequests.forEach { it.response.complete(message.network) }
                         pendingRequests.clear()
                         listeners.values.forEach { it(network) }
@@ -139,6 +142,7 @@ object DefaultNetworkListener {
                             network = null
                             listeners.values.forEach { it(null) }
                             Log.d(TAG, "Lost default network — reconnecting=true, waiting for onAvailable")
+                            if (verbose) Log.d(TAG, "onLost — network=${message.network} serviceActive=${serviceActive.get()} listeners=${listeners.size}")
                         }
 
                     is NetworkMessage.WarmupReconnect -> {
@@ -209,6 +213,7 @@ object DefaultNetworkListener {
             // This fires on BS handoff without onLost/onAvailable cycle.
             val currentAddresses = linkProperties.linkAddresses.map { it.address.hostAddress }.toSet()
             val previous = lastLinkAddresses[network]
+            if (verbose) Log.d(TAG, "onLinkPropertiesChanged — network=$network dns=${linkProperties.dnsServers} addresses=$currentAddresses previous=$previous")
             if (previous != null && previous != currentAddresses) {
                 Log.d(TAG, "IP change detected on BS handoff: $previous -> $currentAddresses")
                 // WarmupReconnect: notify listeners + Mobile.wake() + WakeLock.

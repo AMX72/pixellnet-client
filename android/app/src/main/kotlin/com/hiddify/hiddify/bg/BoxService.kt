@@ -148,11 +148,14 @@ class BoxService(
     
 
 
+    private val verbose get() = Settings.verboseLogging
+
     private var activeProfileName = ""
     private suspend fun startService() {
         try {
             status.postValue(Status.Starting)
             Log.d(TAG, "starting service")
+            if (verbose) Log.d(TAG, "startService() — activeConfigPath=${Settings.activeConfigPath} profileName=${Settings.activeProfileName} debugMode=${Settings.debugMode}")
             withContext(Dispatchers.Main) {
                 notification.show(activeProfileName, R.string.status_starting)
             }
@@ -196,6 +199,7 @@ class BoxService(
             // происходило не всегда (или Setup перезаписывал обратно на 17078).
             // Hardcoded 17079 = никакой race conditions.
             val backendPort = 17079
+            if (verbose) Log.d(TAG, "Mobile.setup() — mode=4 listen=127.0.0.1:$backendPort debug=${Settings.debugMode} fixAndroidStack=${com.hiddify.hiddify.bg.Bugs.fixAndroidStack}")
             val newService = try {
                 Mobile.setup(
                     SetupOptions().also {
@@ -212,9 +216,11 @@ class BoxService(
                 stopAndAlert(Alert.CreateService, e.message)
                 return
             }
+            if (verbose) Log.d(TAG, "Mobile.setup() returned — status→Started")
             status.postValue(Status.Started)
 
             if (Settings.startCoreAfterStartingService){
+                if (verbose) Log.d(TAG, "Mobile.start() — startCoreAfterStartingService=true")
                 Mobile.start("","")
                 }
 //            if (delayStart) {
@@ -297,6 +303,7 @@ class BoxService(
 
     private fun stopService() {
         if (status.value == Status.Stopped) return
+        if (verbose) Log.d(TAG, "stopService() — current status=${status.value}")
         // Signal before any async work so Mobile.wake() guards in DefaultNetworkListener
         // see the false value and skip wake calls during tear-down.
         DefaultNetworkListener.serviceActive.set(false)
@@ -320,6 +327,7 @@ class BoxService(
             wifiLock?.let { if (it.isHeld) runCatching { it.release() } }
             Settings.startedByUser = false
             runCatching { Mobile.close(4L) }
+            if (verbose) Log.d(TAG, "Mobile.close(4L) complete — status→Stopped")
         }
         status.value = Status.Stopped
         service.stopSelf()
@@ -344,9 +352,11 @@ class BoxService(
     @OptIn(DelicateCoroutinesApi::class)
     @Suppress("SameReturnValue")
     internal fun onStartCommand(): Int {
+        if (verbose) Log.d(TAG, "onStartCommand() — status=${status.value}")
         // HIGH FIX (Android audit): также блокируем при Stopping чтобы не
         // допустить второй Mobile.setup пока идёт runBlocking { Mobile.close }
         if (status.value == Status.Starting || status.value == Status.Stopping) {
+            if (verbose) Log.d(TAG, "onStartCommand() ignored — already ${status.value}")
             return Service.START_STICKY
         }
         if (status.value != Status.Stopped) return Service.START_STICKY
@@ -392,6 +402,7 @@ class BoxService(
     }
 
     fun onRevoke() {
+        if (verbose) Log.d(TAG, "onRevoke() — VPN permission revoked by system or another VPN app")
         stopService()
     }
 

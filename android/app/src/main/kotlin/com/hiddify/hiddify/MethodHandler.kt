@@ -50,7 +50,10 @@ class MethodHandler(private val scope: CoroutineScope) : FlutterPlugin,
         channel?.setMethodCallHandler(null)
     }
 
+    private val verbose get() = Settings.verboseLogging
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        if (verbose) Log.d(TAG, "onMethodCall — method=${call.method}")
         when (call.method) {
             Trigger.AddGrpcClientPublicKey.method -> {
                 GlobalScope.launch {
@@ -88,6 +91,7 @@ class MethodHandler(private val scope: CoroutineScope) : FlutterPlugin,
                         val grpcPort = args["grpcPort"] as Int
                         Settings.grpcServiceModePort = grpcPort
                         Log.d("debugmode","${Settings.debugMode}")
+                        if (verbose) Log.d(TAG, "Trigger.Setup — mode=$mode grpcPort=$grpcPort debug=${Settings.debugMode} baseDir=${Settings.baseDir}")
                         runCatching {
                             Mobile.setup(
                                 SetupOptions().also {
@@ -118,6 +122,7 @@ class MethodHandler(private val scope: CoroutineScope) : FlutterPlugin,
                         Settings.activeProfileName = args["name"] as String? ?: ""
                         Settings.debugMode = args["debug"] as Boolean? ?: false
                         Settings.grpcServiceModePort = args["grpcPort"] as Int
+                        if (verbose) Log.d(TAG, "Trigger.Start — path=${Settings.activeConfigPath} name=${Settings.activeProfileName} grpcPort=${Settings.grpcServiceModePort}")
 
                         val mainActivity = MainActivity.instance
 //                        val started = mainActivity.serviceStatus.value == Status.Started
@@ -142,6 +147,7 @@ class MethodHandler(private val scope: CoroutineScope) : FlutterPlugin,
                             Log.w(TAG, "service is not running")
                             //    return@launch success(true)
                         }
+                        if (verbose) Log.d(TAG, "Trigger.Stop — serviceStarted=$started")
                         BoxService.stop()
                         success(true)
                     }

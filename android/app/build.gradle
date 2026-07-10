@@ -82,6 +82,26 @@ android {
         multiDexEnabled true
     }
 
+    // v0.0.37: product flavors — «prod» (публичная сборка) vs «admin» (superadmin).
+    // Admin variant имеет отдельный applicationId → отдельный APK канал,
+    // отдельный launcher icon (через resValue) + admin-only код в src/admin/.
+    flavorDimensions "distribution"
+    productFlavors {
+        prod {
+            dimension "distribution"
+            applicationIdSuffix ""
+            resValue "string", "app_name", "PIXELLNET"
+            buildConfigField "boolean", "IS_ADMIN", "false"
+        }
+        admin {
+            dimension "distribution"
+            applicationIdSuffix ".admin"
+            versionNameSuffix "-admin"
+            resValue "string", "app_name", "PIXELLNET Admin"
+            buildConfigField "boolean", "IS_ADMIN", "true"
+        }
+    }
+
     splits {
         abi {
             enable true

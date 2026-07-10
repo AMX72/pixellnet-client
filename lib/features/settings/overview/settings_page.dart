@@ -77,50 +77,83 @@ class SettingsPage extends HookConsumerWidget {
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
           ),
-          // ── Auto-update toggle ──────────────────────────────────────────────
-          Consumer(
-            builder: (context, ref, _) {
-              final autoUpdate = ref.watch(autoUpdateEnabledProvider);
-              return SwitchListTile(
-                secondary: const Icon(Icons.system_update_outlined),
-                title: const Text('Автообновление'),
-                subtitle: const Text('Проверять и устанавливать новые версии автоматически'),
-                value: autoUpdate,
-                onChanged: (v) =>
-                    ref.read(autoUpdateEnabledProvider.notifier).toggle(v),
-              );
-            },
-          ),
-          // ── Manual check ────────────────────────────────────────────────────
-          Builder(
-            builder: (context) {
-              final version = ref.watch(appInfoProvider).valueOrNull?.presentVersion ?? '';
-              return ListTile(
-                leading: const Icon(Icons.info_outline_rounded),
-                title: const Text('Проверить обновления'),
-                subtitle: version.isNotEmpty ? Text('Версия $version') : null,
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () async {
-                  final info = await UpdaterService.instance
-                      .checkForUpdate(force: true);
-                  if (context.mounted) {
-                    if (info != null) {
-                      showDialog(
-                        context: context,
-                        builder: (_) => UpdateDialog(info: info),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Установлена последняя версия'),
-                          duration: Duration(seconds: 2),
+          // ── Auto-update block (v0.0.37: выделен Card, prominent CTA) ────────
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final autoUpdate = ref.watch(autoUpdateEnabledProvider);
+                      return SwitchListTile(
+                        secondary: const Icon(Icons.system_update_rounded),
+                        title: const Text('Автообновление'),
+                        subtitle: const Text(
+                          'Приложение само проверяет наличие новых версий и скачивает '
+                          'обновление в фоне. Ничего делать не нужно — '
+                          'просто подтверди установку когда появится запрос.',
+                        ),
+                        value: autoUpdate,
+                        onChanged: (v) =>
+                            ref.read(autoUpdateEnabledProvider.notifier).toggle(v),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            topRight: Radius.circular(12),
+                          ),
                         ),
                       );
-                    }
-                  }
-                },
-              );
-            },
+                    },
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  Builder(
+                    builder: (context) {
+                      final version =
+                          ref.watch(appInfoProvider).valueOrNull?.presentVersion ?? '';
+                      return ListTile(
+                        leading: const Icon(Icons.search_rounded),
+                        title: const Text('Проверить обновления сейчас'),
+                        subtitle: version.isNotEmpty ? Text('Текущая версия: $version') : null,
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(12),
+                            bottomRight: Radius.circular(12),
+                          ),
+                        ),
+                        onTap: () async {
+                          final info = await UpdaterService.instance
+                              .checkForUpdate(force: true);
+                          if (context.mounted) {
+                            if (info != null) {
+                              showDialog(
+                                context: context,
+                                builder: (_) => UpdateDialog(info: info),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Установлена последняя версия'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
           // v0.0.33: Диагностика — прямой доступ к логам без dev-menu (для support).
           ListTile(
@@ -129,6 +162,42 @@ class SettingsPage extends HookConsumerWidget {
             subtitle: const Text('Логи для поддержки — открой и поделись если что-то не работает'),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/logs'),
+          ),
+          // v0.0.37: полное логирование toggle + размер лимита.
+          Consumer(
+            builder: (context, ref, _) {
+              final verbose = ref.watch(verboseLoggingNotifierProvider);
+              return SwitchListTile(
+                secondary: const Icon(Icons.article_outlined),
+                title: const Text('Полное логирование'),
+                subtitle: const Text('Записывать все события приложения. Только для дебага — сильно увеличивает размер логов.'),
+                value: verbose,
+                onChanged: (v) => ref.read(verboseLoggingNotifierProvider.notifier).update(v),
+              );
+            },
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final limit = ref.watch(logSizeLimitNotifierProvider);
+              return ListTile(
+                leading: const Icon(Icons.storage_outlined),
+                title: const Text('Макс. размер логов'),
+                subtitle: Text('$limit МБ (при превышении удаляется старая половина)'),
+                trailing: DropdownButton<int>(
+                  value: limit,
+                  underline: const SizedBox.shrink(),
+                  items: const [
+                    DropdownMenuItem(value: 10, child: Text('10 МБ')),
+                    DropdownMenuItem(value: 50, child: Text('50 МБ')),
+                    DropdownMenuItem(value: 100, child: Text('100 МБ')),
+                    DropdownMenuItem(value: 200, child: Text('200 МБ')),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) ref.read(logSizeLimitNotifierProvider.notifier).update(v);
+                  },
+                ),
+              );
+            },
           ),
           _SettingsTile(
             title: t.pages.settings.general.title,

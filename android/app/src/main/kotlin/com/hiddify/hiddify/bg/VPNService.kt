@@ -3,6 +3,7 @@ import android.util.Log
 
 import com.hiddify.hiddify.Settings
 import android.content.Intent
+
 import android.content.pm.PackageManager.NameNotFoundException
 import android.net.ProxyInfo
 import android.net.VpnService
@@ -23,6 +24,7 @@ class VPNService : VpnService(), PlatformInterfaceWrapper {
         private const val TAG = "A/VPNService"
     }
 
+    private val verbose get() = Settings.verboseLogging
     private val service = BoxService(this, this)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int) =
@@ -41,6 +43,7 @@ class VPNService : VpnService(), PlatformInterfaceWrapper {
     }
 
     override fun onRevoke() {
+        if (verbose) Log.d(TAG, "onRevoke() — VPN permission revoked")
         runBlocking {
             withContext(Dispatchers.Main) {
                 service.onRevoke()
@@ -49,6 +52,7 @@ class VPNService : VpnService(), PlatformInterfaceWrapper {
     }
 
     override fun autoDetectInterfaceControl(fd: Int) {
+        if (verbose) Log.d(TAG, "protect(fd=$fd) called")
         protect(fd)
     }
 
@@ -209,6 +213,7 @@ class VPNService : VpnService(), PlatformInterfaceWrapper {
 
         val pfd = builder.establish() ?: error("android: the application is not prepared or is revoked")
         service.fileDescriptor = pfd
+        if (verbose) Log.d(TAG, "openTun() — TUN fd=${pfd.fd} mtu=${options.mtu} autoRoute=${options.autoRoute}")
         return pfd.fd
     }
 

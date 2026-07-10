@@ -20,6 +20,7 @@ import 'package:hiddify/features/chain/model/chain_enum.dart';
 import 'package:hiddify/features/chain/notifier/chain_profile_notifier.dart';
 
 import 'package:hiddify/features/log/data/log_data_providers.dart';
+import 'package:hiddify/features/log/data/log_rotation_service.dart';
 import 'package:hiddify/features/profile/data/profile_data_providers.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
@@ -135,6 +136,11 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async
 
   if (!kIsWeb) {
     FlutterNativeSplash.remove();
+  }
+
+  // v0.0.37: Log rotation — запускаем сразу (не после кадра, файл не UI)
+  if (PlatformUtils.isAndroid) {
+    container.read(logRotationServiceProvider);
   }
 
   // Auto-update check — запускаем после первого кадра, не блокируем UI

@@ -7,6 +7,7 @@ import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/core/router/adaptive_layout/shell_route_action.dart';
 import 'package:hiddify/core/router/go_router/helper/active_breakpoint_notifier.dart';
 import 'package:hiddify/core/router/go_router/routing_config_notifier.dart';
+import 'package:hiddify/core/superadmin.dart';
 import 'package:hiddify/features/stats/widget/side_bar_stats_overview.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -53,10 +54,18 @@ class MyAdaptiveLayout extends HookConsumerWidget {
         HardwareKeyboard.instance.removeHandler(handler);
       };
     }, [isMobileBreakpoint, showProfilesAction, navigationShell.currentIndex]);
-    // Sprint 3 sidebar mapping. Видимые пункты: 0=Главная, 1=Настройки.
-    // Реальные go_router branches: 0=Home, 1=Profiles, 2=Settings, 3=Logs, 4=About.
-    // Юзер видит только 2, но branches все ещё активны для deep-link/dev-menu.
-    final visibleSelectedIndex = navigationShell.currentIndex == 0 ? 0 : 1;
+    // Sprint 3 sidebar mapping. Видимые пункты: 0=Главная, 1=Настройки [, 2=Разработчик если admin].
+    // Реальные go_router branches: 0=Home, 1=Profiles?, 2=Settings, 3=Logs, 4=About [, 5=Developer?].
+    // v0.0.37: при kSuperAdminBuild последний branch = developer.
+    final int developerBranchIndex = showProfilesAction ? 5 : 4;
+    int visibleSelectedIndex;
+    if (kSuperAdminBuild && navigationShell.currentIndex == developerBranchIndex) {
+      visibleSelectedIndex = 2;
+    } else if (navigationShell.currentIndex == 0) {
+      visibleSelectedIndex = 0;
+    } else {
+      visibleSelectedIndex = 1;
+    }
     return Material(
       child: Scaffold(
         body: isMobileBreakpoint
@@ -98,20 +107,25 @@ class MyAdaptiveLayout extends HookConsumerWidget {
   }
 
   /// Маппинг видимого индекса → реальный go_router branch index.
-  /// UI: 0=Главная, 1=Настройки.
-  /// Branches если showProfilesAction=true: [Home, Profiles, Settings, Logs, About].
-  /// Branches если showProfilesAction=false: [Home, Settings, Logs, About].
+  /// UI: 0=Главная, 1=Настройки [, 2=Разработчик если kSuperAdminBuild].
+  /// Branches если showProfilesAction=true: [Home, Profiles, Settings, Logs, About, Developer?].
+  /// Branches если showProfilesAction=false: [Home, Settings, Logs, About, Developer?].
   int _mapVisibleToBranch(int visibleIndex, bool showProfilesAction) {
     if (visibleIndex == 0) return 0; // Home всегда branch 0
-    return showProfilesAction ? 2 : 1; // Settings: с профилями = 2, без = 1
+    if (kSuperAdminBuild && visibleIndex == 2) {
+      // Developer — последний branch
+      return showProfilesAction ? 5 : 4;
+    }
+    return showProfilesAction ? 2 : 1; // Settings
   }
 
   /// Sprint 3: sidebar сокращён до 2 пунктов (Главная + Настройки).
-  /// «Профили», «Логи», «О программе» вынесены в Настройки → Дополнительно
-  /// и dev-menu (5-tap по версии). Один юзер = один ключ → отдельный «Профили» не нужен.
+  /// v0.0.37: в superadmin-сборке добавляется 3-й пункт «Разработчик».
   List<ShellRouteAction> _actions(Translations t) => [
     ShellRouteAction(Icons.power_settings_new_rounded, t.pages.home.title),
     ShellRouteAction(Icons.settings_rounded, t.pages.settings.title),
+    if (kSuperAdminBuild)
+      ShellRouteAction(Icons.developer_mode_rounded, 'Разработчик'),
   ];
 
   List<NavigationDestination> _navDests(List<ShellRouteAction> actions) =>
