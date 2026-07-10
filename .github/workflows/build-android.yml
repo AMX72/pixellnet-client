@@ -103,14 +103,20 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
+          # v0.0.40: Gradle product flavors (prod + admin) → флаг --flavor prod
+          # обязателен, иначе Flutter не находит output APK.
           flutter build apk --release \
+            --flavor prod \
             --split-per-abi \
             --build-number=${{ github.run_number }} \
             --build-name=${{ steps.ver.outputs.version }}
           mkdir -p out
           for f in build/app/outputs/flutter-apk/*.apk; do
             base=$(basename "$f")
-            cp "$f" "out/pixellnet-${{ steps.ver.outputs.version }}-${base}"
+            # Rename app-prod-arm64-v8a-release.apk → pixellnet-{version}-arm64-v8a-release.apk
+            # (совместимость с mirror URLs pixellnet.com/download/pixellnet-{version}-arm64.apk)
+            clean=$(echo "$base" | sed 's/app-prod-/app-/')
+            cp "$f" "out/pixellnet-${{ steps.ver.outputs.version }}-${clean}"
           done
           ls -la out/
 
