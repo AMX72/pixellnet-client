@@ -214,7 +214,7 @@ Future<String?> _uploadDiagnostic(BuildContext context) async {
   // Шаг 1 — явный consent юзера.
   final consent = await showDialog<bool>(
     context: context,
-    builder: (_) => AlertDialog(
+    builder: (dialogCtx) => AlertDialog(
       title: const Text('Отправить логи разработчику?'),
       content: const Text(
         'Диагностический журнал (события приложения, состояние VPN, '
@@ -225,11 +225,11 @@ Future<String?> _uploadDiagnostic(BuildContext context) async {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context, false),
+          onPressed: () => Navigator.pop(dialogCtx, false),
           child: const Text('Отмена'),
         ),
         FilledButton(
-          onPressed: () => Navigator.pop(context, true),
+          onPressed: () => Navigator.pop(dialogCtx, true),
           child: const Text('Отправить'),
         ),
       ],
