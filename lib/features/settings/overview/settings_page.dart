@@ -162,7 +162,10 @@ class SettingsPage extends HookConsumerWidget {
             title: const Text('Диагностика'),
             subtitle: const Text('Логи для поддержки — открой и поделись если что-то не работает'),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/logs'),
+            // v0.0.44 fix: pushNamed вместо push('/logs') — на мобильных
+            // route зарегистрирован под /settings/logs (relative), не /logs.
+            // Раньше context.push('/logs') не находил маршрут → fallback на Home.
+            onTap: () => context.pushNamed('logs'),
           ),
           // v0.0.37: полное логирование toggle + размер лимита.
           Consumer(
