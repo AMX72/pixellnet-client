@@ -8,6 +8,7 @@ import 'package:hiddify/features/connection/data/connection_data_providers.dart'
 import 'package:hiddify/features/connection/data/connection_repository.dart';
 import 'package:hiddify/features/connection/model/connection_failure.dart';
 import 'package:hiddify/features/connection/model/connection_status.dart';
+import 'package:hiddify/features/diagnostics/diagnostics_service.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/hiddifycore/init_signal.dart';
@@ -74,16 +75,18 @@ class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
   Future<void> toggleConnection() async {
     final haptic = ref.read(hapticServiceProvider.notifier);
     if (state case AsyncError()) {
+      DiagnosticsService.instance.event('vpn.toggle', {'from': 'error'});
       await haptic.lightImpact();
       await _connect();
     } else if (state case AsyncData(:final value)) {
       switch (value) {
         case Disconnected():
+          DiagnosticsService.instance.event('vpn.toggle', {'from': 'disconnected'});
           await haptic.lightImpact();
           await ref.read(Preferences.startedByUser.notifier).update(true);
           await _connect();
         case Connected():
-          // default:
+          DiagnosticsService.instance.event('vpn.toggle', {'from': 'connected'});
           await haptic.mediumImpact();
           await ref.read(Preferences.startedByUser.notifier).update(false);
           await _disconnect();

@@ -12,6 +12,7 @@ import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/widget/adaptive_icon.dart';
 import 'package:hiddify/features/app_update/notifier/app_update_notifier.dart';
 import 'package:hiddify/features/app_update/notifier/app_update_state.dart';
+import 'package:hiddify/features/diagnostics/diagnostics_service.dart';
 import 'package:hiddify/features/updater/update_dialog.dart';
 import 'package:hiddify/features/updater/updater_service.dart';
 import 'package:hiddify/gen/assets.gen.dart';
@@ -82,6 +83,18 @@ class AboutPage extends HookConsumerWidget {
             await ref.read(appUpdateNotifierProvider.notifier).check();
           },
         ),
+      ListTile(
+        title: const Text('Собрать диагностику'),
+        subtitle: const Text('Инфа о ПК/интернете + последние события — в буфер обмена'),
+        leading: const Icon(Icons.medical_services_rounded),
+        onTap: () async {
+          final snap = await DiagnosticsService.instance.collect();
+          final md = DiagnosticsService.instance.formatAsMarkdown(snap);
+          await Clipboard.setData(ClipboardData(text: md));
+          if (!context.mounted) return;
+          CustomToast.success('Диагностика в буфере (${md.length} симв.)').show(context);
+        },
+      ),
       if (PlatformUtils.isDesktop)
         ListTile(
           title: Text(t.pages.about.openWorkingDir),

@@ -46,9 +46,11 @@ class LogsOverviewNotifier extends _$LogsOverviewNotifier with AppLogger {
     loggy.debug("adding listeners");
     ref.watch(coreRestartSignalProvider);
     await _listener?.cancel();
-    _listener = ref
-        .read(logRepositoryProvider)
-        .requireValue
+    // v0.1.10 fix: wait for logRepositoryProvider Future before .requireValue
+    // (иначе StateError → бесконечный AsyncLoading спиннер на Windows где
+    // getApplicationSupportDirectory() init async занимает > mount виджета)
+    final repo = await ref.read(logRepositoryProvider.future);
+    _listener = repo
         .watchLogs()
         .throttle((_) => Stream.value(_listener?.isPaused ?? false), leading: false, trailing: true)
         .throttleTime(const Duration(milliseconds: 250), leading: false, trailing: true)

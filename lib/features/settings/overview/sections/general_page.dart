@@ -72,6 +72,21 @@ class GeneralPage extends HookConsumerWidget {
             value: !ref.watch(Preferences.disableMemoryLimit),
             onChanged: (value) async => await ref.read(Preferences.disableMemoryLimit.notifier).update(!value),
           ),
+          ListTile(
+            leading: const Icon(Icons.description_rounded),
+            title: const Text('Размер журнала'),
+            subtitle: Text('${ref.watch(Preferences.logMaxSizeMb)} МБ — старые записи затираются'),
+            trailing: DropdownButton<int>(
+              value: ref.watch(Preferences.logMaxSizeMb),
+              underline: const SizedBox.shrink(),
+              items: const [5, 20, 50, 100, 500]
+                  .map((mb) => DropdownMenuItem(value: mb, child: Text('$mb МБ')))
+                  .toList(),
+              onChanged: (v) async {
+                if (v != null) await ref.read(Preferences.logMaxSizeMb.notifier).update(v);
+              },
+            ),
+          ),
           // Debug mode toggle — hidden in release builds (PIXELLNET brand)
           if (kDebugMode)
             SwitchListTile.adaptive(

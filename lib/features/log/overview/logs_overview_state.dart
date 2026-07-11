@@ -10,7 +10,10 @@ class LogsOverviewState with _$LogsOverviewState {
   const LogsOverviewState._();
 
   const factory LogsOverviewState({
-    @Default(AsyncLoading()) AsyncValue<List<LogEntity>> logs,
+    // v0.1.10 fix: было AsyncLoading — если core не запущен и watchLogs()
+    // завершается без yield, UI навсегда висел спиннер. Пустой список =
+    // корректный empty state, дальше LogsPage покажет «Пока всё тихо».
+    @Default(AsyncData([])) AsyncValue<List<LogEntity>> logs,
     @Default(false) bool paused,
     @Default("") String filter,
     LogLevel? levelFilter,

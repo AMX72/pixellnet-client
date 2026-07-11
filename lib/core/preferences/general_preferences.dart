@@ -100,6 +100,11 @@ abstract class Preferences {
 
   static final autoCheckIp = PreferencesNotifier.create<bool, bool>("auto_check_ip", true);
 
+  // Максимальный размер файла логов в мегабайтах.
+  // Юзер выбирает: 5 / 20 / 50 / 100 / 500. Дефолт 20 МБ — достаточно для
+  // 1-2 сутки диагностики без обрезки, не съедает диск на слабых устройствах.
+  static final logMaxSizeMb = PreferencesNotifier.create<int, int>("log_max_size_mb", 20);
+
   static final startedByUser = PreferencesNotifier.create<bool, bool>("started_by_user", false);
 
   static final storeReviewedByUser = PreferencesNotifier.create<bool, bool>("store_reviewed_by_user", false);

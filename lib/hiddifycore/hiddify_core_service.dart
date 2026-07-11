@@ -368,6 +368,10 @@ class HiddifyCoreService with InfraLogger {
   Stream<List<LogMessage>> watchLogs(String path) async* {
     if (!core.isInitialized()) {
       loggy.debug("core is not initialized, returning empty log stream");
+      // v0.1.10 fix: yield пустой список ДО return — иначе подписчик не
+      // получает ни одного события, notifier state.logs остаётся AsyncLoading
+      // → вечный спиннер на LogsPage когда core ещё не поднят.
+      yield [];
       return;
     }
     await startListeningLogs("bg", core.bgClient);
