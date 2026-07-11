@@ -1,6 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
-  <circle cx="64" cy="64" r="60" fill="#2B2A28"/>
-  <rect x="36" y="28" width="14" height="72" rx="2" fill="#B08858"/>
-  <path d="M50 28 H72 C88 28 96 38 96 52 C96 66 88 76 72 76 H50 Z" fill="#B08858"/>
-  <path d="M50 40 H70 C80 40 84 45 84 52 C84 59 80 64 70 64 H50 Z" fill="#2B2A28"/>
+  <defs>
+    <radialGradient id="rimGrad" cx="0.35" cy="0.3" r="0.75">
+      <stop offset="0%" stop-color="#D8E9F5"/>
+      <stop offset="70%" stop-color="#8FA8C4"/>
+      <stop offset="100%" stop-color="#6F8AA8"/>
+    </radialGradient>
+    <radialGradient id="dishGrad" cx="0.4" cy="0.35" r="0.75">
+      <stop offset="0%" stop-color="#3C3A36"/>
+      <stop offset="80%" stop-color="#1F1E1C"/>
+      <stop offset="100%" stop-color="#141312"/>
+    </radialGradient>
+    <linearGradient id="pGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D4B26A"/>
+      <stop offset="55%" stop-color="#B08858"/>
+      <stop offset="100%" stop-color="#8B6738"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="0.6"/>
+    </filter>
+  </defs>
+  <!-- outer light-blue rim (3D coin) -->
+  <circle cx="64" cy="64" r="62" fill="url(#rimGrad)"/>
+  <!-- inner dark dish -->
+  <circle cx="64" cy="64" r="48" fill="url(#dishGrad)"/>
+  <!-- highlight arc on rim -->
+  <path d="M20 40 A54 54 0 0 1 88 14" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <!-- letter P — mocha/gold -->
+  <path d="M50 30 H74 C86 30 94 38 94 50 C94 62 86 70 74 70 H60 V96 H50 Z M60 42 V58 H72 C77 58 82 55 82 50 C82 45 77 42 72 42 H60 Z"
+        fill="url(#pGrad)" filter="url(#soft)"/>
 </svg>
