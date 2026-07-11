@@ -45,7 +45,6 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
             GetPackagesIcon("get_package_icon"),
             CanRequestPackageInstalls("can_request_package_installs"),
             OpenInstallUnknownAppsSettings("open_install_unknown_apps_settings"),
-            SetVerboseLogging("set_verbose_logging"),
         }
     }
 
@@ -210,13 +209,6 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
                         Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
                     success(base64)
                 }
-            }
-
-            Trigger.SetVerboseLogging.method -> {
-                val enabled = call.arguments as? Boolean ?: false
-                Settings.verboseLogging = enabled
-                android.util.Log.d("PlatformSettingsHandler", "verboseLogging set to $enabled")
-                result.success(null)
             }
 
             else -> result.notImplemented()
