@@ -9,32 +9,152 @@ class AppTheme {
   final AppThemeMode mode;
   final String fontFamily;
 
-  ThemeData lightTheme(ColorScheme? lightColorScheme) {
-    final ColorScheme scheme = lightColorScheme ?? ColorScheme.fromSeed(seedColor: PixellnetBrand.primary);
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: scheme,
-      fontFamily: fontFamily,
-      extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
-    );
+  static const _radiusButton = 12.0;
+  static const _radiusCard = 16.0;
+  static const _radiusChip = 6.0;
+
+  // Palette v3 — единая warm/mocha схема для light и dark.
+  // Light theme в MVP не используется, но описан для совместимости.
+  ColorScheme get _v3Dark => const ColorScheme.dark(
+        primary: PixellnetBrand.mocha,
+        onPrimary: Color(0xFF1A1917),
+        primaryContainer: PixellnetBrand.mochaDark,
+        onPrimaryContainer: PixellnetBrand.textPrimary,
+        secondary: PixellnetBrand.amber,
+        onSecondary: Color(0xFF1A1917),
+        tertiary: PixellnetBrand.olive,
+        onTertiary: Color(0xFF1A1917),
+        error: PixellnetBrand.coral,
+        onError: Color(0xFF1A1917),
+        surface: PixellnetBrand.surface,
+        onSurface: PixellnetBrand.textPrimary,
+        surfaceContainerLowest: PixellnetBrand.bgDark,
+        surfaceContainerLow: PixellnetBrand.surface,
+        surfaceContainer: PixellnetBrand.surfaceElevated,
+        surfaceContainerHigh: PixellnetBrand.surfaceElevated,
+        surfaceContainerHighest: PixellnetBrand.surfaceHover,
+        onSurfaceVariant: PixellnetBrand.textSecondary,
+        outline: PixellnetBrand.textMuted,
+        outlineVariant: Color(0xFF3C3A36),
+      );
+
+  ColorScheme get _v3Light => const ColorScheme.light(
+        primary: PixellnetBrand.mochaDark,
+        onPrimary: Color(0xFFFFFDF9),
+        secondary: PixellnetBrand.mocha,
+        onSecondary: Color(0xFFFFFDF9),
+        tertiary: PixellnetBrand.olive,
+        error: PixellnetBrand.coral,
+        surface: Color(0xFFF7F3EC),
+        onSurface: Color(0xFF1A1917),
+      );
+
+  ThemeData lightTheme(ColorScheme? _) {
+    return _buildTheme(_v3Light, Brightness.light);
   }
 
-  ThemeData darkTheme(ColorScheme? darkColorScheme) {
-    final ColorScheme scheme =
-        darkColorScheme ??
-            ColorScheme.fromSeed(seedColor: PixellnetBrand.primary, brightness: Brightness.dark).copyWith(
-              background: PixellnetBrand.bgDark,
-              surface: PixellnetBrand.surface,
-              onSurface: PixellnetBrand.textOnDark,
-              secondary: PixellnetBrand.accent,
-              onSecondary: PixellnetBrand.bgDark,
-            );
-    return ThemeData(
+  ThemeData darkTheme(ColorScheme? _) {
+    return _buildTheme(_v3Dark, Brightness.dark);
+  }
+
+  ThemeData _buildTheme(ColorScheme scheme, Brightness brightness) {
+    final bool isDark = brightness == Brightness.dark;
+    final Color scaffoldBg = isDark
+        ? (mode.trueBlack ? Colors.black : PixellnetBrand.bgDark)
+        : scheme.surface;
+
+    final base = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: mode.trueBlack ? Colors.black : scheme.background,
+      brightness: brightness,
       fontFamily: fontFamily,
+      scaffoldBackgroundColor: scaffoldBg,
+      canvasColor: scaffoldBg,
       extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
+    );
+
+    return base.copyWith(
+      appBarTheme: AppBarTheme(
+        backgroundColor: scaffoldBg,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleTextStyle: TextStyle(
+          fontFamily: fontFamily,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.2,
+          color: scheme.onSurface,
+        ),
+        iconTheme: IconThemeData(color: scheme.primary, size: 24),
+      ),
+      cardTheme: CardThemeData(
+        color: isDark ? PixellnetBrand.surfaceElevated : scheme.surface,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radiusCard)),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
+          minimumSize: const Size(0, 48),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radiusButton)),
+          textStyle: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.3,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: scheme.primary,
+          side: BorderSide(color: scheme.primary, width: 1.5),
+          minimumSize: const Size(0, 48),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radiusButton)),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: scheme.onSurfaceVariant,
+          minimumSize: const Size(0, 40),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: scheme.primary,
+        textColor: scheme.onSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radiusChip)),
+      ),
+      dividerTheme: DividerThemeData(
+        color: scheme.outlineVariant,
+        thickness: 1,
+        space: 1,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: scheme.secondary.withValues(alpha: 0.18),
+        labelStyle: TextStyle(
+          fontFamily: fontFamily,
+          color: scheme.secondary,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radiusChip)),
+        side: BorderSide.none,
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: scheme.secondary,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: PixellnetBrand.surfaceElevated,
+        contentTextStyle: TextStyle(fontFamily: fontFamily, color: scheme.onSurface, fontSize: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radiusButton)),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 
@@ -46,9 +166,6 @@ class AppTheme {
       AppThemeMode.black => true,
     };
     final def = CupertinoThemeData(brightness: isDark ? Brightness.dark : Brightness.light);
-    // final def = CupertinoThemeData(brightness: Brightness.dark);
-
-    // return def;
     final defaultMaterialTheme = isDark ? darkTheme(darkColorScheme) : lightTheme(lightColorScheme);
     return MaterialBasedCupertinoThemeData(
       materialTheme: defaultMaterialTheme.copyWith(

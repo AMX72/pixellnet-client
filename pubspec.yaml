@@ -1,7 +1,7 @@
 name: hiddify
 description: PIXELLNET VPN — commercial VPN client for Russia (internal package name kept as 'hiddify' to preserve upstream imports; user-facing brand is PIXELLNET everywhere)
 publish_to: "none"
-version: 0.1.0+1
+version: 0.1.1+2
 
 environment:
   sdk: ^3.10.4
@@ -178,11 +178,11 @@ flutter_gen:
     flutter_svg: true
 
 flutter_native_splash:
-  color: "#0F1729"
+  color: "#1A1917"
   image: assets/images/source/ic_launcher_splash.png
   android_gravity: center
   android_12:
-    color: "#0F1729"
+    color: "#1A1917"
     image: assets/images/source/ic_launcher_foreground.png
 
 flutter_launcher_icons:
@@ -190,7 +190,7 @@ flutter_launcher_icons:
   android: true
   ios: false
   image_path: "assets/brand/icon_source.png"
-  adaptive_icon_background: "#0F1729"
+  adaptive_icon_background: "#1A1917"
   adaptive_icon_foreground: "assets/brand/icon_foreground.png"
   min_sdk_android: 21
   windows:

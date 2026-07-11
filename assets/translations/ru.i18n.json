@@ -683,14 +683,14 @@
     }
   },
   "connection": {
-    "tapToConnect": "Нажмите для подключения",
-    "connect": "Подключить",
-    "connecting": "Подключение...",
-    "connected": "Подключено",
-    "disconnect": "Отключить",
-    "disconnecting": "Отключение...",
-    "reconnect": "Переподключить",
-    "reconnectMsg": "Переподключение для учета изменений..."
+    "tapToConnect": "Тапни — и ты в сети",
+    "connect": "Включить",
+    "connecting": "Пинаем канал…",
+    "connected": "В сети",
+    "disconnect": "Выключить",
+    "disconnecting": "Отключаем…",
+    "reconnect": "Пинаем заново",
+    "reconnectMsg": "Что-то поменялось — обновляем канал…"
   },
   "errors": {
     "unexpected": "Непредвиденная ошибка",
