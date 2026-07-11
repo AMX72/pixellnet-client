@@ -8,6 +8,7 @@ import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/core/theme/theme_extensions.dart';
 import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
+import 'package:hiddify/features/home/widget/pin_coin_painter.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/settings/notifier/config_option/config_option_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -57,16 +58,25 @@ class ConnectionButton extends HookConsumerWidget {
       _ => false,
     };
 
+    // Маппинг из ConnectionStatus → PinCoinState (палитра монеты)
+    final coinState = switch (connectionStatus) {
+      AsyncData(value: Connected()) when requiresReconnect => PinCoinState.connecting,
+      AsyncData(value: Connected()) => PinCoinState.connected,
+      AsyncData(value: Connecting()) => PinCoinState.connecting,
+      AsyncData(value: Disconnecting()) => PinCoinState.connecting,
+      AsyncError() => PinCoinState.error,
+      _ => PinCoinState.idle,
+    };
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _PinButton(
           onTap: onTap,
           enabled: enabled,
-          color: color,
-          textColor: buttonTheme.textColor ?? const Color(0xFF1A1917),
           label: label,
-          state: animState,
+          coinState: coinState,
+          animState: animState,
         ),
         const Gap(20),
         AnimatedSwitcher(
@@ -94,37 +104,37 @@ class ConnectionButton extends HookConsumerWidget {
   ) {
     return switch (status) {
       AsyncData(value: Connected()) when requiresReconnect => (
-          'PiN',
+          'PIN',
           t.connection.reconnect,
           theme.connectingColor!,
           _PinAnim.pulse,
         ),
       AsyncData(value: Connected()) => (
-          'PiN',
+          'PIN',
           t.connection.connected,
           theme.connectedColor!,
           _PinAnim.connected,
         ),
       AsyncData(value: Connecting()) => (
-          'PiN',
+          'PIN',
           t.connection.connecting,
           theme.connectingColor!,
           _PinAnim.pulse,
         ),
       AsyncData(value: Disconnecting()) => (
-          'PiN',
+          'PIN',
           t.connection.disconnecting,
           theme.connectingColor!,
           _PinAnim.pulse,
         ),
       AsyncError() => (
-          'PiN',
+          'PIN',
           t.connection.tapToConnect,
           theme.errorColor!,
           _PinAnim.shake,
         ),
       _ => (
-          'PiN',
+          'PIN',
           t.connection.tapToConnect,
           theme.idleColor!,
           _PinAnim.idle,
@@ -139,71 +149,76 @@ class _PinButton extends StatelessWidget {
   const _PinButton({
     required this.onTap,
     required this.enabled,
-    required this.color,
-    required this.textColor,
     required this.label,
-    required this.state,
+    required this.coinState,
+    required this.animState,
   });
 
   final VoidCallback onTap;
   final bool enabled;
-  final Color color;
-  final Color textColor;
   final String label;
-  final _PinAnim state;
+  final PinCoinState coinState;
+  final _PinAnim animState;
 
   static const double _size = 180;
 
   @override
   Widget build(BuildContext context) {
+    // Плавный transition палитр — 240ms Color.lerp через TweenAnimationBuilder
+    // (мгновенно для error чтобы shake сигнализировал).
+    final target = paletteFor(coinState);
+    final transitionMs = coinState == PinCoinState.error ? 0 : 240;
+
     Widget button = Semantics(
       button: true,
       enabled: enabled,
       label: label,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeOut,
-        width: _size,
-        height: _size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.45),
-              blurRadius: 32,
-              spreadRadius: 2,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 1.0, end: 1.0),
+        duration: Duration(milliseconds: transitionMs),
+        curve: Curves.easeInOutCubic,
+        builder: (context, t, child) {
+          // При каждой смене palette Flutter ре-строит с новым target — прямо
+          // передаём target в painter (плавность даёт AnimatedSwitcher поверх).
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: target.glow.withValues(alpha: target.glowAlpha),
+                  blurRadius: target.glowBlur,
+                  spreadRadius: target.glowSpread,
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Material(
-          key: const ValueKey('home_connection_button'),
-          shape: const CircleBorder(),
-          color: Colors.transparent,
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: onTap,
-            splashColor: PixellnetBrand.amber.withValues(alpha: 0.20),
-            highlightColor: Colors.white.withValues(alpha: 0.04),
-            child: Center(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 48,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -1.5,
-                  height: 1.0,
-                  color: textColor,
+            child: SizedBox(
+              width: _size,
+              height: _size,
+              child: Material(
+                key: const ValueKey('home_connection_button'),
+                shape: const CircleBorder(),
+                color: Colors.transparent,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: onTap,
+                  splashColor: target.rim.withValues(alpha: 0.20),
+                  highlightColor: Colors.white.withValues(alpha: 0.04),
+                  child: CustomPaint(
+                    painter: PinCoinPainter(
+                      palette: target,
+                      label: label,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
 
-    switch (state) {
+    switch (animState) {
       case _PinAnim.pulse:
         button = button
             .animate(onPlay: (c) => c.repeat(reverse: true))
