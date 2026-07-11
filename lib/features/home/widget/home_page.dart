@@ -7,6 +7,8 @@ import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
 import 'package:hiddify/features/home/widget/connection_button.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/profile/widget/profile_tile.dart';
+import 'package:hiddify/features/trial/auto_trial_provider.dart';
+import 'package:hiddify/features/trial/trial_service.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
 import 'package:hiddify/gen/assets.gen.dart';
@@ -22,6 +24,10 @@ class HomePage extends HookConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     // final hasAnyProfile = ref.watch(hasAnyProfileProvider);
     final activeProfile = ref.watch(activeProfileProvider);
+    // Zero-config: при первом запуске автоматически получаем trial через
+    // pixellnet-api и импортируем как активный профиль. Если у юзера уже
+    // есть профиль — провайдер вернёт null и ничего не сделает.
+    final autoTrial = ref.watch(autoTrialProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -139,6 +145,56 @@ class HomePage extends HookConsumerWidget {
                 ),
               ),
             ),
+            // Zero-config auto-trial overlay: показывается пока идёт запрос
+            // на pixellnet-api /api/trial при первом запуске.
+            if (autoTrial.isLoading)
+              Container(
+                color: theme.scaffoldBackgroundColor.withValues(alpha: 0.85),
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(width: 48, height: 48, child: CircularProgressIndicator(strokeWidth: 3)),
+                    const Gap(24),
+                    Text('Готовим ваш пробный период (7 дней)',
+                        style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
+                    const Gap(8),
+                    Text('Одна секунда, и всё готово',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  ],
+                ),
+              ),
+            if (autoTrial.hasError)
+              Container(
+                color: theme.scaffoldBackgroundColor.withValues(alpha: 0.9),
+                alignment: Alignment.center,
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.wifi_off_rounded, size: 48, color: theme.colorScheme.error),
+                    const Gap(16),
+                    Text('Не получилось создать пробный доступ',
+                        style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
+                    const Gap(8),
+                    Text(
+                      autoTrial.error is TrialException
+                          ? (autoTrial.error as TrialException).message
+                          : 'Проверь интернет и попробуй снова',
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                    const Gap(24),
+                    FilledButton.icon(
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('Повторить'),
+                      onPressed: () => ref.invalidate(autoTrialProvider),
+                    ),
+                  ],
+                ),
+              ),
             if (ref.watch(hasAnyProfileProvider).value ?? false)
               Positioned(
                 right: 0,
