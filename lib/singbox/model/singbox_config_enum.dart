@@ -18,7 +18,11 @@ enum ServiceMode {
 
   final String key;
 
-  static ServiceMode get defaultMode => PlatformUtils.isDesktop ? systemProxy : tun;
+  // Zero-config: TUN default всегда (Windows/Linux/macOS/Android/iOS).
+  // System-proxy на Windows ломает Node.js/Docker/Claude Code которые
+  // не читают Windows proxy registry. TUN перехватывает всю сеть → работает
+  // из коробки для всех приложений. Требует admin (см. runner.exe.manifest).
+  static ServiceMode get defaultMode => tun;
 
   /// supported service mode based on platform, use this instead of [values] in UI
   static List<ServiceMode> get choices {
