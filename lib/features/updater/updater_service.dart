@@ -77,11 +77,22 @@ class UpdateInfo {
   final String downloadUrl;
   final String changelog;
 
+  /// v0.1.30: fallback-зеркала. Пробуем в порядке: primary → mirrors по очереди.
+  /// РФ-юзеры на CF/GH ловят ТСПУ throttle 16 KB — mirror в РФ-DC даёт full speed.
+  final List<String> mirrors;
+
   const UpdateInfo({
     required this.version,
     required this.downloadUrl,
     required this.changelog,
+    this.mirrors = const [],
   });
+
+  /// Все URL: primary + mirrors без дубликатов, порядок сохраняется.
+  List<String> get allSources {
+    final seen = <String>{};
+    return [downloadUrl, ...mirrors].where(seen.add).toList();
+  }
 }
 
 // ── Service ───────────────────────────────────────────────────────────────────
@@ -175,10 +186,19 @@ class UpdaterService {
       final latest = Version.parse(tagName);
 
       if (latest > current) {
+        // v0.1.30: mirror через pixellnet.com/latest.apk (nginx alias на
+        // Netcup mirror-dir) — обходит GH release-assets.githubusercontent.com
+        // на который ТСПУ шлёт RST после 16 KB для российских ISP.
+        // При смене GH → pixellnet mirror файл начинается с нуля (разные ETag),
+        // поэтому mirror-цикл в downloadAndInstall стирает частичный файл.
+        final ghMirrors = Platform.isWindows
+            ? <String>[] // Windows пока без mirror — zip на pixellnet.com/latest.zip нет
+            : <String>['https://pixellnet.com/latest.apk'];
         return UpdateInfo(
           version: tagName,
           downloadUrl: apkUrl,
           changelog: body ?? '',
+          mirrors: ghMirrors,
         );
       }
       return null;
@@ -202,6 +222,12 @@ class UpdaterService {
       final version = (data['version'] as String).replaceFirst('v', '');
       final apkUrl = data['apk_url'] as String;
       final changelog = data['changelog'] as String? ?? '';
+      // v0.1.30: apk_url_mirrors — fallback список для РФ (обход ТСПУ throttle
+      // 16 KB на TCP → CF/Fastly). Порядок значим: primary = самый быстрый.
+      final mirrors = (data['apk_url_mirrors'] as List<dynamic>?)
+              ?.whereType<String>()
+              .toList() ??
+          const <String>[];
 
       final packageInfo = await PackageInfo.fromPlatform();
       final current = Version.parse(packageInfo.version.split('+').first);
@@ -212,6 +238,7 @@ class UpdaterService {
           version: version,
           downloadUrl: apkUrl,
           changelog: changelog,
+          mirrors: mirrors,
         );
       }
       return null;
@@ -230,12 +257,12 @@ class UpdaterService {
     if (Platform.isWindows) {
       return _downloadAndInstallWindows(info, onProgress: onProgress);
     }
-    // Use app-specific external cache directory — не требует MANAGE_EXTERNAL_STORAGE.
-    // FileProvider (см. AndroidManifest) уже знает про external-cache-path.
-    final dir = await getExternalStorageDirectory();
-    if (dir == null) {
-      throw Exception('Не удалось получить директорию для загрузки');
-    }
+    // v0.1.30: fallback dir. getExternalStorageDirectory() может вернуть null
+    // на нестандартных Android (некоторые Xiaomi/HyperOS без external storage
+    // разрешения). Documents dir всегда доступен + покрыт FileProvider (see
+    // file_paths.xml files-path).
+    final dir = await getExternalStorageDirectory() ??
+        await getApplicationDocumentsDirectory();
     final downloadDir = Directory('${dir.path}/updates');
     if (!await downloadDir.exists()) {
       await downloadDir.create(recursive: true);
@@ -260,9 +287,10 @@ class UpdaterService {
       if (kDebugMode) debugPrint('[Updater] cleanup failed: $e');
     }
 
-    if (await file.exists()) {
-      await file.delete();
-    }
+    // v0.1.30: НЕ удаляем существующий файл текущей версии — сохраняем для
+    // resume между сессиями (если Android убил приложение OOM во время
+    // download 120 МБ, при повторе Range докачивает без обрыва в начало).
+    // Финальная проверка size ниже отловит битый файл.
 
     // Проверяем runtime permission REQUEST_INSTALL_PACKAGES (Android 8+).
     // Если нет — фейлимся заранее, не скачивая 119 МБ впустую.
@@ -270,68 +298,34 @@ class UpdaterService {
       throw InstallPermissionDeniedException();
     }
 
-    // v0.0.33: retry с Range headers если Yota/CGNAT рвёт stream.
-    // errno 103 «Software caused connection abort» = TCP RST от middlebox.
+    // v0.1.30: multi-mirror loop. Перебираем primary + mirrors по очереди,
+    // 3 retry на каждый mirror. При смене mirror стираем частичный файл
+    // (разные ETag могут дать битый склеенный APK).
+    final urls = info.allSources;
+    Exception? lastError;
     int totalSize = 0;
-    int received = 0;
-    for (int attempt = 0; attempt < 3; attempt++) {
-      final client = http.Client();
+    for (int mirrorIdx = 0; mirrorIdx < urls.length; mirrorIdx++) {
+      final url = urls[mirrorIdx];
+      if (kDebugMode) debugPrint('[Updater] trying mirror #$mirrorIdx: $url');
       try {
-        final headers = <String, String>{};
-        if (received > 0) {
-          headers['Range'] = 'bytes=$received-';
-        }
-        final request = http.Request('GET', Uri.parse(info.downloadUrl))
-          ..headers.addAll(headers);
-        final response = await client.send(request).timeout(
-              const Duration(seconds: 30),
-              onTimeout: () =>
-                  throw Exception('Таймаут подключения к серверу обновлений'),
-            );
-
-        if (received == 0) {
-          if (response.statusCode != 200) {
-            throw Exception('HTTP ${response.statusCode} от сервера');
-          }
-          totalSize = response.contentLength ?? 0;
-        } else {
-          if (response.statusCode != 206) {
-            // Server не поддерживает Range → перекачиваем с нуля
-            received = 0;
-            if (await file.exists()) await file.delete();
-            continue;
-          }
-        }
-
-        final sink = file.openWrite(mode: received > 0 ? FileMode.append : FileMode.write);
-        try {
-          await response.stream.map((chunk) {
-            received += chunk.length;
-            if (totalSize > 0) onProgress?.call(received / totalSize);
-            return chunk;
-          }).pipe(sink);
-        } finally {
-          await sink.close();
-        }
-
-        // Verify size — если не докачали, следующая итерация докачает через Range.
-        final actual = await file.length();
-        if (totalSize > 0 && actual < totalSize) {
-          received = actual;
-          continue;
-        }
+        totalSize = await _downloadWithResume(
+          url: url,
+          file: file,
+          onProgress: onProgress,
+        );
+        lastError = null;
         break; // success
       } on Exception catch (e) {
-        // Обрыв стрима — сохраняем позицию, retry с Range.
-        received = await file.exists() ? await file.length() : 0;
-        if (attempt == 2) {
-          rethrow;
+        lastError = e;
+        if (kDebugMode) debugPrint('[Updater] mirror #$mirrorIdx failed: $e');
+        // Перед переключением на след. mirror стираем частичный файл —
+        // разные origin могут отдавать байты с разным ETag, склейка = битый APK.
+        if (mirrorIdx < urls.length - 1) {
+          if (await file.exists()) await file.delete();
         }
-        await Future.delayed(const Duration(seconds: 2));
-      } finally {
-        client.close();
       }
     }
+    if (lastError != null) throw lastError;
 
     // Финальная проверка размера — если APK truncated, install даст
     // «Приложение не установлено, конфликтует с другим пакетом».
@@ -359,6 +353,95 @@ class UpdaterService {
     }
   }
 
+  /// v0.1.30: скачивает [url] в [file] с Range-resume и 3 retry.
+  /// Возвращает `totalSize` от сервера (Content-Length при первом GET).
+  /// Кидает Exception если 3 попытки провалились — caller ловит и пробует
+  /// следующий mirror.
+  ///
+  /// Начинает с текущего размера файла (если файл был частично скачан
+  /// в предыдущей сессии — докачивает через `Range: bytes=X-`).
+  Future<int> _downloadWithResume({
+    required String url,
+    required File file,
+    void Function(double progress)? onProgress,
+  }) async {
+    int totalSize = 0;
+    int received = await file.exists() ? await file.length() : 0;
+
+    for (int attempt = 0; attempt < 3; attempt++) {
+      final client = http.Client();
+      try {
+        final headers = <String, String>{};
+        if (received > 0) {
+          headers['Range'] = 'bytes=$received-';
+        }
+        final request = http.Request('GET', Uri.parse(url))
+          ..headers.addAll(headers);
+        // v0.1.30: 15s handshake timeout (было 30s) — быстрее переключение
+        // на следующий mirror при ТСПУ throttle.
+        final response = await client.send(request).timeout(
+              const Duration(seconds: 15),
+              onTimeout: () =>
+                  throw Exception('Таймаут подключения к серверу обновлений'),
+            );
+
+        if (received == 0) {
+          if (response.statusCode != 200) {
+            throw Exception('HTTP ${response.statusCode}');
+          }
+          totalSize = response.contentLength ?? 0;
+        } else {
+          if (response.statusCode != 206) {
+            // Server не поддерживает Range → перекачиваем с нуля
+            received = 0;
+            if (await file.exists()) await file.delete();
+            continue;
+          }
+          // 206 Partial — восстановить totalSize из Content-Range если нет
+          if (totalSize == 0) {
+            final cr = response.headers['content-range'];
+            if (cr != null) {
+              final m = RegExp(r'/(\d+)$').firstMatch(cr);
+              if (m != null) {
+                totalSize = int.tryParse(m.group(1) ?? '') ?? 0;
+              }
+            }
+          }
+        }
+
+        final sink =
+            file.openWrite(mode: received > 0 ? FileMode.append : FileMode.write);
+        try {
+          await response.stream.map((chunk) {
+            received += chunk.length;
+            if (totalSize > 0) onProgress?.call(received / totalSize);
+            return chunk;
+          }).pipe(sink);
+        } finally {
+          await sink.close();
+        }
+
+        // Verify size — если не докачали, следующая итерация докачает через Range.
+        final actual = await file.length();
+        if (totalSize > 0 && actual < totalSize) {
+          received = actual;
+          continue;
+        }
+        return totalSize; // success
+      } on Exception {
+        // Обрыв стрима — сохраняем позицию, retry с Range.
+        received = await file.exists() ? await file.length() : 0;
+        if (attempt == 2) {
+          rethrow;
+        }
+        await Future.delayed(const Duration(seconds: 2));
+      } finally {
+        client.close();
+      }
+    }
+    return totalSize;
+  }
+
   /// Windows: zero-config in-app update без открытия GitHub.
   ///
   /// 1. Скачивает release zip в %TEMP%\pixellnet-update\
@@ -383,51 +466,29 @@ class UpdaterService {
     final zipFile = File('${workDir.path}\\update.zip');
     final extractDir = Directory('${workDir.path}\\extracted');
 
-    // Скачивание с retry+Range (та же логика что для APK)
-    int totalSize = 0;
-    int received = 0;
-    for (int attempt = 0; attempt < 3; attempt++) {
-      final client = http.Client();
+    // v0.1.30: multi-mirror + resume через общий _downloadWithResume.
+    final urls = info.allSources;
+    Exception? lastError;
+    for (int mirrorIdx = 0; mirrorIdx < urls.length; mirrorIdx++) {
+      final url = urls[mirrorIdx];
+      if (kDebugMode) debugPrint('[Updater/Win] trying mirror #$mirrorIdx: $url');
       try {
-        final headers = <String, String>{};
-        if (received > 0) headers['Range'] = 'bytes=$received-';
-        final request = http.Request('GET', Uri.parse(info.downloadUrl))..headers.addAll(headers);
-        final response = await client.send(request).timeout(
-              const Duration(seconds: 30),
-              onTimeout: () => throw Exception('Таймаут подключения к серверу обновлений'),
-            );
-        if (received == 0) {
-          if (response.statusCode != 200) throw Exception('HTTP ${response.statusCode} от сервера');
-          totalSize = response.contentLength ?? 0;
-        } else if (response.statusCode != 206) {
-          received = 0;
-          if (await zipFile.exists()) await zipFile.delete();
-          continue;
-        }
-        final sink = zipFile.openWrite(mode: received > 0 ? FileMode.append : FileMode.write);
-        try {
-          await response.stream.map((chunk) {
-            received += chunk.length;
-            if (totalSize > 0) onProgress?.call(received / totalSize);
-            return chunk;
-          }).pipe(sink);
-        } finally {
-          await sink.close();
-        }
-        final actual = await zipFile.length();
-        if (totalSize > 0 && actual < totalSize) {
-          received = actual;
-          continue;
-        }
+        await _downloadWithResume(
+          url: url,
+          file: zipFile,
+          onProgress: onProgress,
+        );
+        lastError = null;
         break;
-      } on Exception {
-        received = await zipFile.exists() ? await zipFile.length() : 0;
-        if (attempt == 2) rethrow;
-        await Future.delayed(const Duration(seconds: 2));
-      } finally {
-        client.close();
+      } on Exception catch (e) {
+        lastError = e;
+        if (kDebugMode) debugPrint('[Updater/Win] mirror #$mirrorIdx failed: $e');
+        if (mirrorIdx < urls.length - 1) {
+          if (await zipFile.exists()) await zipFile.delete();
+        }
       }
     }
+    if (lastError != null) throw lastError;
 
     final actualSize = await zipFile.length();
     if (actualSize < 5 * 1024 * 1024) {
