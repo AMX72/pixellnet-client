@@ -115,10 +115,14 @@ class UpdaterService {
     // }
 
     try {
+      // v0.1.18: /releases/latest возвращает ТОЛЬКО что запушенный тег,
+      // build которого может ещё не завершиться (нет assets). Итерируемся
+      // по последним 10 releases и берём первый где есть подходящий asset —
+      // так пропускаем незавершённые CI-релизы и находим последний рабочий.
       final response = await http
           .get(
             Uri.parse(
-                'https://api.github.com/repos/$_kGithubRepo/releases/latest'),
+                'https://api.github.com/repos/$_kGithubRepo/releases?per_page=10'),
             headers: {'Accept': 'application/vnd.github+json'},
           )
           .timeout(const Duration(seconds: 10));
@@ -127,42 +131,45 @@ class UpdaterService {
 
       await prefs.setInt(_kPrefLastCheck, now);
 
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final tagName = (data['tag_name'] as String).replaceFirst('v', '');
-      final body = data['body'] as String? ?? '';
-
-      final assets = data['assets'] as List<dynamic>;
+      final releases = jsonDecode(response.body) as List<dynamic>;
+      String? tagName;
+      String? body;
       String? downloadUrl;
-      // Выбор asset'а по платформе: Windows — zip, Android — arm64 APK
-      if (Platform.isWindows) {
-        for (final asset in assets) {
-          final name = asset['name'] as String;
-          if (name.contains('windows') && name.endsWith('.zip')) {
-            downloadUrl = asset['browser_download_url'] as String;
-            break;
+
+      for (final release in releases) {
+        final r = release as Map<String, dynamic>;
+        final assets = r['assets'] as List<dynamic>;
+        if (assets.isEmpty) continue; // build ещё не завершился
+
+        String? url;
+        if (Platform.isWindows) {
+          for (final asset in assets) {
+            final name = asset['name'] as String;
+            if (name.contains('windows') && name.endsWith('.zip')) {
+              url = asset['browser_download_url'] as String;
+              break;
+            }
+          }
+        } else {
+          for (final asset in assets) {
+            final name = asset['name'] as String;
+            if (name.contains('arm64') && name.endsWith('.apk')) {
+              url = asset['browser_download_url'] as String;
+              break;
+            }
           }
         }
-      } else {
-        for (final asset in assets) {
-          final name = asset['name'] as String;
-          if (name.contains('arm64') && name.endsWith('.apk')) {
-            downloadUrl = asset['browser_download_url'] as String;
-            break;
-          }
+        if (url != null) {
+          tagName = (r['tag_name'] as String).replaceFirst('v', '');
+          body = r['body'] as String? ?? '';
+          downloadUrl = url;
+          break;
         }
-        downloadUrl ??= assets
-            .cast<Map<String, dynamic>>()
-            .firstWhere(
-              (a) => (a['name'] as String).endsWith('.apk'),
-              orElse: () => {},
-            )['browser_download_url'] as String?;
       }
 
-      if (downloadUrl == null) return null;
+      if (downloadUrl == null || tagName == null) return null;
       final apkUrl = downloadUrl;
 
-      // v0.1.5: используем GitHub direct URL. Mirror pixellnet.com/download/
-      // пока не работает (404). Fallback на GH assets URL.
       final packageInfo = await PackageInfo.fromPlatform();
       final current = Version.parse(packageInfo.version.split('+').first);
       final latest = Version.parse(tagName);
@@ -171,7 +178,7 @@ class UpdaterService {
         return UpdateInfo(
           version: tagName,
           downloadUrl: apkUrl,
-          changelog: body,
+          changelog: body ?? '',
         );
       }
       return null;
