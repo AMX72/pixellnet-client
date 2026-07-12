@@ -75,32 +75,26 @@ class ActiveProxyFooter extends ConsumerWidget with InfraLogger {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // v0.1.22: 2-строчная структура (app-designer bimodal spec).
+                  // Title: страна · имя канала — понятно и домохозяйке.
+                  // Subtitle: качество + пинг — IT-юзеру нужное.
                   Semantics(
                     label: t.pages.proxies.activeProxy,
                     child: Text(
-                      // getRealOutboundTag(activeProxy),
-                      activeProxy.tagDisplay,
-                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                      _titleFor(activeProxy),
+                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      if (activeProxy.ipinfo.ip.isNotEmpty)
-                        IPText(ip: activeProxy.ipinfo.ip, onLongPress: handleUrlTest, constrained: true)
-                      else
-                        UnknownIPText(text: t.pages.proxies.unknownIp, onTap: handleUrlTest),
-                      const Spacer(),
-                      Text(
-                        // getRealOutboundTag(activeProxy),
-                        activeProxy.type,
-                        style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                  const SizedBox(height: 2),
+                  Text(
+                    _subtitleFor(activeProxy),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -122,6 +116,53 @@ String getRealOutboundTag(OutboundInfo group) {
     tag = "$tag → ${group.groupSelectedTagDisplay}";
   }
   return tag;
+}
+
+/// v0.1.22: title сервер-карточки — «Германия · Matrix» (без «lowest→»).
+String _titleFor(OutboundInfo p) {
+  final country = _countryName(p.ipinfo.countryCode);
+  final name = p.groupSelectedTagDisplay.isNotEmpty ? p.groupSelectedTagDisplay : p.tagDisplay;
+  if (country.isEmpty) return name;
+  return '$country · $name';
+}
+
+/// v0.1.22: subtitle — «Быстрый канал · 45 мс» вместо IP + protocol.
+/// Классификация по ping для домохозяек: <200ms fast, <500 обычный, >500 медленный.
+String _subtitleFor(OutboundInfo p) {
+  final delay = p.urlTestDelay;
+  if (delay <= 0 || delay >= 65000) return 'Проверяем связь…';
+  final String quality;
+  if (delay < 200) {
+    quality = 'Быстрый канал';
+  } else if (delay < 500) {
+    quality = 'Обычный канал';
+  } else {
+    quality = 'Медленный канал';
+  }
+  return '$quality · $delay мс';
+}
+
+String _countryName(String code) {
+  const map = {
+    'DE': 'Германия',
+    'NL': 'Нидерланды',
+    'LT': 'Литва',
+    'FI': 'Финляндия',
+    'FR': 'Франция',
+    'SE': 'Швеция',
+    'US': 'США',
+    'GB': 'Великобритания',
+    'CH': 'Швейцария',
+    'AT': 'Австрия',
+    'PL': 'Польша',
+    'CZ': 'Чехия',
+    'RU': 'Россия',
+    'UA': 'Украина',
+    'BY': 'Беларусь',
+    'KZ': 'Казахстан',
+    'TR': 'Турция',
+  };
+  return map[code.toUpperCase()] ?? '';
 }
 
 // class _StatsColumn extends HookConsumerWidget {

@@ -15,6 +15,7 @@ import 'package:hiddify/features/profile/widget/profile_tile.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
+import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hiddify/features/trial/auto_trial_provider.dart';
 import 'package:hiddify/features/trial/trial_service.dart';
 import 'package:hiddify/gen/assets.gen.dart';
@@ -267,6 +268,8 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
     final line = parts.join(' · ');
 
     return GestureDetector(
+      // Тап → session sheet с деталями (v0.1.22)
+      onTap: () => _showSessionSheet(context, active, _upSpeed, _downSpeed),
       onLongPress: () async {
         await Clipboard.setData(ClipboardData(text: line));
         if (!context.mounted) return;
@@ -293,6 +296,93 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
     if (bytesPerSec < 1024) return '${bytesPerSec.toInt()}B/s';
     if (bytesPerSec < 1024 * 1024) return '${(bytesPerSec / 1024).toStringAsFixed(0)}KB/s';
     return '${(bytesPerSec / (1024 * 1024)).toStringAsFixed(1)}MB/s';
+  }
+
+  void _showSessionSheet(BuildContext context, OutboundInfo active, double up, double down) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        final rows = <(String, String)>[
+          ('Канал', active.tagDisplay.isNotEmpty ? active.tagDisplay : active.tag),
+          ('Страна', active.ipinfo.countryCode.isNotEmpty ? active.ipinfo.countryCode : '—'),
+          ('IP выходной',
+              active.ipinfo.ip.isNotEmpty ? active.ipinfo.ip : '—'),
+          ('Провайдер (ASN)',
+              active.ipinfo.org.isNotEmpty ? active.ipinfo.org : '—'),
+          ('Протокол', active.type.isNotEmpty ? active.type : '—'),
+          ('Задержка',
+              active.urlTestDelay > 0 && active.urlTestDelay < 65000
+                  ? '${active.urlTestDelay} мс'
+                  : '—'),
+          ('Скорость сейчас',
+              '↑${_formatSpeed(up)}  ↓${_formatSpeed(down)}'),
+          ('Всего за сессию',
+              '↑${_bytes(active.upload.toInt())}  ↓${_bytes(active.download.toInt())}'),
+        ];
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('Сессия',
+                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+                const Gap(4),
+                Text('Технические детали текущего соединения',
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                const Gap(16),
+                for (final r in rows) ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: Text(r.$1,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant)),
+                      ),
+                      Expanded(
+                        flex: 7,
+                        child: Text(r.$2,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Consolas')),
+                      ),
+                    ],
+                  ),
+                  const Gap(10),
+                ],
+                const Gap(8),
+                FilledButton.icon(
+                  icon: const Icon(Icons.copy_rounded, size: 18),
+                  label: const Text('Скопировать для поддержки'),
+                  onPressed: () async {
+                    final text = rows.map((r) => '${r.$1}: ${r.$2}').join('\n');
+                    await Clipboard.setData(ClipboardData(text: text));
+                    if (!ctx.mounted) return;
+                    Navigator.of(ctx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Скопировано')),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  static String _bytes(int b) {
+    if (b < 1024) return '${b}B';
+    if (b < 1024 * 1024) return '${(b / 1024).toStringAsFixed(1)}KB';
+    if (b < 1024 * 1024 * 1024) return '${(b / (1024 * 1024)).toStringAsFixed(1)}MB';
+    return '${(b / (1024 * 1024 * 1024)).toStringAsFixed(2)}GB';
   }
 }
 
