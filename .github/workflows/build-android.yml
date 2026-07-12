@@ -83,28 +83,18 @@ jobs:
           tar -xzf /tmp/hiddify-lib-android.tar.gz -C android/app/libs
           rm /tmp/hiddify-lib-android.tar.gz
 
-      - name: Decode keystore + write key.properties
+      - name: Verify keystore in repo
         id: keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 -d > android/app/pixellnet.keystore
-            # build.gradle читает key.properties для release-подписи
-            {
-              printf 'storeFile=app/pixellnet.keystore\n'
-              printf 'storePassword=%s\n' "$KEYSTORE_PASSWORD"
-              printf 'keyAlias=%s\n' "$KEY_ALIAS"
-              printf 'keyPassword=%s\n' "$KEY_PASSWORD"
-            } > android/key.properties
+          # v0.1.21: keystore + key.properties commit'нуты в репо
+          # (zero-config CI — юзеру не нужно добавлять GH secrets).
+          if [ -f android/app/pixellnet.keystore ] && [ -f android/key.properties ]; then
             echo "signed=true" >> $GITHUB_OUTPUT
-            echo "APK will be signed with release keystore"
+            echo "APK будет подписан release keystore"
           else
             echo "signed=false" >> $GITHUB_OUTPUT
-            echo "::warning::ANDROID_KEYSTORE_BASE64 not set — building unsigned APK"
+            echo "::error::keystore или key.properties отсутствуют в репо"
+            exit 1
           fi
 
       - name: Flutter build APK release (split per ABI)
