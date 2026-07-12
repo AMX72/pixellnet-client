@@ -94,12 +94,12 @@ jobs:
           if [ -n "$KEYSTORE_BASE64" ]; then
             echo "$KEYSTORE_BASE64" | base64 -d > android/app/pixellnet.keystore
             # build.gradle читает key.properties для release-подписи
-            cat > android/key.properties <<EOF
-          storeFile=app/pixellnet.keystore
-          storePassword=$KEYSTORE_PASSWORD
-          keyAlias=$KEY_ALIAS
-          keyPassword=$KEY_PASSWORD
-          EOF
+            {
+              printf 'storeFile=app/pixellnet.keystore\n'
+              printf 'storePassword=%s\n' "$KEYSTORE_PASSWORD"
+              printf 'keyAlias=%s\n' "$KEY_ALIAS"
+              printf 'keyPassword=%s\n' "$KEY_PASSWORD"
+            } > android/key.properties
             echo "signed=true" >> $GITHUB_OUTPUT
             echo "APK will be signed with release keystore"
           else
