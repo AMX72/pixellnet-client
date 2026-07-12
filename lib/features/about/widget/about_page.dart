@@ -45,7 +45,7 @@ class AboutPage extends HookConsumerWidget {
     final checking = useState(false);
 
     final conditionalTiles = [
-      if (PlatformUtils.isAndroid)
+      if (PlatformUtils.isAndroid || PlatformUtils.isWindows)
         ListTile(
           title: Text(t.pages.about.checkForUpdate),
           trailing: checking.value
@@ -72,7 +72,7 @@ class AboutPage extends HookConsumerWidget {
                   }
                 },
         ),
-      if (appInfo.release.allowCustomUpdateChecker && !PlatformUtils.isAndroid)
+      if (appInfo.release.allowCustomUpdateChecker && !PlatformUtils.isAndroid && !PlatformUtils.isWindows)
         ListTile(
           title: Text(t.pages.about.checkForUpdate),
           trailing: switch (appUpdate) {

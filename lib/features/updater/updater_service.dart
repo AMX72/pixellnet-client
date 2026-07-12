@@ -96,7 +96,8 @@ class UpdaterService {
   /// v0.0.37: сначала пробует pixellnet.com/updates.json (superadmin rollout
   /// channel), fallback на GitHub API если rollout ещё не опубликован.
   Future<UpdateInfo?> checkForUpdate({bool force = false}) async {
-    if (!Platform.isAndroid) return null;
+    // v0.1.16: поддержка Windows (кроме Android) — качаем portable zip
+    if (!Platform.isAndroid && !Platform.isWindows) return null;
 
     final prefs = await SharedPreferences.getInstance();
     final lastCheck = prefs.getInt(_kPrefLastCheck) ?? 0;
@@ -131,22 +132,34 @@ class UpdaterService {
       final body = data['body'] as String? ?? '';
 
       final assets = data['assets'] as List<dynamic>;
-      String? apkUrl;
-      for (final asset in assets) {
-        final name = asset['name'] as String;
-        if (name.contains('arm64') && name.endsWith('.apk')) {
-          apkUrl = asset['browser_download_url'] as String;
-          break;
+      String? downloadUrl;
+      // Выбор asset'а по платформе: Windows — zip, Android — arm64 APK
+      if (Platform.isWindows) {
+        for (final asset in assets) {
+          final name = asset['name'] as String;
+          if (name.contains('windows') && name.endsWith('.zip')) {
+            downloadUrl = asset['browser_download_url'] as String;
+            break;
+          }
         }
+      } else {
+        for (final asset in assets) {
+          final name = asset['name'] as String;
+          if (name.contains('arm64') && name.endsWith('.apk')) {
+            downloadUrl = asset['browser_download_url'] as String;
+            break;
+          }
+        }
+        downloadUrl ??= assets
+            .cast<Map<String, dynamic>>()
+            .firstWhere(
+              (a) => (a['name'] as String).endsWith('.apk'),
+              orElse: () => {},
+            )['browser_download_url'] as String?;
       }
-      apkUrl ??= assets
-          .cast<Map<String, dynamic>>()
-          .firstWhere(
-            (a) => (a['name'] as String).endsWith('.apk'),
-            orElse: () => {},
-          )['browser_download_url'] as String?;
 
-      if (apkUrl == null) return null;
+      if (downloadUrl == null) return null;
+      final apkUrl = downloadUrl;
 
       // v0.1.5: используем GitHub direct URL. Mirror pixellnet.com/download/
       // пока не работает (404). Fallback на GH assets URL.
@@ -207,6 +220,9 @@ class UpdaterService {
     UpdateInfo info, {
     void Function(double progress)? onProgress,
   }) async {
+    if (Platform.isWindows) {
+      return _downloadAndInstallWindows(info, onProgress: onProgress);
+    }
     // Use app-specific external cache directory — не требует MANAGE_EXTERNAL_STORAGE.
     // FileProvider (см. AndroidManifest) уже знает про external-cache-path.
     final dir = await getExternalStorageDirectory();
@@ -327,5 +343,139 @@ class UpdaterService {
     if (result.type != ResultType.done) {
       throw Exception('Не удалось открыть установщик: ${result.message}');
     }
+  }
+
+  /// Windows: zero-config in-app update без открытия GitHub.
+  ///
+  /// 1. Скачивает release zip в %TEMP%\pixellnet-update\
+  /// 2. Распаковывает через PowerShell Expand-Archive (нативно на Windows 10+)
+  /// 3. Генерит updater.bat который ждёт закрытия pixellnet.exe → xcopy /Y
+  ///    новые файлы поверх текущих → запускает pixellnet.exe → self-delete
+  /// 4. Detached Process.start(updater.bat), затем exit(0) — Flutter закрывается
+  /// 5. Bat пёстрит: 3 сек ожидания, копирование, restart
+  Future<void> _downloadAndInstallWindows(
+    UpdateInfo info, {
+    void Function(double progress)? onProgress,
+  }) async {
+    final tempBase = Platform.environment['TEMP'] ?? Platform.environment['TMP'] ?? r'C:\Windows\Temp';
+    final workDir = Directory('$tempBase\\pixellnet-update');
+    if (await workDir.exists()) {
+      try {
+        await workDir.delete(recursive: true);
+      } catch (_) {}
+    }
+    await workDir.create(recursive: true);
+
+    final zipFile = File('${workDir.path}\\update.zip');
+    final extractDir = Directory('${workDir.path}\\extracted');
+
+    // Скачивание с retry+Range (та же логика что для APK)
+    int totalSize = 0;
+    int received = 0;
+    for (int attempt = 0; attempt < 3; attempt++) {
+      final client = http.Client();
+      try {
+        final headers = <String, String>{};
+        if (received > 0) headers['Range'] = 'bytes=$received-';
+        final request = http.Request('GET', Uri.parse(info.downloadUrl))..headers.addAll(headers);
+        final response = await client.send(request).timeout(
+              const Duration(seconds: 30),
+              onTimeout: () => throw Exception('Таймаут подключения к серверу обновлений'),
+            );
+        if (received == 0) {
+          if (response.statusCode != 200) throw Exception('HTTP ${response.statusCode} от сервера');
+          totalSize = response.contentLength ?? 0;
+        } else if (response.statusCode != 206) {
+          received = 0;
+          if (await zipFile.exists()) await zipFile.delete();
+          continue;
+        }
+        final sink = zipFile.openWrite(mode: received > 0 ? FileMode.append : FileMode.write);
+        try {
+          await response.stream.map((chunk) {
+            received += chunk.length;
+            if (totalSize > 0) onProgress?.call(received / totalSize);
+            return chunk;
+          }).pipe(sink);
+        } finally {
+          await sink.close();
+        }
+        final actual = await zipFile.length();
+        if (totalSize > 0 && actual < totalSize) {
+          received = actual;
+          continue;
+        }
+        break;
+      } on Exception {
+        received = await zipFile.exists() ? await zipFile.length() : 0;
+        if (attempt == 2) rethrow;
+        await Future.delayed(const Duration(seconds: 2));
+      } finally {
+        client.close();
+      }
+    }
+
+    final actualSize = await zipFile.length();
+    if (actualSize < 5 * 1024 * 1024) {
+      throw Exception('Скачанный файл слишком мал ($actualSize байт). Проверь интернет.');
+    }
+
+    // Распаковка через PowerShell (нативная на Windows 10+, без зависимостей)
+    final expand = await Process.run(
+      'powershell.exe',
+      [
+        '-NoProfile', '-NonInteractive', '-Command',
+        "Expand-Archive -Path '${zipFile.path}' -DestinationPath '${extractDir.path}' -Force"
+      ],
+      runInShell: false,
+    );
+    if (expand.exitCode != 0) {
+      throw Exception('Не удалось распаковать zip: ${expand.stderr}');
+    }
+
+    // Определить директорию установки (где лежит текущий .exe)
+    final currentExe = Platform.resolvedExecutable;
+    final installDir = File(currentExe).parent.path;
+    final exeName = currentExe.split('\\').last;
+
+    // Найти папку с распакованными файлами — Flutter zip обычно содержит
+    // подпапку Release/ или напрямую .exe в корне extracted/. Ищем .exe.
+    String sourceRoot = extractDir.path;
+    final rootEntries = await extractDir.list().toList();
+    if (rootEntries.length == 1 && rootEntries.first is Directory) {
+      sourceRoot = rootEntries.first.path;
+    }
+
+    // Пишем updater.bat
+    final batFile = File('${workDir.path}\\updater.bat');
+    // Не убиваем сами процесс — appExit() ниже сделает это.
+    // Bat ждёт 3 сек чтобы файлы разлочились, потом копирует и запускает.
+    final batContent = '''@echo off
+chcp 65001 > nul
+timeout /T 3 /NOBREAK > nul
+xcopy /Y /E /Q /I "$sourceRoot\\*" "$installDir\\" > nul
+if errorlevel 1 (
+  echo Copy failed, aborting.
+  pause
+  exit /b 1
+)
+start "" "$installDir\\$exeName"
+timeout /T 2 /NOBREAK > nul
+rmdir /S /Q "${workDir.path}" > nul 2>&1
+(goto) 2>nul & del "%~f0"
+''';
+    await batFile.writeAsString(batContent);
+
+    // Запускаем detached bat и выходим из приложения
+    await Process.start(
+      'cmd.exe',
+      ['/C', 'start', '""', '/MIN', batFile.path],
+      runInShell: false,
+      mode: ProcessStartMode.detached,
+    );
+
+    // Дать Windows время подхватить detached процесс перед exit
+    await Future.delayed(const Duration(milliseconds: 500));
+    exit(0);
   }
 }
