@@ -105,6 +105,12 @@ abstract class Preferences {
   // 1-2 сутки диагностики без обрезки, не съедает диск на слабых устройствах.
   static final logMaxSizeMb = PreferencesNotifier.create<int, int>("log_max_size_mb", 20);
 
+  // Adblock — DNS-фильтр рекламы/трекеров.
+  // Дефолт ON (value-driver, юзер видит «работает» с первого дня).
+  // v1: preference + toggle. v2 (позже): DNS-rule в singbox template с
+  // whitelist топ-50 РФ (ozon/wb/sber/gosuslugi чтобы не ломать capchа).
+  static final adBlockEnabled = PreferencesNotifier.create<bool, bool>("ad_block_enabled", true);
+
   static final startedByUser = PreferencesNotifier.create<bool, bool>("started_by_user", false);
 
   static final storeReviewedByUser = PreferencesNotifier.create<bool, bool>("store_reviewed_by_user", false);
