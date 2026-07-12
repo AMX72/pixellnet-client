@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartx/dartx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -188,16 +190,60 @@ class HomePage extends HookConsumerWidget {
   }
 }
 
-/// Info-strip: тонкая техническая строка `DE · 45ms · Reality · ↑2.3 ↓15 MB`.
+/// Info-strip с live-скоростью: `Gandalf · 45ms · vless · ↑12KB/s ↓340KB/s`.
 ///
 /// Дизайн (app-designer bimodal spec): 11sp Mono muted alpha 55% — домохозяйка
-/// её не замечает (как EXIF), IT-юзер сразу видит всё нужное. Тап открывает
-/// session-sheet с deep telemetry. Long-press копирует в буфер обмена.
-class _InfoStrip extends ConsumerWidget {
+/// не замечает (как EXIF), IT-юзер сразу видит нужное. Обновляется каждую
+/// секунду через Timer.periodic, скорость вычисляется как delta upload/
+/// download от предыдущего тика. Long-press копирует в буфер обмена.
+class _InfoStrip extends ConsumerStatefulWidget {
   const _InfoStrip();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_InfoStrip> createState() => _InfoStripState();
+}
+
+class _InfoStripState extends ConsumerState<_InfoStrip> {
+  Timer? _timer;
+  int _prevUp = 0;
+  int _prevDown = 0;
+  DateTime? _prevTime;
+  double _upSpeed = 0;
+  double _downSpeed = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      final active = ref.read(activeProxyNotifierProvider).valueOrNull;
+      if (active == null) return;
+      final now = DateTime.now();
+      final upNow = active.upload.toInt();
+      final downNow = active.download.toInt();
+      if (_prevTime != null) {
+        final delta = now.difference(_prevTime!).inMilliseconds / 1000.0;
+        if (delta > 0) {
+          setState(() {
+            _upSpeed = ((upNow - _prevUp) / delta).clamp(0, double.infinity);
+            _downSpeed = ((downNow - _prevDown) / delta).clamp(0, double.infinity);
+          });
+        }
+      }
+      _prevUp = upNow;
+      _prevDown = downNow;
+      _prevTime = now;
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final connection = ref.watch(connectionNotifierProvider).valueOrNull;
     if (connection is! Connected) return const SizedBox.shrink();
@@ -211,13 +257,12 @@ class _InfoStrip extends ConsumerWidget {
         ? active.tagDisplay
         : (active.tag.isNotEmpty ? active.tag : '—');
     final protocol = active.type.isNotEmpty ? active.type : '';
-    final up = _formatBytes(active.upload.toInt());
-    final down = _formatBytes(active.download.toInt());
+    final speedPart = '↑${_formatSpeed(_upSpeed)} ↓${_formatSpeed(_downSpeed)}';
     final parts = [
       name,
       delayText,
       if (protocol.isNotEmpty) protocol,
-      if (up.isNotEmpty || down.isNotEmpty) '↑$up ↓$down',
+      speedPart,
     ];
     final line = parts.join(' · ');
 
@@ -244,12 +289,10 @@ class _InfoStrip extends ConsumerWidget {
     );
   }
 
-  static String _formatBytes(int bytes) {
-    if (bytes <= 0) return '0B';
-    if (bytes < 1024) return '${bytes}B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)}KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)}MB';
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)}GB';
+  static String _formatSpeed(double bytesPerSec) {
+    if (bytesPerSec < 1024) return '${bytesPerSec.toInt()}B/s';
+    if (bytesPerSec < 1024 * 1024) return '${(bytesPerSec / 1024).toStringAsFixed(0)}KB/s';
+    return '${(bytesPerSec / (1024 * 1024)).toStringAsFixed(1)}MB/s';
   }
 }
 
