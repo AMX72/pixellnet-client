@@ -3,6 +3,9 @@ package com.hiddify.hiddify
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -11,6 +14,8 @@ import android.graphics.Canvas
 import android.net.Uri
 import android.os.Build
 import android.util.Base64
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.hiddify.hiddify.Application.Companion.packageManager
@@ -36,6 +41,13 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
         const val channelName = "com.hiddify.app/platform"
 
         const val REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 44
+
+        // v0.1.31: notification для in-app APK download progress.
+        // Юзер может свернуть приложение — Android не убьёт download т.к.
+        // notification закрепляет процесс в foreground-like state.
+        const val UPDATE_NOTIF_CHANNEL_ID = "pixellnet_updater"
+        const val UPDATE_NOTIF_ID = 42
+
         val gson = Gson()
 
         enum class Trigger(val method: String) {
@@ -45,6 +57,11 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
             GetPackagesIcon("get_package_icon"),
             CanRequestPackageInstalls("can_request_package_installs"),
             OpenInstallUnknownAppsSettings("open_install_unknown_apps_settings"),
+            // v0.1.31: download UI hooks
+            DownloadProgressStart("download_progress_start"),
+            DownloadProgressUpdate("download_progress_update"),
+            DownloadProgressDone("download_progress_done"),
+            OemInfo("oem_info"),
         }
     }
 
@@ -211,7 +228,77 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
                 }
             }
 
+            Trigger.DownloadProgressStart.method -> {
+                val version = call.argument<String>("version") ?: "?"
+                showDownloadNotification(version, 0)
+                result.success(true)
+            }
+
+            Trigger.DownloadProgressUpdate.method -> {
+                val version = call.argument<String>("version") ?: "?"
+                val percent = call.argument<Int>("percent") ?: 0
+                showDownloadNotification(version, percent)
+                result.success(true)
+            }
+
+            Trigger.DownloadProgressDone.method -> {
+                cancelDownloadNotification()
+                result.success(true)
+            }
+
+            Trigger.OemInfo.method -> {
+                val info = mapOf(
+                    "manufacturer" to (Build.MANUFACTURER ?: "").lowercase(),
+                    "brand" to (Build.BRAND ?: "").lowercase(),
+                    "model" to (Build.MODEL ?: ""),
+                    "sdk" to Build.VERSION.SDK_INT,
+                )
+                result.success(gson.toJson(info))
+            }
+
             else -> result.notImplemented()
+        }
+    }
+
+    // v0.1.31: notification helpers — простой прогресс-бар для download.
+    // POST_NOTIFICATIONS permission на Android 13+ может отсутствовать — тогда
+    // silently skip (не критично, скачивание всё равно идёт).
+    private fun ensureNotifChannel(ctx: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val nm = ctx.getSystemService(NotificationManager::class.java)
+            if (nm?.getNotificationChannel(UPDATE_NOTIF_CHANNEL_ID) == null) {
+                val ch = NotificationChannel(
+                    UPDATE_NOTIF_CHANNEL_ID,
+                    "PIXELLNET Обновление",
+                    NotificationManager.IMPORTANCE_LOW,
+                ).apply {
+                    description = "Прогресс скачивания новой версии"
+                    setShowBadge(false)
+                }
+                nm?.createNotificationChannel(ch)
+            }
+        }
+    }
+
+    private fun showDownloadNotification(version: String, percent: Int) {
+        val ctx = Application.application
+        ensureNotifChannel(ctx)
+        val builder = NotificationCompat.Builder(ctx, UPDATE_NOTIF_CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle("Скачиваем PIXELLNET $version")
+            .setContentText(if (percent > 0) "$percent%" else "Подключаемся...")
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setProgress(100, percent.coerceIn(0, 100), percent <= 0)
+        runCatching {
+            NotificationManagerCompat.from(ctx).notify(UPDATE_NOTIF_ID, builder.build())
+        }
+    }
+
+    private fun cancelDownloadNotification() {
+        runCatching {
+            NotificationManagerCompat.from(Application.application).cancel(UPDATE_NOTIF_ID)
         }
     }
 }

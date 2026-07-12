@@ -41,6 +41,68 @@ Future<void> openInstallUnknownAppsSettings() async {
   }
 }
 
+/// v0.1.31: OEM info для guided permission screen.
+/// Возвращает {manufacturer, brand, model, sdk} — все lowercase.
+/// Пустой Map если не Android или ошибка.
+Future<Map<String, dynamic>> _oemInfo() async {
+  if (!Platform.isAndroid) return const {};
+  try {
+    final json =
+        await _platformChannel.invokeMethod<String>('oem_info') ?? '{}';
+    return jsonDecode(json) as Map<String, dynamic>;
+  } catch (_) {
+    return const {};
+  }
+}
+
+/// v0.1.31: Классифицирует устройство юзера по OEM для guided-подсказок.
+/// Публичное API — виджет UpdateDialog вызывает перед показом install-диалога.
+enum OemFamily { xiaomi, huawei, oppo, vivo, samsung, other }
+
+Future<OemFamily> detectOemFamily() async {
+  final info = await _oemInfo();
+  final m = (info['manufacturer'] as String? ?? '').toLowerCase();
+  final b = (info['brand'] as String? ?? '').toLowerCase();
+  final tokens = '$m|$b';
+  if (tokens.contains('xiaomi') ||
+      tokens.contains('redmi') ||
+      tokens.contains('poco')) return OemFamily.xiaomi;
+  if (tokens.contains('huawei') || tokens.contains('honor')) {
+    return OemFamily.huawei;
+  }
+  if (tokens.contains('oppo') || tokens.contains('realme')) {
+    return OemFamily.oppo;
+  }
+  if (tokens.contains('vivo') || tokens.contains('iqoo')) return OemFamily.vivo;
+  if (tokens.contains('samsung')) return OemFamily.samsung;
+  return OemFamily.other;
+}
+
+/// v0.1.31: notification прогресс-бар при download. Если permission не выдан
+/// или fail — silent.
+Future<void> _notifStart(String version) async {
+  if (!Platform.isAndroid) return;
+  try {
+    await _platformChannel
+        .invokeMethod('download_progress_start', {'version': version});
+  } catch (_) {}
+}
+
+Future<void> _notifUpdate(String version, int percent) async {
+  if (!Platform.isAndroid) return;
+  try {
+    await _platformChannel.invokeMethod(
+        'download_progress_update', {'version': version, 'percent': percent});
+  } catch (_) {}
+}
+
+Future<void> _notifDone() async {
+  if (!Platform.isAndroid) return;
+  try {
+    await _platformChannel.invokeMethod('download_progress_done');
+  } catch (_) {}
+}
+
 const _kGithubRepo = 'AMX72/pixellnet-client';
 const _kPrefAutoUpdate = 'pixellnet.updater.auto_update_enabled';
 const _kPrefLastCheck = 'pixellnet.updater.last_check';
@@ -186,14 +248,20 @@ class UpdaterService {
       final latest = Version.parse(tagName);
 
       if (latest > current) {
-        // v0.1.30: mirror через pixellnet.com/latest.apk (nginx alias на
-        // Netcup mirror-dir) — обходит GH release-assets.githubusercontent.com
-        // на который ТСПУ шлёт RST после 16 KB для российских ISP.
-        // При смене GH → pixellnet mirror файл начинается с нуля (разные ETag),
-        // поэтому mirror-цикл в downloadAndInstall стирает частичный файл.
+        // v0.1.30/31: mirror-цепочка для обхода ТСПУ throttle 16 KB на CF/GH.
+        //   primary: GH releases (upstream, всегда актуальный)
+        //   #1: pixellnet.com/latest.apk (Netcup через CF proxy)
+        //   #2: http://com.pixell.ru/pixellnet-<ver>-arm64.apk (Eurobyte MSK
+        //       shared, HTTP т.к. self-signed cert; cleartext разрешён в
+        //       network_security_config для этого домена)
+        // При обрыве на mirror #N — cycle стирает частичный файл (разные
+        // ETag = склеенный APK будет битым).
         final ghMirrors = Platform.isWindows
             ? <String>[] // Windows пока без mirror — zip на pixellnet.com/latest.zip нет
-            : <String>['https://pixellnet.com/latest.apk'];
+            : <String>[
+                'https://pixellnet.com/latest.apk',
+                'http://com.pixell.ru/pixellnet-$tagName-arm64.apk',
+              ];
         return UpdateInfo(
           version: tagName,
           downloadUrl: apkUrl,
@@ -301,29 +369,46 @@ class UpdaterService {
     // v0.1.30: multi-mirror loop. Перебираем primary + mirrors по очереди,
     // 3 retry на каждый mirror. При смене mirror стираем частичный файл
     // (разные ETag могут дать битый склеенный APK).
+    // v0.1.31: notification-based progress — юзер может свернуть приложение,
+    // download продолжается в фоне (notification удерживает процесс).
     final urls = info.allSources;
     Exception? lastError;
     int totalSize = 0;
-    for (int mirrorIdx = 0; mirrorIdx < urls.length; mirrorIdx++) {
-      final url = urls[mirrorIdx];
-      if (kDebugMode) debugPrint('[Updater] trying mirror #$mirrorIdx: $url');
-      try {
-        totalSize = await _downloadWithResume(
-          url: url,
-          file: file,
-          onProgress: onProgress,
-        );
-        lastError = null;
-        break; // success
-      } on Exception catch (e) {
-        lastError = e;
-        if (kDebugMode) debugPrint('[Updater] mirror #$mirrorIdx failed: $e');
-        // Перед переключением на след. mirror стираем частичный файл —
-        // разные origin могут отдавать байты с разным ETag, склейка = битый APK.
-        if (mirrorIdx < urls.length - 1) {
-          if (await file.exists()) await file.delete();
+    int lastNotifiedPercent = -1;
+    void wrappedProgress(double p) {
+      onProgress?.call(p);
+      final percent = (p * 100).toInt();
+      if (percent != lastNotifiedPercent) {
+        lastNotifiedPercent = percent;
+        _notifUpdate(info.version, percent);
+      }
+    }
+
+    await _notifStart(info.version);
+    try {
+      for (int mirrorIdx = 0; mirrorIdx < urls.length; mirrorIdx++) {
+        final url = urls[mirrorIdx];
+        if (kDebugMode) debugPrint('[Updater] trying mirror #$mirrorIdx: $url');
+        try {
+          totalSize = await _downloadWithResume(
+            url: url,
+            file: file,
+            onProgress: wrappedProgress,
+          );
+          lastError = null;
+          break; // success
+        } on Exception catch (e) {
+          lastError = e;
+          if (kDebugMode) debugPrint('[Updater] mirror #$mirrorIdx failed: $e');
+          // Перед переключением на след. mirror стираем частичный файл —
+          // разные origin могут отдавать байты с разным ETag, склейка = битый APK.
+          if (mirrorIdx < urls.length - 1) {
+            if (await file.exists()) await file.delete();
+          }
         }
       }
+    } finally {
+      await _notifDone();
     }
     if (lastError != null) throw lastError;
 

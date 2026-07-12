@@ -13,6 +13,35 @@ class _UpdateDialogState extends State<UpdateDialog> {
   double? _progress;
   bool _installing = false;
   String? _error;
+  OemFamily _oem = OemFamily.other;
+
+  @override
+  void initState() {
+    super.initState();
+    // v0.1.31: определяем OEM для guided hint. Если Xiaomi/HyperOS — покажем
+    // подсказку что при установке будет доп. диалог MIUI Security.
+    detectOemFamily().then((f) {
+      if (mounted) setState(() => _oem = f);
+    });
+  }
+
+  String? get _oemHint {
+    switch (_oem) {
+      case OemFamily.xiaomi:
+        return 'MIUI/HyperOS покажет: «Приложение содержит риски». '
+            'Нажми «Установить всё равно» → «Готово».';
+      case OemFamily.huawei:
+        return 'EMUI спросит подтверждение установки. '
+            'Отмечай «Разрешить» на всех запросах.';
+      case OemFamily.oppo:
+        return 'ColorOS/PurityScan может флажить как «риск». '
+            'Нажми «Установить всё равно».';
+      case OemFamily.vivo:
+      case OemFamily.samsung:
+      case OemFamily.other:
+        return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +86,29 @@ class _UpdateDialogState extends State<UpdateDialog> {
               style: TextStyle(
                 color: Theme.of(context).colorScheme.error,
                 fontSize: 13,
+              ),
+            ),
+          ],
+          if (_oemHint != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.info_outline, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _oemHint!,
+                      style: const TextStyle(fontSize: 12, height: 1.35),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

@@ -2,5 +2,9 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="false">127.0.0.1</domain>
+        <!-- v0.1.31: Eurobyte APK mirror. HTTPS отдаёт self-signed (ждём CF
+             proxy toggle для Universal SSL *.pixell.ru), HTTP работает
+             штатно. Используется только для APK download в updater. -->
+        <domain includeSubdomains="false">com.pixell.ru</domain>
     </domain-config>
 </network-security-config>
