@@ -218,6 +218,25 @@ class UpdaterService {
       await downloadDir.create(recursive: true);
     }
     final file = File('${downloadDir.path}/pixellnet-${info.version}.apk');
+
+    // v0.1.15: чистим старые APK — не копим архив на диске.
+    // Всё pixellnet-*.apk кроме файла текущей версии удаляется.
+    try {
+      await for (final entity in downloadDir.list()) {
+        if (entity is File) {
+          final name = entity.path.split(Platform.pathSeparator).last;
+          if (name.startsWith('pixellnet-') && name.endsWith('.apk') && entity.path != file.path) {
+            try {
+              await entity.delete();
+              if (kDebugMode) debugPrint('[Updater] cleaned old APK: $name');
+            } catch (_) {}
+          }
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Updater] cleanup failed: $e');
+    }
+
     if (await file.exists()) {
       await file.delete();
     }

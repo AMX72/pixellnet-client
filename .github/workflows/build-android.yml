@@ -83,14 +83,25 @@ jobs:
           tar -xzf /tmp/hiddify-lib-android.tar.gz -C android/app/libs
           rm /tmp/hiddify-lib-android.tar.gz
 
-      - name: Decode keystore (if present)
+      - name: Decode keystore + write key.properties
         id: keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
           if [ -n "$KEYSTORE_BASE64" ]; then
             echo "$KEYSTORE_BASE64" | base64 -d > android/app/pixellnet.keystore
+            # build.gradle читает key.properties для release-подписи
+            cat > android/key.properties <<EOF
+          storeFile=app/pixellnet.keystore
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
             echo "signed=true" >> $GITHUB_OUTPUT
+            echo "APK will be signed with release keystore"
           else
             echo "signed=false" >> $GITHUB_OUTPUT
             echo "::warning::ANDROID_KEYSTORE_BASE64 not set — building unsigned APK"
