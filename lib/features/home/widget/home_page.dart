@@ -15,7 +15,12 @@ import 'package:hiddify/features/profile/widget/profile_tile.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
+import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
+import 'package:hiddify/features/updater/auto_update_notifier.dart';
+import 'package:hiddify/features/updater/update_dialog.dart';
+import 'package:hiddify/features/updater/updater_service.dart';
+import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hiddify/features/trial/auto_trial_provider.dart';
 import 'package:hiddify/features/trial/trial_service.dart';
@@ -36,6 +41,8 @@ class HomePage extends HookConsumerWidget {
     // pixellnet-api и импортируем как активный профиль. Если у юзера уже
     // есть профиль — провайдер вернёт null и ничего не сделает.
     final autoTrial = ref.watch(autoTrialProvider);
+    // v0.1.26: активация тихой автопроверки обновлений при первом mount Home.
+    ref.watch(autoUpdateStateProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -84,7 +91,12 @@ class HomePage extends HookConsumerWidget {
                     // AsyncData(value: final profile?) =>
                     MultiSliver(
                       children: [
-                        // const Gap(100),
+                        // v0.1.26: banner «Есть свежая версия» — над всем.
+                        // Подхватывается автопроверкой; тап → скачать/установить.
+                        const SliverToBoxAdapter(child: _UpdateAvailableBanner()),
+                        // v0.1.26: banner «Обновлено до X · Что нового →»
+                        // Показывается 3 дня после успешной установки.
+                        const SliverToBoxAdapter(child: _PostUpdateBanner()),
                         switch (activeProfile) {
                           AsyncData(value: final profile?) => ProfileTile(
                             profile: profile,
@@ -378,6 +390,137 @@ class AppVersionLabel extends HookConsumerWidget {
           version,
           textDirection: TextDirection.ltr,
           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSecondaryContainer),
+        ),
+      ),
+    );
+  }
+}
+
+/// v0.1.26: Banner «Есть свежая версия» на Home.
+/// Синтез app-designer + linguist: короткий title + одна CTA + крестик.
+/// Тап на текст = скачать сразу, крестик = скрыть на 3 дня.
+class _UpdateAvailableBanner extends ConsumerWidget {
+  const _UpdateAvailableBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(autoUpdateStateProvider);
+    if (!state.shouldShowBanner) return const SizedBox.shrink();
+    final info = state.available!;
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      child: Material(
+        color: PixellnetBrand.mocha.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () async {
+            await showDialog<void>(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => UpdateDialog(info: info),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+            child: Row(
+              children: [
+                Icon(Icons.system_update_rounded,
+                    color: PixellnetBrand.mochaOnDark, size: 20),
+                const Gap(10),
+                Expanded(
+                  child: Text(
+                    'Есть свежая версия · ${info.version}',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: PixellnetBrand.mochaOnDark,
+                    ),
+                  ),
+                ),
+                Text('Обновить',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                        color: PixellnetBrand.mochaOnDark,
+                        fontWeight: FontWeight.w700)),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 18),
+                  color: PixellnetBrand.textSecondary,
+                  tooltip: 'Скрыть на 3 дня',
+                  onPressed: () =>
+                      ref.read(autoUpdateStateProvider.notifier).dismissBanner(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// v0.1.26: Post-update banner «Обновлено до X · Что нового →».
+/// Показывается 3 дня после установки. Читает Preferences.lastInstalledAt.
+class _PostUpdateBanner extends ConsumerWidget {
+  const _PostUpdateBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ts = ref.watch(Preferences.lastInstalledAt);
+    final version = ref.watch(Preferences.lastInstalledVersion);
+    if (ts == 0 || version.isEmpty) return const SizedBox.shrink();
+
+    // Показываем не дольше 3 дней после установки.
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final ageMs = now - ts;
+    if (ageMs > const Duration(days: 3).inMilliseconds) {
+      return const SizedBox.shrink();
+    }
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      child: Material(
+        color: PixellnetBrand.olive.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            // TODO v0.1.27: показать changelog для этой версии
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Обновлено до $version')),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+            child: Row(
+              children: [
+                Icon(Icons.check_circle_rounded, color: PixellnetBrand.olive, size: 20),
+                const Gap(10),
+                Expanded(
+                  child: Text(
+                    'Обновлено до $version',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: PixellnetBrand.olive,
+                    ),
+                  ),
+                ),
+                Text('Что нового →',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                        color: PixellnetBrand.olive, fontWeight: FontWeight.w700)),
+                const Gap(4),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 18),
+                  color: PixellnetBrand.textSecondary,
+                  tooltip: 'Скрыть',
+                  onPressed: () async {
+                    await ref.read(Preferences.lastInstalledAt.notifier).update(0);
+                  },
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

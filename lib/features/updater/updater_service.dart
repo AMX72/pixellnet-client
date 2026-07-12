@@ -346,6 +346,13 @@ class UpdaterService {
       throw Exception('Скачанный файл слишком мал ($actualSize байт). Проверь интернет.');
     }
 
+    // v0.1.26: метка установки для post-update banner на Home.
+    // Android install через PackageInstaller — юзер подтверждает вручную,
+    // сохраняем ДО запуска (если откажется — сотрёт следующая проверка).
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('update_last_installed_at', DateTime.now().millisecondsSinceEpoch);
+    await prefs.setString('update_last_installed_version', info.version);
+
     final result = await OpenFile.open(file.path, type: 'application/vnd.android.package-archive');
     if (result.type != ResultType.done) {
       throw Exception('Не удалось открыть установщик: ${result.message}');
@@ -472,6 +479,11 @@ rmdir /S /Q "${workDir.path}" > nul 2>&1
 (goto) 2>nul & del "%~f0"
 ''';
     await batFile.writeAsString(batContent);
+
+    // v0.1.26: сохраняем метку установки для post-update banner на Home
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('update_last_installed_at', DateTime.now().millisecondsSinceEpoch);
+    await prefs.setString('update_last_installed_version', info.version);
 
     // Запускаем detached bat и выходим из приложения
     await Process.start(

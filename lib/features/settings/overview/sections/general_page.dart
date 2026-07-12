@@ -87,6 +87,44 @@ class GeneralPage extends HookConsumerWidget {
               },
             ),
           ),
+          // v0.1.26: раздел обновлений — 3-режимный dropdown + час проверки.
+          ListTile(
+            leading: const Icon(Icons.system_update_rounded),
+            title: const Text('Как обновлять'),
+            subtitle: Text(_updateModeLabel(ref.watch(Preferences.updateMode))),
+            trailing: DropdownButton<int>(
+              value: ref.watch(Preferences.updateMode),
+              underline: const SizedBox.shrink(),
+              items: const [
+                DropdownMenuItem(value: 0, child: Text('Само')),
+                DropdownMenuItem(value: 1, child: Text('Спросить')),
+                DropdownMenuItem(value: 2, child: Text('Руками')),
+              ],
+              onChanged: (v) async {
+                if (v != null) await ref.read(Preferences.updateMode.notifier).update(v);
+              },
+            ),
+          ),
+          if (ref.watch(Preferences.updateMode) == 0)
+            ListTile(
+              leading: const Icon(Icons.schedule_rounded),
+              title: const Text('Когда проверять'),
+              subtitle: Text(_updateHourLabel(ref.watch(Preferences.updateCheckHour))),
+              trailing: DropdownButton<int>(
+                value: ref.watch(Preferences.updateCheckHour),
+                underline: const SizedBox.shrink(),
+                items: const [
+                  DropdownMenuItem(value: 3, child: Text('Ночью')),
+                  DropdownMenuItem(value: 7, child: Text('Утром')),
+                  DropdownMenuItem(value: 14, child: Text('Днём')),
+                  DropdownMenuItem(value: 21, child: Text('Вечером')),
+                  DropdownMenuItem(value: 24, child: Text('В любое')),
+                ],
+                onChanged: (v) async {
+                  if (v != null) await ref.read(Preferences.updateCheckHour.notifier).update(v);
+                },
+              ),
+            ),
           // Debug mode toggle — hidden in release builds (PIXELLNET brand)
           if (kDebugMode)
             SwitchListTile.adaptive(
@@ -155,4 +193,20 @@ class GeneralPage extends HookConsumerWidget {
       ),
     );
   }
+
+  static String _updateModeLabel(int mode) => switch (mode) {
+        0 => 'Скачает и поставит без вопросов',
+        1 => 'Спросим — ты решишь',
+        2 => 'Только когда сам нажмёшь',
+        _ => '',
+      };
+
+  static String _updateHourLabel(int hour) => switch (hour) {
+        3 => 'Ночью (около 3:00) — пока ты спишь',
+        7 => 'Утром (около 7:00)',
+        14 => 'Днём (около 14:00)',
+        21 => 'Вечером (около 21:00)',
+        24 => 'В любое время дня',
+        _ => 'В $hour:00',
+      };
 }

@@ -111,6 +111,26 @@ abstract class Preferences {
   // whitelist топ-50 РФ (ozon/wb/sber/gosuslugi чтобы не ломать capchа).
   static final adBlockEnabled = PreferencesNotifier.create<bool, bool>("ad_block_enabled", true);
 
+  // v0.1.26: как обновлять приложение.
+  // 0 = "auto"   — тихо скачает и поставит в предпочитаемое время
+  // 1 = "ask"    — покажет banner, юзер решает
+  // 2 = "manual" — только когда сам нажмёт «Проверить обновления»
+  // Дефолт "ask" (безопасно для домохозяек, не автоставит без спроса).
+  static final updateMode = PreferencesNotifier.create<int, int>("update_mode", 1);
+
+  // v0.1.26: предпочитаемый час для тихой проверки автообновлений (0-23).
+  // Проверка при запуске приложения если now.hour >= updateCheckHour
+  // и прошло больше 20 часов с последней проверки.
+  // Дефолт 3 (ночью пока юзер спит).
+  static final updateCheckHour = PreferencesNotifier.create<int, int>("update_check_hour", 3);
+
+  // v0.1.26: timestamp последней успешной установки для post-update banner
+  // «Обновлено до X · Что нового →». Показывается 3 дня после install.
+  static final lastInstalledAt = PreferencesNotifier.create<int, int>("update_last_installed_at", 0);
+
+  // v0.1.26: последняя установленная версия (для post-update banner).
+  static final lastInstalledVersion = PreferencesNotifier.create<String, String>("update_last_installed_version", "");
+
   static final startedByUser = PreferencesNotifier.create<bool, bool>("started_by_user", false);
 
   static final storeReviewedByUser = PreferencesNotifier.create<bool, bool>("store_reviewed_by_user", false);
