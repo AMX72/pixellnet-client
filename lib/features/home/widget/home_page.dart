@@ -19,6 +19,7 @@ import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart'
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
+import 'package:hiddify/features/home/widget/ping_graph.dart';
 import 'package:hiddify/features/updater/auto_update_notifier.dart';
 import 'package:hiddify/features/updater/changelog_sheet.dart';
 import 'package:hiddify/features/updater/update_dialog.dart';
@@ -320,6 +321,43 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
                 Text('Технические детали текущего соединения',
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                const Gap(16),
+                // v0.1.29: live-график скорости за 60 секунд
+                Container(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.download_rounded,
+                              size: 14, color: theme.colorScheme.onSurfaceVariant),
+                          const Gap(4),
+                          Text('Скачивание за минуту',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant)),
+                        ],
+                      ),
+                      const PingGraph(metric: PingMetric.downSpeed, height: 60),
+                      const Gap(8),
+                      Row(
+                        children: [
+                          Icon(Icons.upload_rounded,
+                              size: 14, color: theme.colorScheme.onSurfaceVariant),
+                          const Gap(4),
+                          Text('Загрузка за минуту',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant)),
+                        ],
+                      ),
+                      const PingGraph(metric: PingMetric.upSpeed, height: 60),
+                    ],
+                  ),
+                ),
                 const Gap(16),
                 for (final r in rows) ...[
                   Row(

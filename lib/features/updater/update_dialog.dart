@@ -65,7 +65,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
       actions: [
         TextButton(
           onPressed: _installing ? null : () => Navigator.pop(context),
-          child: Text(_error != null ? 'Закрыть' : 'Позже'),
+          child: Text(_error != null ? 'Закрыть' : 'Не сейчас'),
         ),
         if (_needsPermission)
           FilledButton(
@@ -77,9 +77,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
             onPressed: _installing ? null : _startInstall,
             child: Text(_installing
                 ? (_progress == null
-                    ? 'Загрузка...'
+                    ? 'Скачиваем…'
                     : '${(_progress! * 100).toInt()}%')
-                : (_error != null ? 'Повторить' : 'Установить')),
+                : (_error != null ? 'Ещё раз' : 'Обновить')),
           ),
       ],
     );

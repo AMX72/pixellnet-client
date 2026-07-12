@@ -103,8 +103,19 @@ class AutoUpdateStateNotifier extends Notifier<AutoUpdateState> {
       );
       if (info != null) {
         DiagnosticsService.instance.event('auto_update.found', {'version': info.version});
-        // TODO v0.1.27: если mode==auto, начать silent download в фоне.
-        // Пока: показываем banner для всех non-manual режимов.
+        // v0.1.29: mode==auto → тихая фоновая загрузка + запуск установки.
+        // Windows перезапустится через updater.bat, Android покажет диалог
+        // системного установщика (юзер увидит его на следующей проверке).
+        if (mode == 0) {
+          try {
+            DiagnosticsService.instance.event('auto_update.silent_download.start');
+            await UpdaterService.instance.downloadAndInstall(info);
+            DiagnosticsService.instance.event('auto_update.silent_download.done');
+          } catch (e) {
+            DiagnosticsService.instance.event('auto_update.silent_download.error', {'e': e.toString()});
+            // Ошибка тихой загрузки → скрываем детали, banner остаётся видимым
+          }
+        }
       } else {
         DiagnosticsService.instance.event('auto_update.up_to_date');
       }

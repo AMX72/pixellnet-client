@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hiddify/core/haptic/haptic_service.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
+import 'package:hiddify/features/updater/auto_update_notifier.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
 import 'package:hiddify/features/common/general_pref_tiles.dart';
@@ -125,6 +126,25 @@ class GeneralPage extends HookConsumerWidget {
                 },
               ),
             ),
+          // v0.1.29: ручная кнопка «Проверить сейчас» — доступна во всех режимах
+          ListTile(
+            leading: const Icon(Icons.refresh_rounded),
+            title: const Text('Проверить сейчас'),
+            subtitle: const Text('Не ждём — ищем обновление прямо сейчас'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () async {
+              await ref.read(autoUpdateStateProvider.notifier).forceCheck();
+              if (!context.mounted) return;
+              final available = ref.read(autoUpdateStateProvider).available;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(available == null
+                      ? 'Уже свежак — новее пока нет'
+                      : 'Есть свежая версия · ${available.version}'),
+                ),
+              );
+            },
+          ),
           // Debug mode toggle — hidden in release builds (PIXELLNET brand)
           if (kDebugMode)
             SwitchListTile.adaptive(

@@ -185,7 +185,7 @@
     },
     "about": {
       "title": "О программе",
-      "notAvailableMsg": "Вы уже используете последнюю версию",
+      "notAvailableMsg": "Уже свежак — новее пока нет",
       "checkForUpdate": "Проверить обновления",
       "openWorkingDir": "Открыть рабочую папку",
       "sourceCode": "Исходный код",
