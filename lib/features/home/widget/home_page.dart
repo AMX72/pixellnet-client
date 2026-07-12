@@ -15,6 +15,7 @@ import 'package:hiddify/features/profile/widget/profile_tile.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
+import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hiddify/features/trial/auto_trial_provider.dart';
 import 'package:hiddify/features/trial/trial_service.dart';
@@ -205,44 +206,6 @@ class _InfoStrip extends ConsumerStatefulWidget {
 }
 
 class _InfoStripState extends ConsumerState<_InfoStrip> {
-  Timer? _timer;
-  int _prevUp = 0;
-  int _prevDown = 0;
-  DateTime? _prevTime;
-  double _upSpeed = 0;
-  double _downSpeed = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted) return;
-      final active = ref.read(activeProxyNotifierProvider).valueOrNull;
-      if (active == null) return;
-      final now = DateTime.now();
-      final upNow = active.upload.toInt();
-      final downNow = active.download.toInt();
-      if (_prevTime != null) {
-        final delta = now.difference(_prevTime!).inMilliseconds / 1000.0;
-        if (delta > 0) {
-          setState(() {
-            _upSpeed = ((upNow - _prevUp) / delta).clamp(0, double.infinity);
-            _downSpeed = ((downNow - _prevDown) / delta).clamp(0, double.infinity);
-          });
-        }
-      }
-      _prevUp = upNow;
-      _prevDown = downNow;
-      _prevTime = now;
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -252,13 +215,21 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
     final active = ref.watch(activeProxyNotifierProvider).valueOrNull;
     if (active == null) return const SizedBox.shrink();
 
+    // v0.1.25: скорости из SystemInfo.uplink/downlink (bytes/sec от sing-box
+    // core через gRPC). Раньше вычислял delta от active.upload вручную —
+    // не работало потому что active.upload = cumulative от group-outbound,
+    // не активной сессии. Восстановлено из baseline v0.1.0 stats-модуль.
+    final stats = ref.watch(statsNotifierProvider).valueOrNull;
+    final upSpeed = (stats?.uplink.toInt() ?? 0).toDouble();
+    final downSpeed = (stats?.downlink.toInt() ?? 0).toDouble();
+
     final delay = active.urlTestDelay;
     final delayText = delay > 0 && delay < 65000 ? '${delay}ms' : '—';
     final name = active.tagDisplay.isNotEmpty
         ? active.tagDisplay
         : (active.tag.isNotEmpty ? active.tag : '—');
     final protocol = active.type.isNotEmpty ? active.type : '';
-    final speedPart = '↑${_formatSpeed(_upSpeed)} ↓${_formatSpeed(_downSpeed)}';
+    final speedPart = '↑${_formatSpeed(upSpeed)} ↓${_formatSpeed(downSpeed)}';
     final parts = [
       name,
       delayText,
@@ -269,7 +240,7 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
 
     return GestureDetector(
       // Тап → session sheet с деталями (v0.1.22)
-      onTap: () => _showSessionSheet(context, active, _upSpeed, _downSpeed),
+      onTap: () => _showSessionSheet(context, active, upSpeed, downSpeed),
       onLongPress: () async {
         await Clipboard.setData(ClipboardData(text: line));
         if (!context.mounted) return;
