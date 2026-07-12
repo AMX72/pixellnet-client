@@ -8,6 +8,7 @@ import 'package:hiddify/core/router/adaptive_layout/shell_route_action.dart';
 import 'package:hiddify/core/router/go_router/helper/active_breakpoint_notifier.dart';
 import 'package:hiddify/core/router/go_router/routing_config_notifier.dart';
 import 'package:hiddify/features/stats/widget/side_bar_stats_overview.dart';
+import 'package:hiddify/features/updater/auto_update_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class MyAdaptiveLayout extends HookConsumerWidget {
@@ -63,7 +64,10 @@ class MyAdaptiveLayout extends HookConsumerWidget {
                     node: navScopeNode,
                     child: NavigationRail(
                       extended: Breakpoint(context).isDesktop(),
-                      destinations: _navRailDests(_actions(t, showProfilesAction, isMobileBreakpoint)),
+                      destinations: _navRailDests(
+                        _actions(t, showProfilesAction, isMobileBreakpoint),
+                        ref.watch(autoUpdateStateProvider).available != null,
+                      ),
                       selectedIndex: navigationShell.currentIndex,
                       onDestinationSelected: (index) => _onTap(context, index),
                       trailing: Breakpoint(context).isDesktop()
@@ -84,7 +88,10 @@ class MyAdaptiveLayout extends HookConsumerWidget {
                 node: navScopeNode,
                 child: NavigationBar(
                   selectedIndex: navigationShell.currentIndex <= 1 ? navigationShell.currentIndex : 0,
-                  destinations: _navDests(_actions(t, showProfilesAction, isMobileBreakpoint)),
+                  destinations: _navDests(
+                    _actions(t, showProfilesAction, isMobileBreakpoint),
+                    ref.watch(autoUpdateStateProvider).available != null,
+                  ),
                   onDestinationSelected: (index) => _onTap(context, index),
                 ),
               )
@@ -108,8 +115,32 @@ class MyAdaptiveLayout extends HookConsumerWidget {
     if (!isMobileBreakpoint) ShellRouteAction(Icons.info_rounded, t.pages.about.title),
   ];
 
-  List<NavigationDestination> _navDests(List<ShellRouteAction> actions) =>
-      actions.map((e) => NavigationDestination(icon: Icon(e.icon), label: e.title)).toList();
-  List<NavigationRailDestination> _navRailDests(List<ShellRouteAction> actions) =>
-      actions.map((e) => NavigationRailDestination(icon: Icon(e.icon), label: Text(e.title))).toList();
+  // v0.1.28: badge (красная точка) на последнем pane (О программе) когда
+  // есть доступное обновление. Домохозяйка видит тихий индикатор без banner.
+  Widget _iconWithBadge(IconData icon, bool isLast, bool hasUpdate) {
+    final base = Icon(icon);
+    if (!isLast || !hasUpdate) return base;
+    return Badge(
+      backgroundColor: const Color(0xFFD97865), // coral
+      smallSize: 8,
+      child: base,
+    );
+  }
+
+  List<NavigationDestination> _navDests(List<ShellRouteAction> actions, bool hasUpdate) =>
+      [
+        for (int i = 0; i < actions.length; i++)
+          NavigationDestination(
+            icon: _iconWithBadge(actions[i].icon, i == actions.length - 1, hasUpdate),
+            label: actions[i].title,
+          ),
+      ];
+  List<NavigationRailDestination> _navRailDests(List<ShellRouteAction> actions, bool hasUpdate) =>
+      [
+        for (int i = 0; i < actions.length; i++)
+          NavigationRailDestination(
+            icon: _iconWithBadge(actions[i].icon, i == actions.length - 1, hasUpdate),
+            label: Text(actions[i].title),
+          ),
+      ];
 }

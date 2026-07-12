@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dartx/dartx.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
@@ -18,6 +20,7 @@ import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
 import 'package:hiddify/features/updater/auto_update_notifier.dart';
+import 'package:hiddify/features/updater/changelog_sheet.dart';
 import 'package:hiddify/features/updater/update_dialog.dart';
 import 'package:hiddify/features/updater/updater_service.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
@@ -485,10 +488,16 @@ class _PostUpdateBanner extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            // TODO v0.1.27: показать changelog для этой версии
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Обновлено до $version')),
+          onTap: () async {
+            // v0.1.28: showModalBottomSheet с ChangelogSheet — категории
+            // «Новое / Починили / Стало лучше». Данные тянем с GH release body.
+            final changelog = await _fetchChangelog(version);
+            if (!context.mounted) return;
+            await showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              showDragHandle: false,
+              builder: (_) => ChangelogSheet(version: version, rawChangelog: changelog),
             );
           },
           child: Padding(
@@ -524,5 +533,21 @@ class _PostUpdateBanner extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// v0.1.28: тянет release body с GH API (первый источник для changelog).
+/// Fallback — пустая строка (ChangelogSheet покажет generic-текст).
+Future<String> _fetchChangelog(String version) async {
+  try {
+    final resp = await http
+        .get(Uri.parse(
+            'https://api.github.com/repos/AMX72/pixellnet-client/releases/tags/v$version'))
+        .timeout(const Duration(seconds: 6));
+    if (resp.statusCode != 200) return '';
+    final data = jsonDecode(resp.body) as Map<String, dynamic>;
+    return (data['body'] as String?) ?? '';
+  } catch (_) {
+    return '';
   }
 }
