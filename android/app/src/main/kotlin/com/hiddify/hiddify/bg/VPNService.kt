@@ -84,7 +84,14 @@ class VPNService : VpnService(), PlatformInterfaceWrapper {
             service.notifyVpnPermissionRevoked()
             error("android: missing vpn permission")
         }
-//        service.fileDescriptor?.close()
+        // v0.1.36: закрыть старый TUN fd перед establish() нового.
+        // Без этого при gRPC restart (subscription refresh активного профиля
+        // → sing-box reload) старый fd жив, ядро может ещё не отдать TUN
+        // interface → SIOCSIFFLAGS / TUNGETIFF в libbox getTunnelName() → EACCES.
+        // Симптом: "configure tun interface: permission denied" иногда при refresh.
+        service.fileDescriptor?.close()
+        service.fileDescriptor = null
+        Thread.sleep(200)
 
         val builder = Builder()
             .setSession("hiddify")
