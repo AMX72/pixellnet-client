@@ -482,14 +482,16 @@ class UpdaterService {
             if (await file.exists()) await file.delete();
             continue;
           }
-          // 206 Partial — восстановить totalSize из Content-Range если нет
-          if (totalSize == 0) {
-            final cr = response.headers['content-range'];
-            if (cr != null) {
-              final m = RegExp(r'/(\d+)$').firstMatch(cr);
-              if (m != null) {
-                totalSize = int.tryParse(m.group(1) ?? '') ?? 0;
-              }
+          // 206 Partial — обновить totalSize из Content-Range. v0.1.32:
+          // ВСЕГДА пересчитываем — mirror #2 может отдать другой файл
+          // с другим размером; если оставим старый totalSize от mirror #1,
+          // financial check в конце ошибочно скажет «файл повреждён».
+          final cr = response.headers['content-range'];
+          if (cr != null) {
+            final m = RegExp(r'/(\d+)$').firstMatch(cr);
+            if (m != null) {
+              final crTotal = int.tryParse(m.group(1) ?? '') ?? 0;
+              if (crTotal > 0) totalSize = crTotal;
             }
           }
         }
@@ -511,6 +513,18 @@ class UpdaterService {
         if (totalSize > 0 && actual < totalSize) {
           received = actual;
           continue;
+        }
+        // v0.1.32: если сервер прислал больше чем totalSize (mirror
+        // inconsistency, повторный chunk после Range, CDN edge с другим
+        // файлом) — truncate до ожидаемого размера. APK — это ZIP, лишние
+        // байты в хвосте это не «повредят» файл, но installer их не любит.
+        if (totalSize > 0 && actual > totalSize) {
+          final raf = await file.open(mode: FileMode.append);
+          try {
+            await raf.truncate(totalSize);
+          } finally {
+            await raf.close();
+          }
         }
         return totalSize; // success
       } on Exception {

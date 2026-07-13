@@ -140,9 +140,16 @@ class ChangelogSheet extends StatelessWidget {
   }
 
   Widget _fallbackText(ThemeData theme, String raw) {
+    // v0.1.32: markdown в GH release body — фильтруем ** обёртку
+    // и не показываем «Full Changelog: ...» (юзеру ссылка не нужна).
+    final seen = <String>{};
     final cleaned = raw
         .split('\n')
-        .where((l) => l.trim().isNotEmpty && !l.startsWith('Full Changelog'))
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty)
+        .where((l) =>
+            !l.toLowerCase().replaceAll('*', '').startsWith('full changelog'))
+        .where(seen.add) // dedupe
         .take(8)
         .join('\n');
     return Text(
