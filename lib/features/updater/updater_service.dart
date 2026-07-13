@@ -78,6 +78,54 @@ Future<OemFamily> detectOemFamily() async {
   return OemFamily.other;
 }
 
+/// v0.1.33: диагностика "нет вышки" vs "VPN сломан".
+enum NetworkState {
+  ok, // сеть работает нормально
+  noCellSignal, // оператор выключил вышку (СВО в районе моста/нефтебазы)
+  cellSignalButNoData, // вышка есть, packet не идёт (VPN сломан или DPI режет)
+  wifiOnly, // только Wi-Fi
+  unknown, // permission missing или API error
+}
+
+class NetworkDiagnostics {
+  const NetworkDiagnostics({
+    required this.state,
+    required this.hasWifi,
+    required this.hasCellular,
+  });
+  final NetworkState state;
+  final bool hasWifi;
+  final bool hasCellular;
+}
+
+Future<NetworkDiagnostics> collectNetworkDiagnostics() async {
+  if (!Platform.isAndroid) {
+    return const NetworkDiagnostics(
+        state: NetworkState.unknown, hasWifi: false, hasCellular: false);
+  }
+  try {
+    final json = await _platformChannel
+            .invokeMethod<String>('network_diagnostics') ??
+        '{}';
+    final m = jsonDecode(json) as Map<String, dynamic>;
+    final s = m['state'] as String? ?? 'unknown';
+    return NetworkDiagnostics(
+      state: switch (s) {
+        'ok' => NetworkState.ok,
+        'no_cell_signal' => NetworkState.noCellSignal,
+        'cell_signal_but_no_data' => NetworkState.cellSignalButNoData,
+        'wifi_only' => NetworkState.wifiOnly,
+        _ => NetworkState.unknown,
+      },
+      hasWifi: m['has_wifi'] as bool? ?? false,
+      hasCellular: m['has_cellular'] as bool? ?? false,
+    );
+  } catch (_) {
+    return const NetworkDiagnostics(
+        state: NetworkState.unknown, hasWifi: false, hasCellular: false);
+  }
+}
+
 /// v0.1.31: notification прогресс-бар при download. Если permission не выдан
 /// или fail — silent.
 Future<void> _notifStart(String version) async {

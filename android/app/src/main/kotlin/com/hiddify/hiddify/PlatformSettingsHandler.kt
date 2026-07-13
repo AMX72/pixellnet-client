@@ -11,8 +11,13 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
+import android.telephony.ServiceState
+import android.telephony.SignalStrength
+import android.telephony.TelephonyManager
 import android.util.Base64
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -62,6 +67,8 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
             DownloadProgressUpdate("download_progress_update"),
             DownloadProgressDone("download_progress_done"),
             OemInfo("oem_info"),
+            // v0.1.33: cell-tower vs VPN broken diagnostics
+            NetworkDiagnostics("network_diagnostics"),
         }
     }
 
@@ -256,8 +263,113 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
                 result.success(gson.toJson(info))
             }
 
+            Trigger.NetworkDiagnostics.method -> {
+                result.success(gson.toJson(collectNetworkDiagnostics()))
+            }
+
             else -> result.notImplemented()
         }
+    }
+
+    // v0.1.33: диагностика "нет вышки" vs "VPN сломан". Возвращает enum:
+    //   ok — cellular ИЛИ Wi-Fi работает + interfaces up
+    //   no_cell_signal — SIM активна, но SERVICE_STATE_OUT_OF_SERVICE
+    //                    (оператор выключил вышку — СВО в районе моста/нефтебазы)
+    //   cell_signal_but_no_data — вышка есть, packets не идут (VPN сломан ИЛИ
+    //                             ISP DPI режет)
+    //   wifi_only — только Wi-Fi, cellular не подключен
+    //   unknown — permission missing или API error
+    //
+    // Ключевая тонкость: getActiveNetwork() при поднятом VPN вернёт VPN-сеть.
+    // Underlying cellular ищем через cm.allNetworks фильтром по TRANSPORT_CELLULAR
+    // && !TRANSPORT_VPN.
+    private fun collectNetworkDiagnostics(): Map<String, Any> {
+        val ctx = Application.application
+        val result = mutableMapOf<String, Any>(
+            "state" to "unknown",
+            "has_wifi" to false,
+            "has_cellular" to false,
+            "cellular_has_signal" to false,
+            "service_state" to -1,
+            "signal_rsrp" to Int.MIN_VALUE,
+        )
+
+        try {
+            val cm = ctx.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+                ?: return result
+            val networks = cm.allNetworks
+            var hasWifi = false
+            var hasCellular = false
+            var cellularValidated = false
+
+            for (n in networks) {
+                val caps = cm.getNetworkCapabilities(n) ?: continue
+                if (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) continue
+                if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) hasWifi = true
+                if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                    hasCellular = true
+                    if (caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
+                        cellularValidated = true
+                    }
+                }
+            }
+            result["has_wifi"] = hasWifi
+            result["has_cellular"] = hasCellular
+
+            // Wi-Fi есть — cellular не важно, «нет вышки» не про этот случай
+            if (hasWifi) {
+                result["state"] = "ok"
+                return result
+            }
+
+            // Без permission READ_PHONE_STATE — не можем точно сказать про вышку.
+            // Fallback на ConnectivityManager: если hasCellular=false и hasWifi=false
+            // → скорее всего вышка выключена (или самолётный режим).
+            val hasPhonePerm = ctx.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) ==
+                    PackageManager.PERMISSION_GRANTED
+
+            if (!hasPhonePerm) {
+                result["state"] = when {
+                    hasCellular && cellularValidated -> "ok"
+                    hasCellular && !cellularValidated -> "cell_signal_but_no_data"
+                    else -> "no_cell_signal"
+                }
+                return result
+            }
+
+            // С permission — уточняем через TelephonyManager
+            val tm = ctx.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+                ?: return result
+            val ss = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) tm.serviceState else null
+            val svcState = ss?.state ?: -1
+            result["service_state"] = svcState
+
+            // RSRP только на Android 10+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val sig = tm.signalStrength
+                val cellLte = sig?.getCellSignalStrengths(
+                    android.telephony.CellSignalStrengthLte::class.java
+                )?.firstOrNull()
+                val rsrp = cellLte?.rsrp ?: Int.MIN_VALUE
+                if (rsrp != Int.MAX_VALUE) {
+                    result["signal_rsrp"] = rsrp
+                }
+                result["cellular_has_signal"] = rsrp != Int.MIN_VALUE &&
+                        rsrp != Int.MAX_VALUE && rsrp > -130
+            }
+
+            result["state"] = when {
+                svcState == ServiceState.STATE_POWER_OFF -> "no_cell_signal"
+                svcState == ServiceState.STATE_OUT_OF_SERVICE -> "no_cell_signal"
+                svcState == ServiceState.STATE_EMERGENCY_ONLY -> "no_cell_signal"
+                hasCellular && cellularValidated -> "ok"
+                hasCellular -> "cell_signal_but_no_data"
+                else -> "no_cell_signal"
+            }
+        } catch (e: Exception) {
+            result["error"] = e.message ?: "unknown"
+        }
+        return result
     }
 
     // v0.1.31: notification helpers — простой прогресс-бар для download.

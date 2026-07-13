@@ -165,12 +165,29 @@ class _UpdateDialogState extends State<UpdateDialog> {
       // Success — Android installer открылся, закрываем диалог.
       if (mounted) Navigator.pop(context);
     } catch (e) {
+      // v0.1.33: собираем сетевую диагностику — часто «файл повреждён»
+      // это на самом деле «оператор выключил вышку в этом районе».
+      final diag = await collectNetworkDiagnostics();
       if (mounted) {
         setState(() {
           _installing = false;
-          _error = e.toString().replaceFirst('Exception: ', '');
+          _error = _errorText(e, diag);
         });
       }
     }
+  }
+
+  String _errorText(Object e, NetworkDiagnostics diag) {
+    final raw = e.toString().replaceFirst('Exception: ', '');
+    if (diag.state == NetworkState.noCellSignal) {
+      return 'Возможно вышка твоего оператора сейчас не раздаёт '
+          'интернет в этом районе. Это не VPN — попробуй сменить '
+          'район или подожди раздачи от вышки.';
+    }
+    if (diag.state == NetworkState.cellSignalButNoData) {
+      return 'Сигнал сотовой сети есть, но интернет не идёт. '
+          'Возможно оператор ограничил доступ — попробуй через Wi-Fi.';
+    }
+    return raw;
   }
 }
