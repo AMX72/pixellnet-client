@@ -20,12 +20,14 @@ import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
 import 'package:hiddify/features/home/widget/ping_graph.dart';
+import 'package:hiddify/features/profile/notifier/auto_profile_refresh_notifier.dart';
 import 'package:hiddify/features/updater/auto_update_notifier.dart';
 import 'package:hiddify/features/updater/changelog_sheet.dart';
 import 'package:hiddify/features/updater/update_dialog.dart';
 import 'package:hiddify/features/updater/updater_service.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
+import 'package:hiddify/features/connection/notifier/vpn_permission_recovery.dart';
 import 'package:hiddify/features/trial/auto_trial_provider.dart';
 import 'package:hiddify/features/trial/trial_service.dart';
 import 'package:hiddify/gen/assets.gen.dart';
@@ -47,6 +49,18 @@ class HomePage extends HookConsumerWidget {
     final autoTrial = ref.watch(autoTrialProvider);
     // v0.1.26: активация тихой автопроверки обновлений при первом mount Home.
     ref.watch(autoUpdateStateProvider);
+    // v0.1.38: активация авто-обновления прокси-каналов (Marzban subscription).
+    // ignore: unused_local_variable
+    final profileRefreshState = ref.watch(autoProfileRefreshProvider);
+    // v0.1.38: bottom sheet «Обновить прокси?» при mode=ask
+    ref.listen<AutoProfileRefreshState>(autoProfileRefreshProvider, (prev, next) {
+      if (next.pendingAsk && !(prev?.pendingAsk ?? false)) {
+        _showProfileRefreshAskSheet(context, ref);
+      }
+    });
+    // v0.1.34: запуск авто-мониторинга VPN permission. При детекте
+    // MissingVpnPermission провайдер автоматически показывает системный диалог.
+    final vpnPermState = ref.watch(vpnPermissionRecoveryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -190,6 +204,17 @@ class HomePage extends HookConsumerWidget {
                   ],
                 ),
               ),
+            // v0.1.34: VPN permission recovery banner.
+            // Показывается когда sing-box упал с "permission denied":
+            //   - requesting: системный диалог уже открыт (авто), показываем spinner
+            //   - needsPermission: юзер закрыл диалог, нужна ручная кнопка
+            if (vpnPermState != VpnPermissionState.ok)
+              Positioned(
+                left: 16,
+                right: 16,
+                top: 8,
+                child: _VpnPermissionBanner(state: vpnPermState),
+              ),
             // v0.1.19: bimodal spec — тонкий info-strip внизу для IT-юзеров.
             // 11sp Mono muted — домохозяйке не мешает (как EXIF под фото),
             // IT-юзер сразу видит нужное: страна, ping, protocol, трафик.
@@ -201,6 +226,57 @@ class HomePage extends HookConsumerWidget {
                 bottom: 8,
                 child: _InfoStrip(),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// v0.1.38: bottom sheet «Обновить прокси-каналы?» для mode=ask.
+  static void _showProfileRefreshAskSheet(
+      BuildContext context, WidgetRef ref) {
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Icon(Icons.cloud_sync_rounded, size: 36),
+            const SizedBox(height: 12),
+            const Text(
+              'Обновить список серверов?',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Появились новые прокси-каналы. Обновить сейчас?',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                ref
+                    .read(autoProfileRefreshProvider.notifier)
+                    .confirmRefresh();
+              },
+              child: const Text('Обновить'),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                ref.read(autoProfileRefreshProvider.notifier).dismissAsk();
+              },
+              child: const Text('Не сейчас'),
+            ),
           ],
         ),
       ),
@@ -567,6 +643,124 @@ class _PostUpdateBanner extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// v0.1.34: Banner для VPN permission recovery.
+///
+/// Показывается в двух состояниях:
+///   [VpnPermissionState.requesting] — системный диалог уже открыт автоматически,
+///     показываем мягкую подсказку с spinner.
+///   [VpnPermissionState.needsPermission] — юзер закрыл диалог или авто-открытие
+///     не удалось, показываем кнопку "Разрешить VPN".
+///
+/// Design: такой же стиль как _UpdateAvailableBanner (Material с цветом error).
+/// Не блокирует UI — это overlay Positioned, не диалог.
+class _VpnPermissionBanner extends ConsumerWidget {
+  const _VpnPermissionBanner({required this.state});
+
+  final VpnPermissionState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
+    if (state == VpnPermissionState.requesting) {
+      return Material(
+        color: theme.colorScheme.errorContainer.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: theme.colorScheme.onErrorContainer,
+                ),
+              ),
+              const Gap(12),
+              Expanded(
+                child: Text(
+                  'Запрашиваем разрешение VPN...',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onErrorContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // needsPermission — ручная кнопка
+    return Material(
+      color: theme.colorScheme.errorContainer.withValues(alpha: 0.92),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => ref.read(vpnPermissionRecoveryProvider.notifier).retryPermission(),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+          child: Row(
+            children: [
+              Icon(
+                Icons.vpn_key_rounded,
+                color: theme.colorScheme.onErrorContainer,
+                size: 20,
+              ),
+              const Gap(10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Нет разрешения VPN',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onErrorContainer,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      'Нажмите чтобы разрешить и переподключиться',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Gap(4),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: theme.colorScheme.error,
+                  foregroundColor: theme.colorScheme.onError,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () =>
+                    ref.read(vpnPermissionRecoveryProvider.notifier).retryPermission(),
+                child: const Text('Разрешить'),
+              ),
+              const Gap(4),
+              IconButton(
+                icon: const Icon(Icons.close_rounded, size: 18),
+                color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.7),
+                tooltip: 'Скрыть',
+                onPressed: () =>
+                    ref.read(vpnPermissionRecoveryProvider.notifier).dismiss(),
+              ),
+            ],
           ),
         ),
       ),

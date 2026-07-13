@@ -118,6 +118,18 @@ abstract class Preferences {
   // Дефолт "ask" (безопасно для домохозяек, не автоставит без спроса).
   static final updateMode = PreferencesNotifier.create<int, int>("update_mode", 1);
 
+  // v0.1.38: как обновлять список прокси-каналов (подписку Marzban).
+  // 0 = "auto"   — тихо скачает новый список при запуске (если прошло 20h)
+  // 1 = "ask"    — спросит «Обновить прокси-каналы?» при запуске
+  // 2 = "manual" — только когда сам нажмёт «Обновить прокси сейчас»
+  // Дефолт "auto" — юзер всегда получает свежий список без усилий.
+  static final profileRefreshMode = PreferencesNotifier.create<int, int>("profile_refresh_mode", 0);
+
+  // v0.1.38: предпочитаемый час для тихого обновления прокси-каналов (0-23).
+  // Обновление при запуске если now.hour >= profileRefreshHour и прошло 20h.
+  // 24 = «в любое время». Дефолт 3 (ночью).
+  static final profileRefreshHour = PreferencesNotifier.create<int, int>("profile_refresh_hour", 3);
+
   // v0.1.26: предпочитаемый час для тихой проверки автообновлений (0-23).
   // Проверка при запуске приложения если now.hour >= updateCheckHour
   // и прошло больше 20 часов с последней проверки.

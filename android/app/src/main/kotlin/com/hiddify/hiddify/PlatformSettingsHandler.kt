@@ -69,6 +69,9 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
             OemInfo("oem_info"),
             // v0.1.33: cell-tower vs VPN broken diagnostics
             NetworkDiagnostics("network_diagnostics"),
+            // v0.1.34: запросить VPN разрешение заново и перезапустить сервис.
+            // Flutter вызывает это при автодетекте "permission denied" и по кнопке.
+            VpnRequestPermission("vpn_request_permission"),
         }
     }
 
@@ -265,6 +268,19 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
 
             Trigger.NetworkDiagnostics.method -> {
                 result.success(gson.toJson(collectNetworkDiagnostics()))
+            }
+
+            // v0.1.34: Flutter запрашивает показ системного диалога VPN permission.
+            // MainActivity.requestVpnPermissionAndRetry() делает prepare() и запускает
+            // prepareLauncher → после RESULT_OK автоматически стартует сервис.
+            // result.success(true) возвращается сразу (диалог асинхронный).
+            Trigger.VpnRequestPermission.method -> {
+                try {
+                    MainActivity.instance.requestVpnPermissionAndRetry()
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("VPN_PERMISSION_ERROR", e.message, null)
+                }
             }
 
             else -> result.notImplemented()

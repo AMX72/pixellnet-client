@@ -38,6 +38,7 @@ import com.hiddify.core.libbox.PlatformInterface
 import com.hiddify.core.libbox.SystemProxyStatus
 import com.hiddify.hiddify.BuildConfig
 import com.hiddify.hiddify.MainActivity
+import com.hiddify.hiddify.constant.Alert
 import com.hiddify.hiddify.constant.Bugs
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -405,6 +406,17 @@ class BoxService(
         Log.d("BoxService", message!!)
         binder.broadcast {
             it.onServiceWriteLog(message)
+        }
+    }
+
+    // v0.1.34: вызывается из VPNService.openTun() когда prepare() вернул non-null.
+    // Посылаем Alert.RequestVPNPermission — Flutter уже знает этот enum и маппит
+    // его в CoreAlert.requestVPNPermission → MissingVpnPermission failure.
+    // VpnPermissionRevoked в Alert.kt оставляем для будущего (более детальная диагностика).
+    fun notifyVpnPermissionRevoked() {
+        GlobalScope.launch(Dispatchers.Main) {
+            // stopAndAlert: status = Stopped + broadcast alert → EventHandler → Flutter.
+            stopAndAlert(Alert.RequestVPNPermission, "VPN permission revoked or missing")
         }
     }
 

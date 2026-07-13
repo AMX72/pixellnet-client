@@ -75,20 +75,15 @@ class VPNService : VpnService(), PlatformInterfaceWrapper {
     }
 
     override fun openTun(options: TunOptions): Int {
-        var hasPermission = false
-        for (i in 0 until 20) {
-            if (prepare(this) != null) {
-                Log.w("VPN", "android: missing vpn permission")
-            } else {
-                hasPermission = true
-                break
-            }
-            Thread.sleep(50)
+        // v0.1.34: проверяем разрешение один раз (не loop — UI-диалог нельзя
+        // показать из JNI-потока). Если prepare() != null — разрешение отозвано
+        // (другой VPN забрал его, или MIUI сбросил). Отправляем alert во Flutter
+        // через BoxService → EventHandler, там покажем inline recover banner.
+        if (prepare(this) != null) {
+            Log.w(TAG, "openTun: VPN permission missing or revoked, sending alert")
+            service.notifyVpnPermissionRevoked()
+            error("android: missing vpn permission")
         }
-
-        if (!hasPermission) {
-             error("android: missing vpn permission")
-    }
 //        service.fileDescriptor?.close()
 
         val builder = Builder()

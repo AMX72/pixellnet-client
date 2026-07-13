@@ -121,6 +121,41 @@ class MainActivity : FlutterFragmentActivity(), ServiceConnection.Callback {
             }
         }
 
+    // v0.1.34: вызывается из PlatformSettingsHandler по MethodChannel "vpn_request_permission".
+    // Показывает системный диалог "Разрешить VPN?" и после accept перезапускает сервис.
+    // Используется двумя путями:
+    //   1. Авто-recover: Flutter получил alert VpnPermissionRevoked → вызывает этот метод
+    //   2. Ручной: кнопка "Переподключить" на HomePage
+    fun requestVpnPermissionAndRetry() {
+        lifecycleScope.launch(Dispatchers.Main) {
+            try {
+                val intent = VpnService.prepare(this@MainActivity)
+                if (intent != null) {
+                    // Разрешение отозвано — показываем системный диалог.
+                    prepareForRetryLauncher.launch(intent)
+                } else {
+                    // Уже есть разрешение — сразу стартуем.
+                    startService0()
+                }
+            } catch (e: Exception) {
+                onServiceAlert(Alert.RequestVPNPermission, e.message)
+            }
+        }
+    }
+
+    private val prepareForRetryLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+        ) { result ->
+            if (result.resultCode == RESULT_OK) {
+                // Юзер нажал "Разрешить" → запускаем сервис.
+                startService0()
+            } else {
+                // Юзер отказал — показываем стандартный alert.
+                onServiceAlert(Alert.RequestVPNPermission, null)
+            }
+        }
+
     override fun onServiceStatusChanged(status: Status) {
         serviceStatus.postValue(status)
     }

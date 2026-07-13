@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hiddify/core/haptic/haptic_service.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
+import 'package:hiddify/features/profile/notifier/auto_profile_refresh_notifier.dart';
 import 'package:hiddify/features/updater/auto_update_notifier.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
 import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
@@ -145,6 +146,77 @@ class GeneralPage extends HookConsumerWidget {
               );
             },
           ),
+          // v0.1.38: раздел обновления прокси-каналов (Marzban subscription)
+          ListTile(
+            leading: const Icon(Icons.swap_horiz_rounded),
+            title: const Text('Как обновлять прокси-каналы'),
+            subtitle: Text(_profileRefreshModeLabel(ref.watch(Preferences.profileRefreshMode))),
+            trailing: DropdownButton<int>(
+              value: ref.watch(Preferences.profileRefreshMode),
+              underline: const SizedBox.shrink(),
+              items: const [
+                DropdownMenuItem(value: 0, child: Text('Само')),
+                DropdownMenuItem(value: 1, child: Text('Спросить')),
+                DropdownMenuItem(value: 2, child: Text('Руками')),
+              ],
+              onChanged: (v) async {
+                if (v != null) {
+                  await ref.read(Preferences.profileRefreshMode.notifier).update(v);
+                }
+              },
+            ),
+          ),
+          if (ref.watch(Preferences.profileRefreshMode) == 0)
+            ListTile(
+              leading: const Icon(Icons.schedule_rounded),
+              title: const Text('Когда обновлять каналы'),
+              subtitle: Text(_profileRefreshHourLabel(ref.watch(Preferences.profileRefreshHour))),
+              trailing: DropdownButton<int>(
+                value: ref.watch(Preferences.profileRefreshHour),
+                underline: const SizedBox.shrink(),
+                items: const [
+                  DropdownMenuItem(value: 3, child: Text('Ночью')),
+                  DropdownMenuItem(value: 7, child: Text('Утром')),
+                  DropdownMenuItem(value: 14, child: Text('Днём')),
+                  DropdownMenuItem(value: 21, child: Text('Вечером')),
+                  DropdownMenuItem(value: 24, child: Text('В любое')),
+                ],
+                onChanged: (v) async {
+                  if (v != null) {
+                    await ref.read(Preferences.profileRefreshHour.notifier).update(v);
+                  }
+                },
+              ),
+            ),
+          ListTile(
+            leading: ref.watch(autoProfileRefreshProvider).isRefreshing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.cloud_download_rounded),
+            title: const Text('Обновить прокси сейчас'),
+            subtitle: const Text('Скачать свежий список серверов'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            enabled: !ref.watch(autoProfileRefreshProvider).isRefreshing,
+            onTap: () async {
+              await ref.read(autoProfileRefreshProvider.notifier).refreshNow();
+              if (!context.mounted) return;
+              final st = ref.read(autoProfileRefreshProvider);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    st.lastError != null
+                        ? st.lastError!
+                        : st.newChannelsCount > 0
+                            ? 'Обновились прокси-каналы: +${st.newChannelsCount}'
+                            : 'Список актуален — изменений нет',
+                  ),
+                ),
+              );
+            },
+          ),
           // Debug mode toggle — hidden in release builds (PIXELLNET brand)
           if (kDebugMode)
             SwitchListTile.adaptive(
@@ -222,6 +294,22 @@ class GeneralPage extends HookConsumerWidget {
       };
 
   static String _updateHourLabel(int hour) => switch (hour) {
+        3 => 'Ночью (около 3:00) — пока ты спишь',
+        7 => 'Утром (около 7:00)',
+        14 => 'Днём (около 14:00)',
+        21 => 'Вечером (около 21:00)',
+        24 => 'В любое время дня',
+        _ => 'В $hour:00',
+      };
+
+  static String _profileRefreshModeLabel(int mode) => switch (mode) {
+        0 => 'Обновит список серверов без вопросов',
+        1 => 'Спросим — ты решишь',
+        2 => 'Только когда сам нажмёшь',
+        _ => '',
+      };
+
+  static String _profileRefreshHourLabel(int hour) => switch (hour) {
         3 => 'Ночью (около 3:00) — пока ты спишь',
         7 => 'Утром (около 7:00)',
         14 => 'Днём (около 14:00)',
