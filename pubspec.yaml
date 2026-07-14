@@ -1,7 +1,7 @@
 name: hiddify
 description: PIXELLNET VPN — commercial VPN client for Russia (internal package name kept as 'hiddify' to preserve upstream imports; user-facing brand is PIXELLNET everywhere)
 publish_to: "none"
-version: 0.1.40+41
+version: 0.1.41+42
 
 environment:
   sdk: ^3.10.4
