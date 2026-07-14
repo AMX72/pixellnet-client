@@ -22,6 +22,7 @@ import 'package:hiddify/singbox/model/warp_account.dart';
 
 import 'package:hiddify/hiddifycore/core_interface/core_interface_wrapper_stub.dart'
     if (dart.library.io) 'package:hiddify/hiddifycore/core_interface/core_interface_wrapper.dart';
+import 'package:hiddify/hiddifycore/tun_cleanup_service.dart';
 import 'package:hiddify/utils/custom_loggers.dart';
 import 'package:hiddify/utils/platform_utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -158,41 +159,54 @@ class HiddifyCoreService with InfraLogger {
       // }
       // final content = await File(path).readAsString();
       // loggy.debug("starting with content: $content");
-      try {
-        final res = await core.bgClient.start(
-          StartRequest(
-            configPath: path,
-            configName: name,
-            // configContent: content,
-            disableMemoryLimit: disableMemoryLimit,
-          ),
-        );
-        ref.read(coreRestartSignalProvider.notifier).restart();
-        if (res.messageType != MessageType.ALREADY_STARTED && res.messageType != MessageType.EMPTY) {
-          final alert = res.message.contains("denied") ? CoreAlert.requestVPNPermission : CoreAlert.startFailed;
-          currentState = CoreStatus.stopped(
-            alert: alert,
-            message: "failed to start core ${res.messageType} ${res.message}",
+      CoreInfoResponse? res;
+      GrpcError? lastError;
+      const maxAttempts = 3;
+      for (var attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+          res = await core.bgClient.start(
+            StartRequest(
+              configPath: path,
+              configName: name,
+              disableMemoryLimit: disableMemoryLimit,
+            ),
           );
-
-          statusController.add(currentState);
-
-          return left(
-            currentState.getCoreAlert() ??
-                ConnectionFailure.unexpected("failed to start core ${res.messageType} ${res.message}"),
-          );
+          lastError = null;
+          break;
+        } on GrpcError catch (e) {
+          lastError = e;
+          final msg = e.message ?? '';
+          final isTunStuck = msg.contains('cannot find the file specified') || msg.contains('configure tun interface');
+          if (!isTunStuck || attempt == maxAttempts - 1) break;
+          loggy.warning("TUN adapter stuck on attempt ${attempt + 1}/$maxAttempts, cleanup + retry");
+          await TunCleanupService.cleanupStaleWindowsTunAdapters();
+          await Future.delayed(Duration(milliseconds: 500 * (attempt + 1)));
         }
-      } on GrpcError catch (e) {
-        loggy.error("failed to start bg core: $e");
+      }
+
+      if (lastError != null) {
+        loggy.error("failed to start bg core: $lastError");
         ref.read(coreRestartSignalProvider.notifier).restart();
-        if (e.code == StatusCode.unavailable) {
+        if (lastError.code == StatusCode.unavailable) {
           return left(const ConnectionFailure.unexpected("background core is not started yet!"));
         }
-        // throw InvalidConfig(e.message);
-        // throw DioException.connectionError(requestOptions: RequestOptions(), reason: e.codeName, error: e);
-
-        // throw DioException(requestOptions: RequestOptions(), error: e);
         return left(const ConnectionFailure.unexpected("failed to start background core"));
+      }
+
+      ref.read(coreRestartSignalProvider.notifier).restart();
+      if (res!.messageType != MessageType.ALREADY_STARTED && res.messageType != MessageType.EMPTY) {
+        final alert = res.message.contains("denied") ? CoreAlert.requestVPNPermission : CoreAlert.startFailed;
+        currentState = CoreStatus.stopped(
+          alert: alert,
+          message: "failed to start core ${res.messageType} ${res.message}",
+        );
+
+        statusController.add(currentState);
+
+        return left(
+          currentState.getCoreAlert() ??
+              ConnectionFailure.unexpected("failed to start core ${res.messageType} ${res.message}"),
+        );
       }
 
       // if (res.messageType != MessageType.EMPTY) return left(res);
