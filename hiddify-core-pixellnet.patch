@@ -1,0 +1,75 @@
+diff --git a/v2/config/builder.go b/v2/config/builder.go
+index d37e8b6..f217253 100644
+--- a/v2/config/builder.go
++++ b/v2/config/builder.go
+@@ -922,6 +922,70 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
+ 			},
+ 		})
+ 
++		// PIXELLNET RU-bypass: Yandex/VK non-.ru domains + Yandex AS208398 CIDR.
++		// Крупные РФ-сервисы блокируют DC-IPs (VPN exit) — их трафик обязан идти direct,
++		// иначе юзер получает плашки "отключите VPN" или бесконечные капчи.
++		// .ru suffix выше покрывает только *.ru; .yandex.net/.yastatic.net/.vk.com и др.
++		// (API/CDN) требуют явных правил.
++		if hopt.Region == "ru" {
++			pixellnetRuBypassSuffixes := []string{
++				".yandex.net", ".yandex.com", ".yastatic.net", ".yastat.net",
++				".yandex.st", ".yandexcloud.net", ".mds.yandex.net", ".strm.yandex.net",
++				".xiva.yandex.net", ".quasar.yandex.net", ".mobile.yandex.net",
++				".appmetrica.yandex.net", ".alice.yandex.net",
++				".vk.com", ".vkuser.net", ".userapi.com", ".vk-cdn.net", ".vkuservideo.net",
++			}
++			pixellnetRuBypassCIDR := []string{
++				"77.88.0.0/18", "213.180.192.0/19", "95.108.128.0/17",
++				"87.250.224.0/19", "141.8.128.0/18", "178.154.128.0/17",
++				"5.255.192.0/18", "5.45.192.0/18", "37.9.64.0/18",
++				"37.140.128.0/18", "84.201.128.0/18", "100.43.64.0/19",
++				"93.158.128.0/17",
++			}
++			dnsRules = append(dnsRules, option.DefaultDNSRule{
++				RawDefaultDNSRule: option.RawDefaultDNSRule{
++					DomainSuffix: pixellnetRuBypassSuffixes,
++				},
++				DNSRuleAction: option.DNSRuleAction{
++					Action: C.RuleActionTypeRoute,
++					RouteOptions: option.DNSRouteActionOptions{
++						Server:         DNSMultiDirectTag,
++						Strategy:       hopt.DirectDnsDomainStrategy,
++						RewriteTTL:     &DEFAULT_DNS_TTL,
++						BypassIfFailed: false,
++					},
++				},
++			})
++			routeRules = append(routeRules, option.Rule{
++				Type: C.RuleTypeDefault,
++				DefaultOptions: option.DefaultRule{
++					RawDefaultRule: option.RawDefaultRule{
++						DomainSuffix: pixellnetRuBypassSuffixes,
++					},
++					RuleAction: option.RuleAction{
++						Action: C.RuleActionTypeRoute,
++						RouteOptions: option.RouteActionOptions{
++							Outbound: OutboundDirectTag,
++						},
++					},
++				},
++			})
++			routeRules = append(routeRules, option.Rule{
++				Type: C.RuleTypeDefault,
++				DefaultOptions: option.DefaultRule{
++					RawDefaultRule: option.RawDefaultRule{
++						IPCIDR: pixellnetRuBypassCIDR,
++					},
++					RuleAction: option.RuleAction{
++						Action: C.RuleActionTypeRoute,
++						RouteOptions: option.RouteActionOptions{
++							Outbound: OutboundDirectTag,
++						},
++					},
++				},
++			})
++		}
++
+ 		rulesets = append(rulesets, option.RuleSet{
+ 			Type:   C.RuleSetTypeRemote,
+ 			Tag:    "geoip-" + hopt.Region,

@@ -19,7 +19,51 @@ permissions:
   contents: write
 
 jobs:
+  build-hiddify-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.6'
+          cache: true
+          cache-dependency-path: hiddify-core/go.sum
+
+      - name: Install mingw-w64
+        run: sudo apt-get update && sudo apt-get install -y gcc-mingw-w64-x86-64
+
+      - name: Apply PIXELLNET patch to hiddify-core
+        working-directory: hiddify-core
+        run: |
+          git apply ../hiddify-core-pixellnet.patch
+          echo "--- patched builder.go lines ---"
+          grep -A2 "PIXELLNET RU-bypass" v2/config/builder.go | head -10
+
+      - name: Build hiddify-core.dll + HiddifyCli.exe
+        working-directory: hiddify-core
+        run: |
+          make windows-amd64
+          ls -la bin/
+
+      - name: Upload native artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hiddify-core-windows
+          path: |
+            hiddify-core/bin/hiddify-core.dll
+            hiddify-core/bin/HiddifyCli.exe
+            hiddify-core/bin/libcronet.dll
+          retention-days: 1
+
   build:
+    needs: build-hiddify-core
     runs-on: windows-latest
     timeout-minutes: 60
 
@@ -68,15 +112,19 @@ jobs:
       - name: Generate freezed/drift/riverpod/mappable code
         run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Download prebuilt hiddify-core Windows lib
+      - name: Download hiddify-core native artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: hiddify-core-windows
+          path: hiddify-core/bin/
+
+      - name: Verify native artifacts
         shell: pwsh
         run: |
-          $url = "https://github.com/hiddify/hiddify-core/releases/download/v4.1.0/hiddify-lib-windows-amd64.tar.gz"
-          Invoke-WebRequest -Uri $url -OutFile hiddify-lib.tar.gz -UseBasicParsing
-          New-Item -Path "hiddify-core/bin" -ItemType Directory -Force | Out-Null
-          tar -xzf hiddify-lib.tar.gz -C "hiddify-core/bin"
-          Remove-Item hiddify-lib.tar.gz
-          Get-ChildItem "hiddify-core/bin"
+          Get-ChildItem hiddify-core/bin/
+          if (-not (Test-Path hiddify-core/bin/hiddify-core.dll)) {
+            throw "hiddify-core.dll missing!"
+          }
 
       - name: Flutter build windows release
         run: flutter build windows --release --build-number=${{ github.run_number }} --build-name=${{ steps.ver.outputs.version }}
