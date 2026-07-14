@@ -82,6 +82,18 @@ jobs:
           cache: true
           cache-dependency-path: hiddify-core/go.sum
 
+      - name: Setup Android NDK r25c
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25c
+          add-to-path: false
+
+      - name: Export NDK env
+        run: |
+          echo "ANDROID_NDK_HOME=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
+
       - name: Apply PIXELLNET patch to hiddify-core
         working-directory: hiddify-core
         run: |

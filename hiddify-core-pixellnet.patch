@@ -1,8 +1,8 @@
 diff --git a/v2/config/builder.go b/v2/config/builder.go
-index d37e8b6..f217253 100644
+index f80ccb4..ba3d979 100644
 --- a/v2/config/builder.go
 +++ b/v2/config/builder.go
-@@ -922,6 +922,70 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
+@@ -922,6 +922,74 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
  			},
  		})
  
@@ -26,6 +26,10 @@ index d37e8b6..f217253 100644
 +				"37.140.128.0/18", "84.201.128.0/18", "100.43.64.0/19",
 +				"93.158.128.0/17",
 +			}
++			// IPv4Only обязателен: у РФ-юзеров обычно нет IPv6 на Wi-Fi/LAN,
++			// а Yandex/VK возвращают AAAA → curl/browser пытается v6 → unreachable
++			// → connection reset. С strategy=ipv4_only DNS вернёт только A record.
++			pixellnetRuStrategy := option.DomainStrategy(sdns.DomainStrategyIPv4Only)
 +			dnsRules = append(dnsRules, option.DefaultDNSRule{
 +				RawDefaultDNSRule: option.RawDefaultDNSRule{
 +					DomainSuffix: pixellnetRuBypassSuffixes,
@@ -34,7 +38,7 @@ index d37e8b6..f217253 100644
 +					Action: C.RuleActionTypeRoute,
 +					RouteOptions: option.DNSRouteActionOptions{
 +						Server:         DNSMultiDirectTag,
-+						Strategy:       hopt.DirectDnsDomainStrategy,
++						Strategy:       pixellnetRuStrategy,
 +						RewriteTTL:     &DEFAULT_DNS_TTL,
 +						BypassIfFailed: false,
 +					},
