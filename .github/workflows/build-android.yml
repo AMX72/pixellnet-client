@@ -113,7 +113,10 @@ jobs:
             fi
           fi
           echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME"
-          make android
+          # Override TAGS: strip with_naive_outbound to avoid cronet-go relocation 315
+          # (pre-compiled libcronet.a incompatible with Go 1.25 linker on Android).
+          # Naive outbound не используется в наших каналах — безопасно выключить.
+          make android TAGS="with_gvisor,with_quic,with_wireguard,with_utls,with_clash_api,with_grpc,with_awg,tfogo_checklinkname0,with_conntrack"
           ls -la bin/
           mkdir -p ../android/app/libs
           cp bin/hiddify-core.aar ../android/app/libs/libbox.aar
