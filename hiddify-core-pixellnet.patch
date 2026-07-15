@@ -1,8 +1,40 @@
 diff --git a/v2/config/builder.go b/v2/config/builder.go
-index f80ccb4..9e8fbd1 100644
+index f80ccb4..c8711d0 100644
 --- a/v2/config/builder.go
 +++ b/v2/config/builder.go
-@@ -922,6 +922,74 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
+@@ -875,6 +875,14 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
+ 		})
+ 	}
+ 	if hopt.Region != "other" {
++		// PIXELLNET RU-fix: у большинства РФ-юзеров нет IPv6 на Wi-Fi/LAN,
++		// но DNS-direct возвращает AAAA для .ru доменов (yandex.ru → 2a02:6b8:a::a).
++		// Приложения пытаются IPv6-connect → connectex unreachable network → сайт не открывается.
++		// Форсим ipv4_only на все direct-DNS правила когда region=ru.
++		regionDirectDnsStrategy := hopt.DirectDnsDomainStrategy
++		if hopt.Region == "ru" {
++			regionDirectDnsStrategy = option.DomainStrategy(C.DomainStrategyIPv4Only)
++		}
+ 		dnsRules = append(dnsRules, option.DefaultDNSRule{
+ 			RawDefaultDNSRule: option.RawDefaultDNSRule{
+ 				DomainSuffix: []string{"." + hopt.Region},
+@@ -883,7 +891,7 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
+ 				Action: C.RuleActionTypeRoute,
+ 				RouteOptions: option.DNSRouteActionOptions{
+ 					Server:         DNSMultiDirectTag,
+-					Strategy:       hopt.DirectDnsDomainStrategy,
++					Strategy:       regionDirectDnsStrategy,
+ 					RewriteTTL:     &DEFAULT_DNS_TTL,
+ 					BypassIfFailed: false,
+ 				},
+@@ -915,13 +923,81 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
+ 				Action: C.RuleActionTypeRoute,
+ 				RouteOptions: option.DNSRouteActionOptions{
+ 					Server:         DNSMultiDirectTag,
+-					Strategy:       hopt.DirectDnsDomainStrategy,
++					Strategy:       regionDirectDnsStrategy,
+ 					RewriteTTL:     &DEFAULT_DNS_TTL,
+ 					BypassIfFailed: false,
+ 				},
  			},
  		})
  
