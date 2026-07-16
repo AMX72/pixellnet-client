@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/features/common/qr_code_dialog.dart';
+import 'package:hiddify/features/share/data/referral_api_service.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Реферальный share sheet — «Пригласить друга и получить бонус».
-/// MVP: временный код-заглушка + ссылка pixellnet.com/i/{code}.
-/// В v0.1.45+ подтягивать код из pixellnet-api /api/referral/my.
-class ShareReferralSheet extends StatelessWidget {
+/// v0.1.46+: тянет real ref-код из /api/referral/my через ReferralApiService.
+/// Fallback: если API недоступен — детерминистичный код из имени профиля.
+class ShareReferralSheet extends StatefulWidget {
   const ShareReferralSheet({
     super.key,
     required this.profileName,
@@ -27,30 +28,67 @@ class ShareReferralSheet extends StatelessWidget {
     );
   }
 
-  /// Временный ref-код — детерминированный из имени профиля.
-  /// В v0.1.45 будет заменён на реальный код с pixellnet-api.
-  String get _refCode {
-    // 6 символов из хэша имени. Если профиль пустой — случайный.
-    final base = profileName.isNotEmpty ? profileName : 'PIXELLNET';
+  @override
+  State<ShareReferralSheet> createState() => _ShareReferralSheetState();
+}
+
+class _ShareReferralSheetState extends State<ShareReferralSheet> {
+  ReferralProfile? _profile;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetch();
+  }
+
+  Future<void> _fetch() async {
+    final p = await ReferralApiService.instance.fetchMyProfile();
+    if (!mounted) return;
+    setState(() {
+      _profile = p ?? _fallbackProfile(widget.profileName);
+      _loading = false;
+    });
+  }
+
+  ReferralProfile _fallbackProfile(String name) {
+    // Fallback код — 5 симв из hash имени. Не для реального attribution,
+    // только чтобы UI не показывал пусто когда API недоступен.
+    final base = name.isNotEmpty ? name : 'PIXELLNET';
     final hash = base.codeUnits.fold<int>(0, (acc, c) => (acc * 31 + c) & 0xFFFFFF);
-    const chars = '0123456789ABCDEFGHJKMNPQRSTUVWXYZ'; // без I/L/O — читаемо
+    const chars = '0123456789ABCDEFGHJKMNPQRSTUVWXYZ';
     var n = hash;
     final buf = StringBuffer();
     for (var i = 0; i < 5; i++) {
       buf.write(chars[n % chars.length]);
       n = n ~/ chars.length;
     }
-    return buf.toString();
+    final code = buf.toString();
+    final link = 'https://pixellnet.com/i/$code';
+    return ReferralProfile(
+      refCode: code,
+      refLink: link,
+      inviteText: 'Пользуюсь PIXELLNET — быстрый VPN. Держи 7 дней бесплатно: $link',
+      referralsConfirmed: 0,
+      referralsPending: 0,
+      bonusDaysEarned: 0,
+    );
   }
-
-  String get _refLink => 'https://pixellnet.com/i/$_refCode';
-
-  String get _messengerText =>
-      'Пользуюсь PIXELLNET — быстрый VPN без танцев с бубном. Держи 7 дней бесплатно: $_refLink';
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    if (_loading) {
+      return const SizedBox(
+        height: 240,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final profile = _profile!;
+    final hasBonus = profile.bonusDaysEarned > 0 || profile.referralsConfirmed > 0;
+
     return SafeArea(
       top: false,
       child: Padding(
@@ -60,13 +98,12 @@ class ShareReferralSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 6),
-            // Илюстрация — крупная иконка подарка
             Center(
               child: Container(
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: PixellnetBrand.olive.withOpacity(0.14),
+                  color: PixellnetBrand.olive.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 alignment: Alignment.center,
@@ -95,11 +132,11 @@ class ShareReferralSheet extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Ref-код + ссылка (long-tap to copy code)
+            // Ref-код + ссылка
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -113,7 +150,7 @@ class ShareReferralSheet extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       SelectableText(
-                        _refCode,
+                        profile.refCode,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontFamily: 'monospace',
                           fontWeight: FontWeight.w700,
@@ -121,11 +158,29 @@ class ShareReferralSheet extends StatelessWidget {
                           letterSpacing: 1,
                         ),
                       ),
+                      if (hasBonus) ...[
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: PixellnetBrand.olive.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '+${profile.bonusDaysEarned} дн',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: PixellnetBrand.olive,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    _refLink,
+                    profile.refLink,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -133,6 +188,16 @@ class ShareReferralSheet extends StatelessWidget {
                       fontSize: 12,
                     ),
                   ),
+                  if (profile.referralsConfirmed > 0 || profile.referralsPending > 0) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Подтверждено: ${profile.referralsConfirmed} · ждём оплату: ${profile.referralsPending}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -142,7 +207,7 @@ class ShareReferralSheet extends StatelessWidget {
             FilledButton.icon(
               onPressed: () async {
                 Navigator.of(context).pop();
-                await Share.share(_messengerText, subject: 'PIXELLNET — 7 дней бесплатно');
+                await Share.share(profile.inviteText, subject: 'PIXELLNET — 7 дней бесплатно');
               },
               style: FilledButton.styleFrom(
                 backgroundColor: PixellnetBrand.olive,
@@ -159,7 +224,7 @@ class ShareReferralSheet extends StatelessWidget {
                 Navigator.of(context).pop();
                 showDialog<void>(
                   context: context,
-                  builder: (_) => Dialog(child: QrCodeDialog(_refLink)),
+                  builder: (_) => Dialog(child: QrCodeDialog(profile.refLink)),
                 );
               },
               style: OutlinedButton.styleFrom(
@@ -174,7 +239,7 @@ class ShareReferralSheet extends StatelessWidget {
             // Copy
             TextButton.icon(
               onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: _refLink));
+                await Clipboard.setData(ClipboardData(text: profile.refLink));
                 if (context.mounted) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(

@@ -116,28 +116,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: hiddify-core-windows
-          path: .
+          path: hiddify-core/bin/
+          merge-multiple: true
 
       - name: Verify native artifacts
         shell: pwsh
         run: |
-          Get-ChildItem hiddify-core/bin/ -Recurse
-          if (-not (Test-Path hiddify-core/bin/hiddify-core.dll)) {
-            # v4 может распаковать в nested структуру — попытка переместить
-            $nested = Get-ChildItem -Recurse -Filter hiddify-core.dll | Select-Object -First 1
-            if ($nested) {
-              Copy-Item $nested.FullName hiddify-core/bin/hiddify-core.dll -Force
-              Write-Host "Moved hiddify-core.dll from $($nested.FullName)"
-            } else {
-              throw "hiddify-core.dll missing everywhere!"
-            }
-          }
-          # HiddifyCli.exe тоже
-          if (-not (Test-Path hiddify-core/bin/HiddifyCli.exe)) {
-            $nested = Get-ChildItem -Recurse -Filter HiddifyCli.exe | Select-Object -First 1
-            if ($nested) { Copy-Item $nested.FullName hiddify-core/bin/HiddifyCli.exe -Force }
-          }
           Get-ChildItem hiddify-core/bin/
+          if (-not (Test-Path hiddify-core/bin/hiddify-core.dll)) {
+            throw "hiddify-core.dll missing after download!"
+          }
 
       - name: Flutter build windows release
         run: flutter build windows --release --build-number=${{ github.run_number }} --build-name=${{ steps.ver.outputs.version }}
