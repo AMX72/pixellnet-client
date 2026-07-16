@@ -16,6 +16,7 @@ import 'package:hiddify/core/widget/adaptive_menu.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
 import 'package:hiddify/features/profile/overview/profiles_notifier.dart';
+import 'package:hiddify/features/share/widget/share_bottom_sheet.dart';
 import 'package:hiddify/gen/fonts.gen.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -249,40 +250,23 @@ class ProfileActionsMenu extends HookConsumerWidget {
             ref.read(updateProfileNotifierProvider(profile.id).notifier).updateProfile(profile as RemoteProfileEntity);
           },
         ),
+      // v0.1.44 — единая точка входа Share (bottom sheet с 3 плитками)
+      if (profile case RemoteProfileEntity(:final url, :final name))
+        AdaptiveMenuItem(
+          title: 'Поделиться…',
+          leadingIcon: Icon(AdaptiveIcon(context).share),
+          onTap: () async {
+            final link = LinkParser.generateSubShareLink(url, name);
+            if (link.isEmpty) return;
+            if (!context.mounted) return;
+            await ShareBottomSheet.show(context, subUrl: link, profileName: name);
+          },
+        ),
+      // Экспорт JSON — отдельный редко-нужный action (для advanced юзеров)
       AdaptiveMenuItem(
-        title: t.common.share,
-        leadingIcon: Icon(AdaptiveIcon(context).share),
-        subItems: [
-          if (profile case RemoteProfileEntity(:final url, :final name)) ...[
-            AdaptiveMenuItem(
-              title: t.pages.profiles.share.urlToClipboard,
-              onTap: () async {
-                final link = LinkParser.generateSubShareLink(url, name);
-                if (link.isNotEmpty) {
-                  await Clipboard.setData(ClipboardData(text: link));
-                  if (context.mounted) {
-                    ref
-                        .read(inAppNotificationControllerProvider)
-                        .showSuccessToast(t.common.msg.export.clipboard.success);
-                  }
-                }
-              },
-            ),
-            AdaptiveMenuItem(
-              title: t.pages.profiles.share.showUrlQr,
-              onTap: () async {
-                final link = LinkParser.generateSubShareLink(url, name);
-                if (link.isNotEmpty) {
-                  await ref.read(dialogNotifierProvider.notifier).showQrCode(link, message: name);
-                }
-              },
-            ),
-          ],
-          AdaptiveMenuItem(
-            title: t.pages.profiles.share.jsonToClipboard,
-            onTap: () async => await ref.read(profilesNotifierProvider.notifier).exportConfigToClipboard(profile),
-          ),
-        ],
+        title: t.pages.profiles.share.jsonToClipboard,
+        leadingIcon: const Icon(Icons.data_object_rounded),
+        onTap: () async => await ref.read(profilesNotifierProvider.notifier).exportConfigToClipboard(profile),
       ),
       AdaptiveMenuItem(
         leadingIcon: const Icon(Icons.edit_rounded),
