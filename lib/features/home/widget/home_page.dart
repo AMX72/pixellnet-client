@@ -30,6 +30,7 @@ import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hiddify/features/connection/notifier/vpn_permission_recovery.dart';
 import 'package:hiddify/features/trial/auto_trial_provider.dart';
 import 'package:hiddify/features/trial/trial_service.dart';
+import 'package:hiddify/features/trial/widget/trial_expired_page.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
@@ -175,35 +176,40 @@ class HomePage extends HookConsumerWidget {
                 ),
               ),
             if (autoTrial.hasError)
-              Container(
-                color: theme.scaffoldBackgroundColor.withValues(alpha: 0.9),
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.wifi_off_rounded, size: 48, color: theme.colorScheme.error),
-                    const Gap(16),
-                    Text('Не получилось создать пробный доступ',
-                        style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
-                    const Gap(8),
-                    Text(
-                      autoTrial.error is TrialException
-                          ? (autoTrial.error as TrialException).message
-                          : 'Проверь интернет и попробуй снова',
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                      textAlign: TextAlign.center,
-                    ),
-                    const Gap(24),
-                    FilledButton.icon(
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: const Text('Повторить'),
-                      onPressed: () => ref.invalidate(autoTrialProvider),
-                    ),
-                  ],
+              // v0.1.48: HTTP 410 = trial уже использован → отдельный дружественный экран
+              // с CTA «Ввести ключ» / «Купить подписку». «Повторить» бесполезен для 410.
+              if (autoTrial.error is TrialException && (autoTrial.error as TrialException).isExpired)
+                const TrialExpiredPage()
+              else
+                Container(
+                  color: theme.scaffoldBackgroundColor.withValues(alpha: 0.9),
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.wifi_off_rounded, size: 48, color: theme.colorScheme.error),
+                      const Gap(16),
+                      Text('Не получилось создать пробный доступ',
+                          style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
+                      const Gap(8),
+                      Text(
+                        autoTrial.error is TrialException
+                            ? (autoTrial.error as TrialException).message
+                            : 'Проверь интернет и попробуй снова',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                        textAlign: TextAlign.center,
+                      ),
+                      const Gap(24),
+                      FilledButton.icon(
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('Повторить'),
+                        onPressed: () => ref.invalidate(autoTrialProvider),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             // v0.1.34: VPN permission recovery banner.
             // Показывается когда sing-box упал с "permission denied":
             //   - requesting: системный диалог уже открыт (авто), показываем spinner
@@ -249,13 +255,13 @@ class HomePage extends HookConsumerWidget {
             const Icon(Icons.cloud_sync_rounded, size: 36),
             const SizedBox(height: 12),
             const Text(
-              'Обновить список серверов?',
+              'Обновить список каналов?',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             const Text(
-              'Появились новые прокси-каналы. Обновить сейчас?',
+              'Появились новые каналы. Обновить сейчас?',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14),
             ),
@@ -688,7 +694,7 @@ class _VpnPermissionBanner extends ConsumerWidget {
               const Gap(12),
               Expanded(
                 child: Text(
-                  'Запрашиваем разрешение VPN...',
+                  'Запрашиваем разрешение на соединение...',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onErrorContainer,
                     fontWeight: FontWeight.w600,
@@ -724,7 +730,7 @@ class _VpnPermissionBanner extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Нет разрешения VPN',
+                      'Нужно разрешение на соединение',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onErrorContainer,
                         fontWeight: FontWeight.w700,

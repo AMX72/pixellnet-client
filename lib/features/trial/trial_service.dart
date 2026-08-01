@@ -90,6 +90,18 @@ class TrialService {
 
     if (resp.statusCode != 200) {
       DiagnosticsService.instance.event('trial.error', {'status': resp.statusCode});
+      // 410 Gone = trial уже был использован на этом устройстве (antifraud).
+      // Не показываем «Повторить» — переключаемся на TrialExpiredPage.
+      if (resp.statusCode == 410) {
+        // Persist флаг чтобы при следующем запуске сразу показать TrialExpiredPage
+        // без лишнего запроса к серверу (экономит трафик + быстрый UX).
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('pixellnet.trial.expired', true);
+        throw const TrialException(
+          'Пробный период уже был использован на этом устройстве',
+          isExpired: true,
+        );
+      }
       throw TrialException('Сервер вернул ${resp.statusCode}. Попробуй позже.');
     }
 
@@ -167,8 +179,11 @@ class TrialStatus {
 }
 
 class TrialException implements Exception {
-  const TrialException(this.message);
+  const TrialException(this.message, {this.isExpired = false});
   final String message;
+  /// true когда сервер вернул 410 Gone — trial уже использован на этом устройстве.
+  /// UI должен показать TrialExpiredPage вместо generic error.
+  final bool isExpired;
   @override
   String toString() => message;
 }

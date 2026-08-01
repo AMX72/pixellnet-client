@@ -1,7 +1,16 @@
 diff --git a/v2/config/builder.go b/v2/config/builder.go
-index f80ccb4..c8711d0 100644
+index f80ccb4..b1a47a6 100644
 --- a/v2/config/builder.go
 +++ b/v2/config/builder.go
+@@ -40,7 +40,7 @@ const (
+ 	OutboundBypassTag = "bypass §hide§"
+ 	// OutboundBlockTag          = "block §hide§"
+ 	OutboundSelectTag         = "select"
+-	OutboundURLTestTag        = "lowest"
++	OutboundURLTestTag        = "⚡ Автовыбор"
+ 	OutboundRoundRobinTag     = "balance"
+ 	OutboundDNSTag            = "dns-out §hide§"
+ 	OutboundDirectFragmentTag = "direct-fragment §hide§"
 @@ -875,6 +875,14 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
  		})
  	}
