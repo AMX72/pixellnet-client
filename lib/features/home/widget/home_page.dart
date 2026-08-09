@@ -28,6 +28,8 @@ import 'package:hiddify/features/updater/updater_service.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hiddify/features/connection/notifier/vpn_permission_recovery.dart';
+import 'package:hiddify/features/onboarding/welcome_page.dart';
+import 'package:hiddify/features/profile/data/profile_data_providers.dart';
 import 'package:hiddify/features/trial/auto_trial_provider.dart';
 import 'package:hiddify/features/trial/trial_service.dart';
 import 'package:hiddify/features/trial/widget/trial_expired_page.dart';
@@ -44,10 +46,14 @@ class HomePage extends HookConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     // final hasAnyProfile = ref.watch(hasAnyProfileProvider);
     final activeProfile = ref.watch(activeProfileProvider);
+    // v0.1.49: показать welcome page при первом запуске (юзер сам выбирает
+    // trial или ввод ключа — не автозапускать trial молча).
+    final showWelcome = ref.watch(showWelcomeProvider).value ?? false;
+    final hasProfile = ref.watch(hasAnyProfileProvider).value ?? false;
     // Zero-config: при первом запуске автоматически получаем trial через
-    // pixellnet-api и импортируем как активный профиль. Если у юзера уже
-    // есть профиль — провайдер вернёт null и ничего не сделает.
-    final autoTrial = ref.watch(autoTrialProvider);
+    // pixellnet-api и импортируем как активный профиль. Только если юзер
+    // явно нажал «Попробовать» в welcome (welcome помечен shown).
+    final autoTrial = showWelcome ? const AsyncValue<TrialInfo?>.data(null) : ref.watch(autoTrialProvider);
     // v0.1.26: активация тихой автопроверки обновлений при первом mount Home.
     ref.watch(autoUpdateStateProvider);
     // v0.1.38: активация авто-обновления прокси-каналов (Marzban subscription).
@@ -155,6 +161,9 @@ class HomePage extends HookConsumerWidget {
                 ),
               ),
             ),
+            // v0.1.49: welcome page для fresh install (перекрывает всё до выбора юзера)
+            if (showWelcome && !hasProfile)
+              const Positioned.fill(child: WelcomePage()),
             // Zero-config auto-trial overlay: показывается пока идёт запрос
             // на pixellnet-api /api/trial при первом запуске.
             if (autoTrial.isLoading)
