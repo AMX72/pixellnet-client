@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -1819,12 +1820,137 @@ void _showAddSubscriptionSheet(BuildContext context, WidgetRef ref) {
                 _showManualEntryDialog(context, ref);
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.qr_code_scanner_outlined, size: 20),
+              title: const Text('Сканировать QR-код', style: TextStyle(fontSize: 14)),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _openQrScanner(context, ref);
+              },
+            ),
             const Gap(8),
           ],
         ),
       );
     },
   );
+}
+
+void _openQrScanner(BuildContext context, WidgetRef ref) {
+  Navigator.of(context, rootNavigator: true).push(
+    MaterialPageRoute<void>(
+      fullscreenDialog: true,
+      builder: (_) => _QrScanPage(ref: ref),
+    ),
+  );
+}
+
+class _QrScanPage extends StatefulWidget {
+  const _QrScanPage({required this.ref});
+  final WidgetRef ref;
+
+  @override
+  State<_QrScanPage> createState() => _QrScanPageState();
+}
+
+class _QrScanPageState extends State<_QrScanPage> {
+  final MobileScannerController _controller = MobileScannerController(
+    formats: const [BarcodeFormat.qrCode],
+    detectionSpeed: DetectionSpeed.normal,
+  );
+  bool _handled = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onDetect(BarcodeCapture capture) async {
+    if (_handled) return;
+    for (final b in capture.barcodes) {
+      final text = b.rawValue?.trim();
+      if (text == null || text.isEmpty) continue;
+      _handled = true;
+      await _controller.stop();
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      await widget.ref.read(addProfileNotifierProvider.notifier).addClipboard(text);
+      return;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.black38,
+        foregroundColor: Colors.white,
+        title: const Text('Сканировать QR'),
+        actions: [
+          IconButton(
+            tooltip: 'Вспышка',
+            icon: const Icon(Icons.flash_on_outlined),
+            onPressed: () => _controller.toggleTorch(),
+          ),
+          IconButton(
+            tooltip: 'Сменить камеру',
+            icon: const Icon(Icons.flip_camera_android_outlined),
+            onPressed: () => _controller.switchCamera(),
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          MobileScanner(
+            controller: _controller,
+            onDetect: _onDetect,
+            errorBuilder: (ctx, err) {
+              final msg = switch (err.errorCode) {
+                MobileScannerErrorCode.permissionDenied =>
+                    'Нет доступа к камере. Разрешите в настройках Android.',
+                MobileScannerErrorCode.unsupported =>
+                    'Камера не поддерживается на этом устройстве.',
+                _ => 'Ошибка камеры: ${err.errorCode}',
+              };
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(msg,
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      textAlign: TextAlign.center),
+                ),
+              );
+            },
+          ),
+          IgnorePointer(
+            child: Center(
+              child: Container(
+                width: 260,
+                height: 260,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.white70, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 40,
+            left: 24,
+            right: 24,
+            child: Text(
+              'Наведите камеру на QR-код подписки',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 Future<void> _showManualEntryDialog(BuildContext context, WidgetRef ref) async {
