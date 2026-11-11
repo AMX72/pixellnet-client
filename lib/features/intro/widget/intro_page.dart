@@ -101,7 +101,7 @@ class IntroPage extends HookConsumerWidget with PresLogger {
                     choices: Region.values,
                     title: t.pages.settings.routing.generalOptions.region,
                     showFlag: true,
-                    icon: Icons.place_rounded,
+                    icon: Icons.place_outlined,
                     presentChoice: (value) => value.present(t),
                     onChanged: (val) async {
                       await ref.read(ConfigOptions.directDnsAddress.notifier).reset();

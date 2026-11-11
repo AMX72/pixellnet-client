@@ -49,10 +49,10 @@ enum ChainTimelineLevel {
 
   IconData icon() => switch (this) {
     ChainTimelineLevel.app => ChainConst.iconByPlatform(),
-    ChainTimelineLevel.extraSecurity => Icons.security_rounded,
-    ChainTimelineLevel.mainProfile => Icons.lan_rounded,
-    ChainTimelineLevel.unblocker => Icons.lock_open_rounded,
-    ChainTimelineLevel.filtering => Icons.wifi_rounded,
+    ChainTimelineLevel.extraSecurity => Icons.security_outlined,
+    ChainTimelineLevel.mainProfile => Icons.lan_outlined,
+    ChainTimelineLevel.unblocker => Icons.lock_open_outlined,
+    ChainTimelineLevel.filtering => Icons.wifi_outlined,
   };
 
   bool isApp() => this == app;

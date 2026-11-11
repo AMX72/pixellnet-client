@@ -133,7 +133,7 @@ class SettingsPage extends HookConsumerWidget {
                   controller.open();
                 }
               },
-              icon: const Icon(Icons.more_vert_rounded),
+              icon: const Icon(Icons.more_vert_outlined),
             ),
           ),
           const Gap(8),
@@ -144,41 +144,41 @@ class SettingsPage extends HookConsumerWidget {
           // TipCard(message: t.settings.experimentalMsg),
           SettingsSection(
             title: t.pages.settings.general.title,
-            icon: Icons.layers_rounded,
+            icon: Icons.layers_outlined,
             namedLocation: context.namedLocation('general'),
           ),
           if (ref.watch(hasAnyProfileProvider).value ?? false)
             SettingsSection(
               title: t.pages.settings.chain.title,
-              icon: Icons.webhook_rounded,
+              icon: Icons.webhook_outlined,
               subtitle: Text(t.pages.settings.chain.subtitle),
               namedLocation: context.namedLocation('chainOptions'),
             ),
           SettingsSection(
             title: t.pages.settings.routing.title,
-            icon: Icons.route_rounded,
+            icon: Icons.route_outlined,
             namedLocation: context.namedLocation('routingOptions'),
           ),
           SettingsSection(
             title: t.pages.settings.dns.title,
-            icon: Icons.dns_rounded,
+            icon: Icons.dns_outlined,
             namedLocation: context.namedLocation('dnsOptions'),
           ),
           SettingsSection(
             title: t.pages.settings.inbound.title,
-            icon: Icons.input_rounded,
+            icon: Icons.input_outlined,
             namedLocation: context.namedLocation('inboundOptions'),
           ),
           SettingsSection(
             title: t.pages.settings.tlsTricks.title,
-            icon: Icons.content_cut_rounded,
+            icon: Icons.content_cut_outlined,
             namedLocation: context.namedLocation('tlsTricks'),
           ),
           if (PlatformUtils.isIOS)
             Material(
               child: ListTile(
                 title: Text(t.pages.settings.resetTunnel),
-                leading: const Icon(Icons.autorenew_rounded),
+                leading: const Icon(Icons.autorenew_outlined),
                 onTap: () async {
                   await ref.read(resetTunnelNotifierProvider.notifier).run();
                 },
@@ -187,12 +187,12 @@ class SettingsPage extends HookConsumerWidget {
           if (Breakpoint(context).isMobile()) ...[
             SettingsSection(
               title: t.pages.logs.title,
-              icon: Icons.description_rounded,
+              icon: Icons.description_outlined,
               namedLocation: context.namedLocation('logs'),
             ),
             SettingsSection(
               title: t.pages.about.title,
-              icon: Icons.info_rounded,
+              icon: Icons.info_outlined,
               namedLocation: context.namedLocation('about'),
             ),
           ],
@@ -222,7 +222,7 @@ class SettingsSection extends HookConsumerWidget {
       leading: Icon(icon),
       title: Text(title),
       subtitle: subtitle,
-      trailing: const Icon(Icons.chevron_right_rounded),
+      trailing: const Icon(Icons.chevron_right_outlined),
       onTap: () => context.go(namedLocation),
     );
   }

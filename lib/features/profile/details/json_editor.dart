@@ -1500,7 +1500,7 @@ class _Options<T> extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.check_rounded),
+                    Icon(Icons.check_outlined),
                     SizedBox(width: 10),
                     Text("Boolean", style: TextStyle(fontSize: 14)),
                   ],
@@ -1619,14 +1619,14 @@ class _SearchField extends StatelessWidget {
             onTap: () {
               onAction(_SearchActions.next);
             },
-            child: const Tooltip(message: 'Next', child: Icon(Icons.keyboard_arrow_down_rounded, size: 20)),
+            child: const Tooltip(message: 'Next', child: Icon(Icons.keyboard_arrow_down_outlined, size: 20)),
           ),
           const SizedBox(width: 2),
           InkWell(
             onTap: () {
               onAction(_SearchActions.prev);
             },
-            child: const Tooltip(message: 'Previous', child: Icon(Icons.keyboard_arrow_up_rounded, size: 20)),
+            child: const Tooltip(message: 'Previous', child: Icon(Icons.keyboard_arrow_up_outlined, size: 20)),
           ),
           const SizedBox(width: 5),
         ],

@@ -142,7 +142,7 @@ class ProfileTile extends HookConsumerWidget {
                                         semanticsLabel: t.pages.profiles.activeProfileName(name: profile.name),
                                       ),
                                     ),
-                                    const Icon(Icons.arrow_drop_down_rounded),
+                                    const Icon(Icons.arrow_drop_down_outlined),
                                   ],
                                 ),
                               ),
@@ -206,7 +206,7 @@ class ProfileActionButton extends HookConsumerWidget {
                   .read(updateProfileNotifierProvider(profile.id).notifier)
                   .updateProfile(profile as RemoteProfileEntity);
             },
-            child: const Icon(Icons.update_rounded),
+            child: const Icon(Icons.update_outlined),
           ),
         ),
       );
@@ -242,7 +242,7 @@ class ProfileActionsMenu extends HookConsumerWidget {
       if (profile case RemoteProfileEntity())
         AdaptiveMenuItem(
           title: t.common.update,
-          leadingIcon: const Icon(Icons.update_rounded),
+          leadingIcon: const Icon(Icons.update_outlined),
           onTap: () {
             if (ref.read(updateProfileNotifierProvider(profile.id)).isLoading) {
               return;
@@ -265,11 +265,11 @@ class ProfileActionsMenu extends HookConsumerWidget {
       // Экспорт JSON — отдельный редко-нужный action (для advanced юзеров)
       AdaptiveMenuItem(
         title: t.pages.profiles.share.jsonToClipboard,
-        leadingIcon: const Icon(Icons.data_object_rounded),
+        leadingIcon: const Icon(Icons.data_object_outlined),
         onTap: () async => await ref.read(profilesNotifierProvider.notifier).exportConfigToClipboard(profile),
       ),
       AdaptiveMenuItem(
-        leadingIcon: const Icon(Icons.edit_rounded),
+        leadingIcon: const Icon(Icons.edit_outlined),
         title: t.common.edit,
         onTap: () {
           if (Breakpoint(context).isMobile()) context.pop();
@@ -278,7 +278,7 @@ class ProfileActionsMenu extends HookConsumerWidget {
       ),
       // if (!profile.active)
       AdaptiveMenuItem(
-        leadingIcon: const Icon(Icons.delete_outline_rounded),
+        leadingIcon: const Icon(Icons.delete_outline_outlined),
         title: t.common.delete,
         onTap: () async => await ref
             .read(dialogNotifierProvider.notifier)
@@ -366,7 +366,7 @@ class NewTrafficSubscriptionInfo extends HookConsumerWidget {
 
     return Column(
       children: [
-        const Icon(Icons.assessment_rounded, color: Colors.blue),
+        const Icon(Icons.assessment_outlined, color: Colors.blue),
         Text(t.components.subscriptionInfo.remainingTraffic),
         const SizedBox(height: 4),
         Row(
@@ -470,7 +470,7 @@ class NewDayTrafficSubscriptionInfo extends HookConsumerWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.assessment_rounded, color: Colors.blue),
+        const Icon(Icons.assessment_outlined, color: Colors.blue),
         Text(t.components.subscriptionInfo.remainingUsage),
         const SizedBox(height: 4),
         Text(

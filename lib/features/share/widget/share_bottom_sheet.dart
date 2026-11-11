@@ -55,7 +55,7 @@ class ShareBottomSheet extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _ShareRow(
-              icon: Icons.vpn_key_rounded,
+              icon: Icons.vpn_key_outlined,
               iconColor: PixellnetBrand.mochaOnDark,
               iconBg: PixellnetBrand.mocha.withOpacity(0.12),
               title: 'Ключ для другого VPN-приложения',
@@ -67,7 +67,7 @@ class ShareBottomSheet extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             _ShareRow(
-              icon: Icons.shield_moon_rounded,
+              icon: Icons.shield_moon_outlined,
               iconColor: PixellnetBrand.mocha,
               iconBg: PixellnetBrand.mocha.withOpacity(0.16),
               title: 'Ключ для PIXELLNET',
@@ -80,7 +80,7 @@ class ShareBottomSheet extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             _ShareRow(
-              icon: Icons.card_giftcard_rounded,
+              icon: Icons.card_giftcard_outlined,
               iconColor: PixellnetBrand.olive,
               iconBg: PixellnetBrand.olive.withOpacity(0.14),
               title: 'Пригласить друга и получить бонус',
@@ -200,7 +200,7 @@ class _ShareRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(Icons.chevron_right_rounded, color: theme.colorScheme.onSurfaceVariant),
+              Icon(Icons.chevron_right_outlined, color: theme.colorScheme.onSurfaceVariant),
             ],
           ),
         ),

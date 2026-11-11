@@ -86,7 +86,7 @@ class AboutPage extends HookConsumerWidget {
       ListTile(
         title: const Text('Собрать диагностику'),
         subtitle: const Text('Инфа о ПК/интернете + последние события — в буфер обмена'),
-        leading: const Icon(Icons.medical_services_rounded),
+        leading: const Icon(Icons.medical_services_outlined),
         onTap: () async {
           final snap = await DiagnosticsService.instance.collect();
           final md = DiagnosticsService.instance.formatAsMarkdown(snap);

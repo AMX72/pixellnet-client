@@ -37,7 +37,7 @@ class ChainOptionsPage extends HookConsumerWidget {
                         choices: PsiphonRegion.values,
                         title: t.pages.settings.chain.psiphon.selectServerRegion,
                         showFlag: true,
-                        icon: Icons.place_rounded,
+                        icon: Icons.place_outlined,
                         presentChoice: (value) => value.present(t),
                         onChanged: (val) async {
                           await ref.read(ConfigOptions.extraSecurityPsiphonRegion.notifier).update(val);
@@ -47,7 +47,7 @@ class ChainOptionsPage extends HookConsumerWidget {
                         value: ref.watch(ConfigOptions.extraSecurityPsiphonConduitPairingId),
                         preferences: ref.watch(ConfigOptions.extraSecurityPsiphonConduitPairingId.notifier),
                         title: t.pages.settings.chain.profile.conduitPairingId,
-                        icon: Icons.link_rounded,
+                        icon: Icons.link_outlined,
                         presentValue: (value) => value.isEmpty ? t.common.notSet : value,
                       ),
                     ],
@@ -56,7 +56,7 @@ class ChainOptionsPage extends HookConsumerWidget {
                         value: ref.watch(ConfigOptions.extraSecurityWarpLicenseKey),
                         preferences: ref.watch(ConfigOptions.extraSecurityWarpLicenseKey.notifier),
                         title: t.pages.settings.chain.warp.licenseKey,
-                        icon: Icons.key_rounded,
+                        icon: Icons.key_outlined,
                         presentValue: (value) => value.isEmpty ? t.common.notSet : value,
                       ),
                     ],
@@ -66,7 +66,7 @@ class ChainOptionsPage extends HookConsumerWidget {
                         preferences: ref.watch(ConfigOptions.extraSecurityProfileId.notifier),
                         choices: profiles,
                         title: t.pages.settings.chain.profile.selectProfile,
-                        icon: Icons.view_list_rounded,
+                        icon: Icons.view_list_outlined,
                         presentChoice: (value) => (value as ProfileEntity?)?.name ?? '',
                         autoUpdate: false,
                         onChanged: (val) async {
@@ -104,7 +104,7 @@ class ChainOptionsPage extends HookConsumerWidget {
                         choices: PsiphonRegion.values,
                         title: t.pages.settings.chain.psiphon.selectServerRegion,
                         showFlag: true,
-                        icon: Icons.place_rounded,
+                        icon: Icons.place_outlined,
                         presentChoice: (value) => value.present(t),
                         onChanged: (val) async {
                           await ref.read(ConfigOptions.unblockerPsiphonRegion.notifier).update(val);
@@ -114,7 +114,7 @@ class ChainOptionsPage extends HookConsumerWidget {
                         value: ref.watch(ConfigOptions.unblockerPsiphonConduitPairingId),
                         preferences: ref.watch(ConfigOptions.unblockerPsiphonConduitPairingId.notifier),
                         title: t.pages.settings.chain.profile.conduitPairingId,
-                        icon: Icons.link_rounded,
+                        icon: Icons.link_outlined,
                         presentValue: (value) => value.isEmpty ? t.common.notSet : value,
                       ),
                     ],
@@ -123,20 +123,20 @@ class ChainOptionsPage extends HookConsumerWidget {
                         value: ref.watch(ConfigOptions.extraSecurityWarpLicenseKey),
                         preferences: ref.watch(ConfigOptions.extraSecurityWarpLicenseKey.notifier),
                         title: t.pages.settings.chain.warp.licenseKey,
-                        icon: Icons.key_rounded,
+                        icon: Icons.key_outlined,
                         presentValue: (value) => value.isEmpty ? t.common.notSet : value,
                       ),
                       ValuePreferenceWidget(
                         value: ref.watch(ConfigOptions.unblockerWarpCleanIp),
                         preferences: ref.watch(ConfigOptions.unblockerWarpCleanIp.notifier),
                         title: t.pages.settings.chain.warp.cleanIp,
-                        icon: Icons.auto_awesome_rounded,
+                        icon: Icons.auto_awesome_outlined,
                       ),
                       ValuePreferenceWidget(
                         value: ref.watch(ConfigOptions.unblockerWarpPort),
                         preferences: ref.watch(ConfigOptions.unblockerWarpPort.notifier),
                         title: t.pages.settings.chain.warp.port,
-                        icon: Icons.device_hub_rounded,
+                        icon: Icons.device_hub_outlined,
                         inputToValue: int.tryParse,
                         validateInput: isPort,
                         digitsOnly: true,
@@ -145,7 +145,7 @@ class ChainOptionsPage extends HookConsumerWidget {
                         value: ref.watch(ConfigOptions.unblockerWarpNoise),
                         preferences: ref.watch(ConfigOptions.unblockerWarpNoise.notifier),
                         title: t.pages.settings.chain.warp.noise.count,
-                        icon: Icons.web_stories_rounded,
+                        icon: Icons.web_stories_outlined,
                         inputToValue: (input) => OptionalRange.tryParse(input, allowEmpty: true),
                         presentValue: (value) => value.present(t),
                         formatInputValue: (value) => value.format(),
@@ -154,13 +154,13 @@ class ChainOptionsPage extends HookConsumerWidget {
                         value: ref.watch(ConfigOptions.unblockerWarpNoiseMode),
                         preferences: ref.watch(ConfigOptions.unblockerWarpNoiseMode.notifier),
                         title: t.pages.settings.chain.warp.noise.mode,
-                        icon: Icons.mode_standby_rounded,
+                        icon: Icons.mode_standby_outlined,
                       ),
                       ValuePreferenceWidget(
                         value: ref.watch(ConfigOptions.unblockerWarpNoiseSize),
                         preferences: ref.watch(ConfigOptions.unblockerWarpNoiseSize.notifier),
                         title: t.pages.settings.chain.warp.noise.size,
-                        icon: Icons.settings_ethernet_rounded,
+                        icon: Icons.settings_ethernet_outlined,
                         inputToValue: (input) => OptionalRange.tryParse(input, allowEmpty: true),
                         presentValue: (value) => value.present(t),
                         formatInputValue: (value) => value.format(),
@@ -169,7 +169,7 @@ class ChainOptionsPage extends HookConsumerWidget {
                         value: ref.watch(ConfigOptions.unblockerWarpNoiseDelay),
                         preferences: ref.watch(ConfigOptions.unblockerWarpNoiseDelay.notifier),
                         title: t.pages.settings.chain.warp.noise.delay,
-                        icon: Icons.schedule_rounded,
+                        icon: Icons.schedule_outlined,
                         inputToValue: (input) => OptionalRange.tryParse(input, allowEmpty: true),
                         presentValue: (value) => value.present(t),
                         formatInputValue: (value) => value.format(),
@@ -181,7 +181,7 @@ class ChainOptionsPage extends HookConsumerWidget {
                         preferences: ref.watch(ConfigOptions.unblockerProfileId.notifier),
                         choices: profiles,
                         title: t.pages.settings.chain.profile.selectProfile,
-                        icon: Icons.view_list_rounded,
+                        icon: Icons.view_list_outlined,
                         presentChoice: (value) => (value as ProfileEntity?)?.name ?? '',
                         autoUpdate: false,
                         onChanged: (val) async {
@@ -204,7 +204,7 @@ class ChainOptionsPage extends HookConsumerWidget {
 // SwitchListTile.adaptive(
 //   title: Text(t.pages.settings.warp.enable),
 //   value: isWarpEnabled,
-//   secondary: const Icon(Icons.cloud_rounded),
+//   secondary: const Icon(Icons.cloud_outlined),
 //   onChanged: (value) async {
 //     await ref.read(ConfigOptions.enableWarp.notifier).update(value);
 //     if (value) await ref.read(warpOptionNotifierProvider.notifier).genWarps();
@@ -223,7 +223,7 @@ class ChainOptionsPage extends HookConsumerWidget {
 //   trailing: warpOptions.isLoading
 //       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator())
 //       : null,
-//   leading: const Icon(Icons.build_rounded),
+//   leading: const Icon(Icons.build_outlined),
 //   enabled: isWarpEnabled && !warpOptions.isLoading,
 //   onTap: warpOptions.isLoading
 //       ? null
@@ -237,6 +237,6 @@ class ChainOptionsPage extends HookConsumerWidget {
 //   enabled: isWarpEnabled,
 //   choices: WarpDetourMode.values,
 //   title: t.pages.settings.warp.detourMode,
-//   icon: Icons.alt_route_rounded,
+//   icon: Icons.alt_route_outlined,
 //   presentChoice: (value) => value.present(t),
 // ),

@@ -226,7 +226,7 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
                                 controller.open();
                               }
                             },
-                            icon: const Icon(Icons.more_vert_rounded),
+                            icon: const Icon(Icons.more_vert_outlined),
                           ),
                   ),
                 ),
@@ -263,7 +263,7 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
                               const Gap(16),
                               Text(mode?.present(t).title ?? ''),
                               const Gap(4),
-                              Icon(Icons.arrow_drop_down_rounded, color: theme.colorScheme.onSurfaceVariant),
+                              Icon(Icons.arrow_drop_down_outlined, color: theme.colorScheme.onSurfaceVariant),
                               const Gap(8),
                             ],
                           ),
@@ -284,7 +284,7 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
           ? FloatingActionButton(
               onPressed: () =>
                   scrollController.animateTo(0.0, duration: const Duration(milliseconds: 500), curve: Curves.easeOut),
-              child: const Icon(Icons.keyboard_arrow_up_rounded),
+              child: const Icon(Icons.keyboard_arrow_up_outlined),
             )
           : (ref.watch(ConfigOptions.region) != Region.other)
           ? FloatingActionButton.extended(
@@ -294,7 +294,7 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
               icon: Icon(
                 ref.watch(Preferences.autoAppsSelectionRegion) == null
                     ? Icons.toggle_off_outlined
-                    : Icons.toggle_on_rounded,
+                    : Icons.toggle_on_outlined,
               ),
             )
           : null,

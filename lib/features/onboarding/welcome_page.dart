@@ -99,7 +99,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
                     borderRadius: BorderRadius.circular(22),
                   ),
                   alignment: Alignment.center,
-                  child: const Icon(Icons.shield_moon_rounded, size: 44, color: PixellnetBrand.mocha),
+                  child: const Icon(Icons.shield_moon_outlined, size: 44, color: PixellnetBrand.mocha),
                 ),
               ),
               const SizedBox(height: 20),
@@ -121,7 +121,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
 
               // Card 1 — Trial
               _WelcomeCard(
-                icon: Icons.bolt_rounded,
+                icon: Icons.bolt_outlined,
                 iconColor: PixellnetBrand.olive,
                 iconBg: PixellnetBrand.olive.withValues(alpha: 0.16),
                 title: 'Попробовать 7 дней бесплатно',
@@ -133,7 +133,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
 
               // Card 2 — Enter key
               _WelcomeCard(
-                icon: Icons.vpn_key_rounded,
+                icon: Icons.vpn_key_outlined,
                 iconColor: PixellnetBrand.mocha,
                 iconBg: PixellnetBrand.mocha.withValues(alpha: 0.14),
                 title: 'У меня уже есть ключ',
@@ -245,7 +245,7 @@ class _WelcomeCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 4),
-                        Icon(Icons.arrow_forward_rounded, size: 16, color: iconColor),
+                        Icon(Icons.arrow_forward_outlined, size: 16, color: iconColor),
                       ],
                     ),
                   ],

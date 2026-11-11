@@ -32,19 +32,19 @@ class GeneralPage extends HookConsumerWidget {
           SwitchListTile.adaptive(
             title: Text(t.pages.settings.general.autoIpCheck),
             value: ref.watch(Preferences.autoCheckIp),
-            secondary: const Icon(Icons.flag_rounded),
+            secondary: const Icon(Icons.flag_outlined),
             onChanged: ref.read(Preferences.autoCheckIp.notifier).update,
           ),
           if (PlatformUtils.isAndroid) ...[
             SwitchListTile.adaptive(
               title: Text(t.pages.settings.general.dynamicNotification),
-              secondary: const Icon(Icons.speed_rounded),
+              secondary: const Icon(Icons.speed_outlined),
               value: ref.watch(Preferences.dynamicNotification),
               onChanged: ref.read(Preferences.dynamicNotification.notifier).update,
             ),
             SwitchListTile.adaptive(
               title: Text(t.pages.settings.general.hapticFeedback),
-              secondary: const Icon(Icons.vibration_rounded),
+              secondary: const Icon(Icons.vibration_outlined),
               value: ref.watch(hapticServiceProvider),
               onChanged: ref.read(hapticServiceProvider.notifier).updatePreference,
             ),
@@ -53,7 +53,7 @@ class GeneralPage extends HookConsumerWidget {
             const ClosingPrefTile(),
             SwitchListTile.adaptive(
               title: Text(t.pages.settings.general.autoStart),
-              secondary: const Icon(Icons.auto_mode_rounded),
+              secondary: const Icon(Icons.auto_mode_outlined),
               value: ref.watch(autoStartNotifierProvider).asData!.value,
               onChanged: (value) async => value
                   ? await ref.read(autoStartNotifierProvider.notifier).enable()
@@ -61,7 +61,7 @@ class GeneralPage extends HookConsumerWidget {
             ),
             SwitchListTile.adaptive(
               title: Text(t.pages.settings.general.silentStart),
-              secondary: const Icon(Icons.visibility_off_rounded),
+              secondary: const Icon(Icons.visibility_off_outlined),
               value: ref.watch(Preferences.silentStart),
               onChanged: ref.read(Preferences.silentStart.notifier).update,
             ),
@@ -70,12 +70,12 @@ class GeneralPage extends HookConsumerWidget {
           SwitchListTile.adaptive(
             title: Text(t.pages.settings.general.memoryLimit),
             subtitle: Text(t.pages.settings.general.memoryLimitMsg),
-            secondary: const Icon(Icons.memory_rounded),
+            secondary: const Icon(Icons.memory_outlined),
             value: !ref.watch(Preferences.disableMemoryLimit),
             onChanged: (value) async => await ref.read(Preferences.disableMemoryLimit.notifier).update(!value),
           ),
           ListTile(
-            leading: const Icon(Icons.description_rounded),
+            leading: const Icon(Icons.description_outlined),
             title: const Text('Размер журнала'),
             subtitle: Text('${ref.watch(Preferences.logMaxSizeMb)} МБ — старые записи затираются'),
             trailing: DropdownButton<int>(
@@ -91,7 +91,7 @@ class GeneralPage extends HookConsumerWidget {
           ),
           // v0.1.26: раздел обновлений — 3-режимный dropdown + час проверки.
           ListTile(
-            leading: const Icon(Icons.system_update_rounded),
+            leading: const Icon(Icons.system_update_outlined),
             title: const Text('Как обновлять'),
             subtitle: Text(_updateModeLabel(ref.watch(Preferences.updateMode))),
             trailing: DropdownButton<int>(
@@ -109,7 +109,7 @@ class GeneralPage extends HookConsumerWidget {
           ),
           if (ref.watch(Preferences.updateMode) == 0)
             ListTile(
-              leading: const Icon(Icons.schedule_rounded),
+              leading: const Icon(Icons.schedule_outlined),
               title: const Text('Когда проверять'),
               subtitle: Text(_updateHourLabel(ref.watch(Preferences.updateCheckHour))),
               trailing: DropdownButton<int>(
@@ -129,10 +129,10 @@ class GeneralPage extends HookConsumerWidget {
             ),
           // v0.1.29: ручная кнопка «Проверить сейчас» — доступна во всех режимах
           ListTile(
-            leading: const Icon(Icons.refresh_rounded),
+            leading: const Icon(Icons.refresh_outlined),
             title: const Text('Проверить сейчас'),
             subtitle: const Text('Не ждём — ищем обновление прямо сейчас'),
-            trailing: const Icon(Icons.chevron_right_rounded),
+            trailing: const Icon(Icons.chevron_right_outlined),
             onTap: () async {
               await ref.read(autoUpdateStateProvider.notifier).forceCheck();
               if (!context.mounted) return;
@@ -148,7 +148,7 @@ class GeneralPage extends HookConsumerWidget {
           ),
           // v0.1.38: раздел обновления прокси-каналов (Marzban subscription)
           ListTile(
-            leading: const Icon(Icons.swap_horiz_rounded),
+            leading: const Icon(Icons.swap_horiz_outlined),
             title: const Text('Как обновлять прокси-каналы'),
             subtitle: Text(_profileRefreshModeLabel(ref.watch(Preferences.profileRefreshMode))),
             trailing: DropdownButton<int>(
@@ -168,7 +168,7 @@ class GeneralPage extends HookConsumerWidget {
           ),
           if (ref.watch(Preferences.profileRefreshMode) == 0)
             ListTile(
-              leading: const Icon(Icons.schedule_rounded),
+              leading: const Icon(Icons.schedule_outlined),
               title: const Text('Когда обновлять каналы'),
               subtitle: Text(_profileRefreshHourLabel(ref.watch(Preferences.profileRefreshHour))),
               trailing: DropdownButton<int>(
@@ -195,10 +195,10 @@ class GeneralPage extends HookConsumerWidget {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.cloud_download_rounded),
+                : const Icon(Icons.cloud_download_outlined),
             title: const Text('Обновить прокси сейчас'),
             subtitle: const Text('Скачать свежий список серверов'),
-            trailing: const Icon(Icons.chevron_right_rounded),
+            trailing: const Icon(Icons.chevron_right_outlined),
             enabled: !ref.watch(autoProfileRefreshProvider).isRefreshing,
             onTap: () async {
               await ref.read(autoProfileRefreshProvider.notifier).refreshNow();
@@ -221,7 +221,7 @@ class GeneralPage extends HookConsumerWidget {
           if (kDebugMode)
             SwitchListTile.adaptive(
               title: Text(t.pages.settings.general.debugMode),
-              secondary: const Icon(Icons.bug_report_rounded),
+              secondary: const Icon(Icons.bug_report_outlined),
               value: ref.watch(debugModeNotifierProvider),
               onChanged: (value) async {
                 if (value)
@@ -236,19 +236,19 @@ class GeneralPage extends HookConsumerWidget {
             preferences: ref.watch(ConfigOptions.logLevel.notifier),
             choices: LogLevel.choices,
             title: t.pages.settings.general.logLevel,
-            icon: Icons.description_rounded,
+            icon: Icons.description_outlined,
             presentChoice: (value) => value.name.toUpperCase(),
           ),
           ValuePreferenceWidget(
             value: ref.watch(ConfigOptions.connectionTestUrl),
             preferences: ref.watch(ConfigOptions.connectionTestUrl.notifier),
             title: t.pages.settings.general.connectionTestUrl,
-            icon: Icons.link_rounded,
+            icon: Icons.link_outlined,
           ),
           ListTile(
             title: Text(t.pages.settings.general.urlTestInterval),
             subtitle: Text(ref.watch(ConfigOptions.urlTestInterval).toApproximateTime(isRelativeToNow: false)),
-            leading: const Icon(Icons.timer_rounded),
+            leading: const Icon(Icons.timer_outlined),
             onTap: () async => await ref
                 .read(dialogNotifierProvider.notifier)
                 .showSettingSlider(
@@ -269,7 +269,7 @@ class GeneralPage extends HookConsumerWidget {
             value: ref.watch(ConfigOptions.clashApiPort),
             preferences: ref.watch(ConfigOptions.clashApiPort.notifier),
             title: t.pages.settings.general.clashApiPort,
-            icon: Icons.api_rounded,
+            icon: Icons.api_outlined,
             validateInput: isPort,
             digitsOnly: true,
             inputToValue: int.tryParse,
@@ -277,7 +277,7 @@ class GeneralPage extends HookConsumerWidget {
           SwitchListTile.adaptive(
             title: Text(t.pages.settings.general.useXrayCoreWhenPossible),
             subtitle: Text(t.pages.settings.general.useXrayCoreWhenPossibleMsg),
-            secondary: const Icon(Icons.extension_rounded),
+            secondary: const Icon(Icons.extension_outlined),
             value: ref.watch(ConfigOptions.useXrayCoreWhenPossible),
             onChanged: ref.read(ConfigOptions.useXrayCoreWhenPossible.notifier).update,
           ),

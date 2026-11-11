@@ -108,11 +108,11 @@ class MyAdaptiveLayout extends HookConsumerWidget {
   // v0.1.22: домохозяйке `power` = «выключение» (confusing когда попадает на Home).
   // Заменил на `home_rounded`. «Логи» переименованы в «Журнал» через i18n.
   List<ShellRouteAction> _actions(Translations t, bool showProfilesAction, bool isMobileBreakpoint) => [
-    ShellRouteAction(Icons.home_rounded, t.pages.home.title),
-    if (showProfilesAction && !isMobileBreakpoint) ShellRouteAction(Icons.key_rounded, t.pages.profiles.title),
-    ShellRouteAction(Icons.settings_rounded, t.pages.settings.title),
-    if (!isMobileBreakpoint) ShellRouteAction(Icons.article_rounded, t.pages.logs.title),
-    if (!isMobileBreakpoint) ShellRouteAction(Icons.info_rounded, t.pages.about.title),
+    ShellRouteAction(Icons.home_outlined, t.pages.home.title),
+    if (showProfilesAction && !isMobileBreakpoint) ShellRouteAction(Icons.key_outlined, t.pages.profiles.title),
+    ShellRouteAction(Icons.settings_outlined, t.pages.settings.title),
+    if (!isMobileBreakpoint) ShellRouteAction(Icons.article_outlined, t.pages.logs.title),
+    if (!isMobileBreakpoint) ShellRouteAction(Icons.info_outlined, t.pages.about.title),
   ];
 
   // v0.1.28: badge (красная точка) на последнем pane (О программе) когда

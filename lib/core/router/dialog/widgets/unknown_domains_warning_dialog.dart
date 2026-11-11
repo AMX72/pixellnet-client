@@ -15,7 +15,7 @@ class UnknownDomainsWarningDialog extends HookConsumerWidget {
     return AlertDialog(
       title: Row(
         children: [
-          const Icon(Icons.warning_rounded, color: Colors.orange),
+          const Icon(Icons.warning_outlined, color: Colors.orange),
           const Gap(8),
           Text(t.dialogs.unknownDomainsWarning.title),
         ],

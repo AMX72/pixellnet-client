@@ -211,7 +211,7 @@ class HomePage extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Icons.cloud_sync_rounded, size: 36),
+            const Icon(Icons.cloud_sync_outlined, size: 36),
             const SizedBox(height: 12),
             const Text(
               'Обновить список каналов?',
@@ -375,7 +375,7 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.download_rounded,
+                          Icon(Icons.download_outlined,
                               size: 14, color: theme.colorScheme.onSurfaceVariant),
                           const Gap(4),
                           Text('Скачивание за минуту',
@@ -387,7 +387,7 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
                       const Gap(8),
                       Row(
                         children: [
-                          Icon(Icons.upload_rounded,
+                          Icon(Icons.upload_outlined,
                               size: 14, color: theme.colorScheme.onSurfaceVariant),
                           const Gap(4),
                           Text('Загрузка за минуту',
@@ -423,7 +423,7 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
                 ],
                 const Gap(8),
                 FilledButton.icon(
-                  icon: const Icon(Icons.copy_rounded, size: 18),
+                  icon: const Icon(Icons.copy_outlined, size: 18),
                   label: const Text('Скопировать для поддержки'),
                   onPressed: () async {
                     final text = rows.map((r) => '${r.$1}: ${r.$2}').join('\n');
@@ -925,7 +925,7 @@ class _UpdateAvailableBanner extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
             child: Row(
               children: [
-                Icon(Icons.system_update_rounded,
+                Icon(Icons.system_update_outlined,
                     color: PixellnetBrand.mochaOnDark, size: 20),
                 const Gap(10),
                 Expanded(
@@ -942,7 +942,7 @@ class _UpdateAvailableBanner extends ConsumerWidget {
                         color: PixellnetBrand.mochaOnDark,
                         fontWeight: FontWeight.w700)),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, size: 18),
+                  icon: const Icon(Icons.close_outlined, size: 18),
                   color: PixellnetBrand.textSecondary,
                   tooltip: 'Скрыть на 3 дня',
                   onPressed: () =>
@@ -999,7 +999,7 @@ class _PostUpdateBanner extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
             child: Row(
               children: [
-                Icon(Icons.check_circle_rounded, color: PixellnetBrand.olive, size: 20),
+                Icon(Icons.check_circle_outlined, color: PixellnetBrand.olive, size: 20),
                 const Gap(10),
                 Expanded(
                   child: Text(
@@ -1015,7 +1015,7 @@ class _PostUpdateBanner extends ConsumerWidget {
                         color: PixellnetBrand.olive, fontWeight: FontWeight.w700)),
                 const Gap(4),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, size: 18),
+                  icon: const Icon(Icons.close_outlined, size: 18),
                   color: PixellnetBrand.textSecondary,
                   tooltip: 'Скрыть',
                   onPressed: () async {
@@ -1094,7 +1094,7 @@ class _VpnPermissionBanner extends ConsumerWidget {
           child: Row(
             children: [
               Icon(
-                Icons.vpn_key_rounded,
+                Icons.vpn_key_outlined,
                 color: theme.colorScheme.onErrorContainer,
                 size: 20,
               ),
@@ -1135,7 +1135,7 @@ class _VpnPermissionBanner extends ConsumerWidget {
               ),
               const Gap(4),
               IconButton(
-                icon: const Icon(Icons.close_rounded, size: 18),
+                icon: const Icon(Icons.close_outlined, size: 18),
                 color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.7),
                 tooltip: 'Скрыть',
                 onPressed: () =>

@@ -107,7 +107,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(Icons.card_giftcard_rounded, size: 40, color: PixellnetBrand.olive),
+                child: const Icon(Icons.card_giftcard_outlined, size: 40, color: PixellnetBrand.olive),
               ),
             ),
             const SizedBox(height: 16),
@@ -213,7 +213,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
                 backgroundColor: PixellnetBrand.olive,
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              icon: const Icon(Icons.send_rounded, size: 20),
+              icon: const Icon(Icons.send_outlined, size: 20),
               label: const Text('Отправить приглашение', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 10),
@@ -251,7 +251,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
                   );
                 }
               },
-              icon: const Icon(Icons.copy_rounded, size: 18),
+              icon: const Icon(Icons.copy_outlined, size: 18),
               label: const Text('Скопировать ссылку'),
             ),
           ],

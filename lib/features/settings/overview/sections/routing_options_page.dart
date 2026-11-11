@@ -82,7 +82,7 @@ class RoutingOptionsPage extends HookConsumerWidget {
         title: Text(t.pages.settings.routing.title),
         actions: [
           PopupMenuButton(
-            icon: const Icon(Icons.more_vert_rounded),
+            icon: const Icon(Icons.more_vert_outlined),
             itemBuilder: (_) => rules.isEmpty ? menuItems.getRange(0, 2).toList() : menuItems,
           ),
           const Gap(8),
@@ -116,12 +116,12 @@ class RoutingOptionsPage extends HookConsumerWidget {
                 _ExpandableFab(
                   children: [
                     _FabMenuItem(
-                      icon: Icons.rule_rounded,
+                      icon: Icons.rule_outlined,
                       label: t.pages.settings.routing.routeRule.create,
                       onTap: () => context.goNamed('rule', pathParameters: {'orderId': 'new'}),
                     ),
                     _FabMenuItem(
-                      icon: Icons.view_list_rounded,
+                      icon: Icons.view_list_outlined,
                       label: t.pages.settings.routing.predefinedRules.title,
                       onTap: ref.read(bottomSheetsNotifierProvider.notifier).showPredefinedRules,
                     ),
@@ -156,7 +156,7 @@ class RoutingOptionsPage extends HookConsumerWidget {
                                 Text(t.pages.settings.routing.generalOptions.title),
                                 const Gap(4),
                                 Icon(
-                                  showGeneralOptions ? Icons.arrow_drop_down_rounded : Icons.arrow_drop_up_rounded,
+                                  showGeneralOptions ? Icons.arrow_drop_down_outlined : Icons.arrow_drop_up_outlined,
                                   size: 16,
                                 ),
                               ],
@@ -182,7 +182,7 @@ class RoutingOptionsPage extends HookConsumerWidget {
                   choices: Region.values,
                   title: t.pages.settings.routing.generalOptions.region,
                   showFlag: true,
-                  icon: Icons.place_rounded,
+                  icon: Icons.place_outlined,
                   presentChoice: (value) => value.present(t),
                   onChanged: (val) async {
                     await ref.read(ConfigOptions.directDnsAddress.notifier).reset();
@@ -208,7 +208,7 @@ class RoutingOptionsPage extends HookConsumerWidget {
                 if (PlatformUtils.isAndroid)
                   ListTile(
                     title: Text(t.pages.settings.routing.generalOptions.perAppProxy.title),
-                    leading: const Icon(Icons.apps_rounded),
+                    leading: const Icon(Icons.apps_outlined),
                     trailing: Switch(
                       value: perAppProxy,
                       onChanged: (value) async {
@@ -226,7 +226,7 @@ class RoutingOptionsPage extends HookConsumerWidget {
                   ),
                 ChoicePreferenceWidget(
                   title: t.pages.settings.routing.generalOptions.balancerStrategy.title,
-                  icon: Icons.balance_rounded,
+                  icon: Icons.balance_outlined,
                   selected: ref.watch(ConfigOptions.balancerStrategy),
                   preferences: ref.watch(ConfigOptions.balancerStrategy.notifier),
                   choices: BalancerStrategy.values,
@@ -234,7 +234,7 @@ class RoutingOptionsPage extends HookConsumerWidget {
                 ),
                 SwitchListTile.adaptive(
                   title: Text(t.pages.settings.routing.generalOptions.resolveDestination),
-                  secondary: const Icon(Icons.find_replace_rounded),
+                  secondary: const Icon(Icons.find_replace_outlined),
                   value: ref.watch(ConfigOptions.resolveDestination),
                   onChanged: ref.read(ConfigOptions.resolveDestination.notifier).update,
                 ),
@@ -347,7 +347,7 @@ class _ExpandableFabState extends State<_ExpandableFab> with SingleTickerProvide
                       animation: _controller,
                       builder: (context, _) => Transform.rotate(
                         angle: _controller.value * 0.75 * 3.14159,
-                        child: const Icon(Icons.add_rounded),
+                        child: const Icon(Icons.add_outlined),
                       ),
                     ),
                   )
@@ -357,7 +357,7 @@ class _ExpandableFabState extends State<_ExpandableFab> with SingleTickerProvide
                       animation: _controller,
                       builder: (context, _) => Transform.rotate(
                         angle: _controller.value * 0.75 * 3.14159,
-                        child: const Icon(Icons.add_rounded),
+                        child: const Icon(Icons.add_outlined),
                       ),
                     ),
                   ),

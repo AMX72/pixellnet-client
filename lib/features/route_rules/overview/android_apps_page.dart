@@ -45,7 +45,7 @@
 //         title: Text(t.pages.settings.routing.routeRule.androidApps.pageTitle),
 //         actions: [
 //           PopupMenuButton(
-//             icon: const Icon(Icons.more_vert_rounded),
+//             icon: const Icon(Icons.more_vert_outlined),
 //             itemBuilder: (_) => selected.isEmpty ? [menuItems.first] : menuItems,
 //           ),
 //         ],
@@ -109,7 +109,7 @@
 //                   children: [
 //                     Row(
 //                       children: [
-//                         const Icon(size: 16, Icons.warning_rounded, color: Colors.amber),
+//                         const Icon(size: 16, Icons.warning_outlined, color: Colors.amber),
 //                         const Gap(4),
 //                         Text(
 //                           t.pages.settings.routing.routeRule.androidApps.uninstalled,

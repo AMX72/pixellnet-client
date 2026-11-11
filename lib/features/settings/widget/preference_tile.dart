@@ -168,7 +168,7 @@ class BatteryOptimizationWidget extends HookConsumerWidget {
           : ListTile(
               title: Text(t.pages.settings.general.ignoreBatteryOptimizations),
               subtitle: Text(t.pages.settings.general.ignoreBatteryOptimizationsMsg),
-              leading: const Icon(Icons.battery_saver_rounded),
+              leading: const Icon(Icons.battery_saver_outlined),
               onTap: () async {
                 await ref.read(batteryOptimizationNotifierProvider.notifier).requestToIgnore();
               },

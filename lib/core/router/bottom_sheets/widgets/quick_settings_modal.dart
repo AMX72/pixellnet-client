@@ -54,7 +54,7 @@ class QuickSettingsModal extends HookConsumerWidget {
 
             // Карточка 1 — убрать рекламу
             _SettingCard(
-              icon: Icons.block_rounded,
+              icon: Icons.block_outlined,
               iconColor: PixellnetBrand.mocha,
               title: 'Убрать рекламу',
               subtitle: 'Меньше баннеров, сайты грузятся быстрее',
@@ -76,7 +76,7 @@ class QuickSettingsModal extends HookConsumerWidget {
                 Navigator.of(context).pop();
                 context.go('/settings');
               },
-              icon: const Icon(Icons.tune_rounded, size: 18),
+              icon: const Icon(Icons.tune_outlined, size: 18),
               label: const Text('Все настройки'),
             ),
           ],
@@ -180,7 +180,7 @@ class _TrialCard extends HookConsumerWidget {
               color: accent.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(Icons.hourglass_top_rounded, color: accent, size: 22),
+            child: Icon(Icons.hourglass_top_outlined, color: accent, size: 22),
           ),
           const Gap(14),
           Expanded(

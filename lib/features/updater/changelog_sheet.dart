@@ -59,15 +59,15 @@ class ChangelogSheet extends StatelessWidget {
               _fallbackText(theme, rawChangelog)
             else ...[
               if (parsed['new']?.isNotEmpty ?? false) ...[
-                _section(theme, 'Новое', Icons.auto_awesome_rounded, PixellnetBrand.mocha, parsed['new']!),
+                _section(theme, 'Новое', Icons.auto_awesome_outlined, PixellnetBrand.mocha, parsed['new']!),
                 const Gap(16),
               ],
               if (parsed['fixed']?.isNotEmpty ?? false) ...[
-                _section(theme, 'Починили', Icons.build_rounded, PixellnetBrand.olive, parsed['fixed']!),
+                _section(theme, 'Починили', Icons.build_outlined, PixellnetBrand.olive, parsed['fixed']!),
                 const Gap(16),
               ],
               if (parsed['improved']?.isNotEmpty ?? false) ...[
-                _section(theme, 'Стало лучше', Icons.trending_up_rounded, PixellnetBrand.blue, parsed['improved']!),
+                _section(theme, 'Стало лучше', Icons.trending_up_outlined, PixellnetBrand.blue, parsed['improved']!),
                 const Gap(16),
               ],
             ],
@@ -75,7 +75,7 @@ class ChangelogSheet extends StatelessWidget {
             const Gap(4),
             if (showUpdateButton && onUpdatePressed != null)
               FilledButton.icon(
-                icon: const Icon(Icons.system_update_rounded, size: 18),
+                icon: const Icon(Icons.system_update_outlined, size: 18),
                 label: const Text('Обновить'),
                 onPressed: onUpdatePressed,
               )

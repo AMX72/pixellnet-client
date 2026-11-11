@@ -41,7 +41,7 @@ class ChainQuickSettings extends HookConsumerWidget {
                     ],
                   ),
                   const Gap(4),
-                  Icon(Icons.arrow_downward_rounded, size: 20, color: theme.colorScheme.primary),
+                  Icon(Icons.arrow_downward_outlined, size: 20, color: theme.colorScheme.primary),
                   const Gap(4),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -86,7 +86,7 @@ class ChainQuickSettings extends HookConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Gap(4),
-                              Icon(Icons.webhook_rounded, size: 20, color: theme.colorScheme.primary),
+                              Icon(Icons.webhook_outlined, size: 20, color: theme.colorScheme.primary),
                               const Gap(4),
                               Text(
                                 t.pages.settings.chain.title,
@@ -104,7 +104,7 @@ class ChainQuickSettings extends HookConsumerWidget {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Icon(Icons.arrow_forward_rounded, size: 20, color: theme.colorScheme.primary),
+                        child: Icon(Icons.arrow_forward_outlined, size: 20, color: theme.colorScheme.primary),
                       ),
                       Flexible(
                         child: Column(
@@ -141,7 +141,7 @@ class ChainQuickSettings extends HookConsumerWidget {
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Icon(Icons.arrow_forward_rounded, size: 20, color: theme.colorScheme.primary),
+                        child: Icon(Icons.arrow_forward_outlined, size: 20, color: theme.colorScheme.primary),
                       ),
                     ],
                   ),
@@ -156,7 +156,7 @@ class ChainQuickSettings extends HookConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Gap(4),
-                      Icon(Icons.wifi_rounded, size: 20, color: onSurfaceVariant),
+                      Icon(Icons.wifi_outlined, size: 20, color: onSurfaceVariant),
                       const Gap(4),
                       Text(
                         t.pages.settings.chain.levels.filtering.title,
@@ -166,7 +166,7 @@ class ChainQuickSettings extends HookConsumerWidget {
                     ],
                   ),
                   const Gap(4),
-                  Icon(Icons.arrow_upward_rounded, size: 20, color: theme.colorScheme.primary),
+                  Icon(Icons.arrow_upward_outlined, size: 20, color: theme.colorScheme.primary),
                   const Gap(4),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),

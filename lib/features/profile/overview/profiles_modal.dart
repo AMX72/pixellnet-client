@@ -55,12 +55,12 @@ class ProfilesModal extends HookConsumerWidget {
                     children: [
                       FilledButton.icon(
                         label: Text(t.common.sort, maxLines: 1, overflow: TextOverflow.ellipsis),
-                        icon: const Icon(Icons.sort_rounded),
+                        icon: const Icon(Icons.sort_outlined),
                         onPressed: () => ref.read(dialogNotifierProvider.notifier).showSortProfiles(),
                       ),
                       FilledButton.icon(
                         label: Text(t.pages.profiles.updateSubscriptions, maxLines: 1, overflow: TextOverflow.ellipsis),
-                        icon: const Icon(Icons.update_rounded),
+                        icon: const Icon(Icons.update_outlined),
                         onPressed: () => ref.read(foregroundProfilesUpdateNotifierProvider.notifier).trigger(),
                       ),
                     ],

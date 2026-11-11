@@ -33,7 +33,7 @@ class LanSharingPreferenceWidget extends HookConsumerWidget {
     }
 
     return ListTile(
-      leading: const Icon(Icons.share_rounded),
+      leading: const Icon(Icons.share_outlined),
       title: Text(t.pages.settings.inbound.lanSharing),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +58,7 @@ class LanSharingPreferenceWidget extends HookConsumerWidget {
                           .showSuccessToast(t.common.msg.export.clipboard.success);
                     }
                   },
-                  icon: Icon(Icons.link_rounded, color: theme.colorScheme.primary),
+                  icon: Icon(Icons.link_outlined, color: theme.colorScheme.primary),
                   label: Text(
                     t.pages.settings.inbound.copyLink,
                     style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary),
@@ -73,7 +73,7 @@ class LanSharingPreferenceWidget extends HookConsumerWidget {
                       await ref.read(dialogNotifierProvider.notifier).showQrCode(qrLink, message: link);
                     }
                   },
-                  icon: Icon(Icons.qr_code_rounded, color: theme.colorScheme.primary),
+                  icon: Icon(Icons.qr_code_outlined, color: theme.colorScheme.primary),
                   label: Text(
                     t.pages.settings.inbound.qrCode,
                     style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary),

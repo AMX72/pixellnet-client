@@ -85,7 +85,7 @@ class ShareActionSheet extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.link_rounded, size: 18, color: theme.colorScheme.onSurfaceVariant),
+                  Icon(Icons.link_outlined, size: 18, color: theme.colorScheme.onSurfaceVariant),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -116,7 +116,7 @@ class ShareActionSheet extends StatelessWidget {
                 backgroundColor: PixellnetBrand.mocha,
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              icon: const Icon(Icons.send_rounded, size: 20),
+              icon: const Icon(Icons.send_outlined, size: 20),
               label: const Text('Отправить через мессенджер', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 10),
@@ -154,7 +154,7 @@ class ShareActionSheet extends StatelessWidget {
                   );
                 }
               },
-              icon: const Icon(Icons.copy_rounded, size: 18),
+              icon: const Icon(Icons.copy_outlined, size: 18),
               label: const Text('Скопировать ссылку'),
             ),
             const SizedBox(height: 6),

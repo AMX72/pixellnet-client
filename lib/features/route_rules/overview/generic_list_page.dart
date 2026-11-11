@@ -51,11 +51,11 @@ class GenericListPage extends HookConsumerWidget {
         ],
       ),
       floatingActionButton: list.isNotEmpty
-          ? FloatingActionButton(onPressed: addNewValue, child: const Icon(Icons.add_rounded))
+          ? FloatingActionButton(onPressed: addNewValue, child: const Icon(Icons.add_outlined))
           : FloatingActionButton.extended(
               onPressed: addNewValue,
               label: Text(t.pages.settings.routing.routeRule.genericList.addNew),
-              icon: const Icon(Icons.add_rounded),
+              icon: const Icon(Icons.add_outlined),
             ),
       body: ListView.builder(
         itemBuilder: (context, index) => GenericListTile(

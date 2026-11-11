@@ -53,7 +53,7 @@ class ChainModeButton extends HookConsumerWidget {
                   ),
                 ),
                 const Gap(4),
-                Icon(Icons.arrow_drop_down_rounded, size: 16, color: fColor),
+                Icon(Icons.arrow_drop_down_outlined, size: 16, color: fColor),
               ],
             ),
           ),

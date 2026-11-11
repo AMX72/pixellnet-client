@@ -20,7 +20,7 @@ class LocalePrefTile extends ConsumerWidget {
     return ListTile(
       title: Text(t.pages.settings.general.locale),
       subtitle: Text(locale.localeName),
-      leading: const Icon(Icons.translate_rounded),
+      leading: const Icon(Icons.translate_outlined),
       onTap: () async {
         final selectedLocale = await ref
             .read(dialogNotifierProvider.notifier)
@@ -53,7 +53,7 @@ class EnableAnalyticsPrefTile extends ConsumerWidget {
     return SwitchListTile.adaptive(
       title: Text(t.pages.settings.general.enableAnalytics),
       subtitle: Text(t.pages.settings.general.enableAnalyticsMsg, style: Theme.of(context).textTheme.bodySmall),
-      secondary: const Icon(Icons.analytics_rounded),
+      secondary: const Icon(Icons.analytics_outlined),
       value: enabled,
       onChanged: (value) async {
         if (onChanged != null) {
@@ -82,10 +82,10 @@ class ThemeModePrefTile extends ConsumerWidget {
       title: Text(t.pages.settings.general.themeMode),
       subtitle: Text(themeMode.present(t)),
       leading: Icon(switch (ref.watch(themePreferencesProvider)) {
-        AppThemeMode.system => Icons.auto_awesome_rounded,
-        AppThemeMode.light => Icons.light_mode_rounded,
-        AppThemeMode.dark => Icons.dark_mode_rounded,
-        AppThemeMode.black => Icons.contrast_rounded,
+        AppThemeMode.system => Icons.auto_awesome_outlined,
+        AppThemeMode.light => Icons.light_mode_outlined,
+        AppThemeMode.dark => Icons.dark_mode_outlined,
+        AppThemeMode.black => Icons.contrast_outlined,
       }),
       onTap: () async {
         final selectedThemeMode = await ref
@@ -117,7 +117,7 @@ class ClosingPrefTile extends ConsumerWidget {
     return ListTile(
       title: Text(t.pages.settings.general.actionAtClosing),
       subtitle: Text(action.present(t)),
-      leading: const Icon(Icons.logout_rounded),
+      leading: const Icon(Icons.logout_outlined),
       onTap: () async {
         final selectedAction = await ref.read(dialogNotifierProvider.notifier).showActionAtClosing(selected: action);
         if (selectedAction != null) {

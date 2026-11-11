@@ -37,12 +37,12 @@ class ProfilesPage extends HookConsumerWidget {
         actions: [
           IconButton(
             onPressed: () => ref.read(foregroundProfilesUpdateNotifierProvider.notifier).trigger(),
-            icon: const Icon(Icons.update_rounded),
+            icon: const Icon(Icons.update_outlined),
             tooltip: t.pages.profiles.updateSubscriptions,
           ),
           IconButton(
             onPressed: () => ref.read(dialogNotifierProvider.notifier).showSortProfiles(),
-            icon: const Icon(Icons.sort_rounded),
+            icon: const Icon(Icons.sort_outlined),
             tooltip: t.common.sort,
           ),
           const Gap(8),
@@ -51,7 +51,7 @@ class ProfilesPage extends HookConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async => await ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile(),
         label: Text(t.pages.profiles.add),
-        icon: const Icon(Icons.add_rounded),
+        icon: const Icon(Icons.add_outlined),
       ),
       body: asyncProfiles.when(
         data: (data) => ListView(
@@ -103,7 +103,7 @@ class _ChannelsSection extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                 child: Row(
                   children: [
-                    Icon(Icons.public_rounded,
+                    Icon(Icons.public_outlined,
                         color: PixellnetBrand.mocha, size: 18),
                     const Gap(8),
                     Text('Каналы (${group.items.length})',
@@ -188,7 +188,7 @@ class _ChannelTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
-                selected ? Icons.check_rounded : Icons.public_rounded,
+                selected ? Icons.check_outlined : Icons.public_outlined,
                 color: PixellnetBrand.mochaOnDark,
                 size: 16,
               ),
