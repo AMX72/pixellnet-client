@@ -5,6 +5,7 @@ import 'package:dartx/dartx.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -1886,6 +1887,10 @@ class _SettingsSection extends ConsumerWidget {
           label: t.pages.home.language,
           value: langLabel,
           onTap: () => _showLanguageSheet(context, ref),
+        ),
+        _Row(
+          label: 'Приложения в туннеле',
+          onTap: () => context.pushNamed('perAppProxy'),
         ),
         _Row(
           label: t.pages.home.developer,
