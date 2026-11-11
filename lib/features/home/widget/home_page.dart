@@ -525,14 +525,17 @@ class _Row extends StatelessWidget {
                   ),
                 ),
               ),
-            if (trailing != null) ...[
-              const Gap(6),
-              trailing!,
-            ] else if (onTap != null) ...[
-              const Gap(6),
+            // Right gutter is always reserved so every row's value column
+            // ends at the same x coordinate, regardless of whether a chevron
+            // or custom trailing is shown. Width = 6 gap + 18 icon = 24.
+            const Gap(6),
+            if (trailing != null)
+              trailing!
+            else if (onTap != null)
               Icon(Icons.chevron_right_outlined,
-                  size: 18, color: theme.colorScheme.onSurfaceVariant),
-            ],
+                  size: 18, color: theme.colorScheme.onSurfaceVariant)
+            else
+              const SizedBox(width: 18),
           ],
         ),
       ),
@@ -1107,9 +1110,9 @@ class _HeroInlineRow extends StatelessWidget {
     final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 7, 8, 7),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 36),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
         child: Row(
           children: [
             if (label != null)
@@ -1129,8 +1132,9 @@ class _HeroInlineRow extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            const Gap(6),
             Icon(Icons.chevron_right_outlined,
-                size: 16, color: theme.colorScheme.onSurfaceVariant),
+                size: 18, color: theme.colorScheme.onSurfaceVariant),
           ],
         ),
       ),
