@@ -46,7 +46,71 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
     if (Platform.isWindows) {
       return _getWindowsProcesses(hideSystem);
     }
+    if (Platform.isLinux || Platform.isMacOS) {
+      return _getUnixProcesses(hideSystem);
+    }
     return {};
+  }
+
+  /// Scan running processes on Linux/macOS via `ps -A -o comm=`.
+  /// - Linux: returns command name (basename, no args).
+  /// - macOS: returns full executable path — we basename it.
+  /// Deduped by basename, filtered system/kernel noise.
+  Future<Set<AppPackageInfo>> _getUnixProcesses(bool hideSystem) async {
+    const noise = <String>{
+      // Linux kernel threads + core services
+      'init', 'systemd', 'systemd-journal', 'systemd-logind', 'systemd-udevd',
+      'systemd-resolve', 'systemd-timesyn', 'systemd-oomd', 'systemd-networkd',
+      'kthreadd', 'ksoftirqd', 'kworker', 'rcu_sched', 'rcu_tasks_rude_',
+      'migration', 'watchdog', 'cpuhp', 'kcompactd', 'khugepaged', 'kswapd0',
+      'kblockd', 'ata_sff', 'md', 'edac-poller', 'devfreq_wq', 'kdevtmpfs',
+      'khubd', 'kintegrityd', 'kstrp', 'crypto', 'scsi_eh_0',
+      'dbus-daemon', 'dbus-broker', 'udevd', 'rsyslogd', 'cron', 'crond',
+      'sshd', 'avahi-daemon', 'cups-browsed', 'NetworkManager', 'wpa_supplicant',
+      'polkitd', 'accounts-daemon', 'power-profiles-', 'upowerd', 'colord',
+      'bluetoothd', 'ModemManager', 'gdm', 'gdm-session-wor', 'gdm-wayland-ses',
+      'Xorg', 'Xwayland', 'gnome-shell', 'gnome-session-b', 'ibus-daemon',
+      'at-spi-bus-laun', 'at-spi2-registr', 'gvfsd', 'gvfs-udisks2-vo',
+      'tracker-miner-f', 'goa-daemon', 'evolution-calen', 'evolution-addre',
+      // macOS daemons
+      'launchd', 'kernel_task', 'WindowServer', 'loginwindow', 'SystemUIServer',
+      'ControlCenter', 'Dock', 'Finder', 'NotificationCenter', 'Spotlight',
+      'coreaudiod', 'logd', 'mds', 'mds_stores', 'mdworker', 'mdworker_shared',
+      'opendirectoryd', 'blued', 'identityservices', 'cfprefsd',
+      'distnoted', 'trustd', 'nsurlsessiond', 'nsurlstoraged',
+      'syspolicyd', 'tccd', 'secd', 'useractivityd', 'lsd', 'sharingd',
+      'coreduetd', 'contextstored', 'suggestd', 'knowledge-agent',
+      'universalaccessd', 'symptomsd', 'routined', 'remindd', 'callservicesd',
+      'commerce', 'softwareupdated', 'parsec', 'cloudd', 'bird', 'apsd',
+      'assistantd', 'coreremoted', 'bluetoothuserd',
+      // PIXELLNET self
+      'pixellnet', 'PIXELLNET', 'pixellnetagent', 'hiddify',
+    };
+    try {
+      final result = await Process.run('ps', ['-A', '-o', 'comm=']);
+      if (result.exitCode != 0) return {};
+      final lines = (result.stdout as String).split('\n');
+      final processes = <String, AppPackageInfo>{};
+      for (final raw in lines) {
+        final trimmed = raw.trim();
+        if (trimmed.isEmpty) continue;
+        // Skip kernel threads in square brackets: [kworker/0:1-events]
+        if (trimmed.startsWith('[') && trimmed.endsWith(']')) continue;
+        // Basename
+        final name = trimmed.contains('/')
+            ? trimmed.substring(trimmed.lastIndexOf('/') + 1)
+            : trimmed;
+        if (name.isEmpty) continue;
+        if (hideSystem && noise.contains(name)) continue;
+        final key = name.toLowerCase();
+        if (processes.containsKey(key)) continue;
+        processes[key] = AppPackageInfo(packageName: name, name: name, icon: null);
+      }
+      return processes.values.toSet();
+    } catch (e) {
+      loggy.warning('Unix ps failed', e);
+      return {};
+    }
   }
 
   /// Scan running Windows processes via `tasklist /FO CSV /NH`.
