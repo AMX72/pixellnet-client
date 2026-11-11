@@ -24,15 +24,11 @@ enum ServiceMode {
   // из коробки для всех приложений. Требует admin (см. runner.exe.manifest).
   static ServiceMode get defaultMode => tun;
 
-  /// supported service mode based on platform, use this instead of [values] in UI
+  /// supported service mode based on platform, use this instead of [values] in UI.
+  /// v0.1.78: TUN-only everywhere per feedback_service_mode_default_vpn —
+  /// systemProxy breaks Node.js/Docker on Windows, proxy is advanced-user only.
   static List<ServiceMode> get choices {
-    if (Platform.isWindows || Platform.isLinux) {
-      return values;
-    } else if (Platform.isMacOS) {
-      return [proxy, systemProxy, tun];
-    }
-    // mobile
-    return [proxy, tun];
+    return [tun];
   }
 
   // bool get isExperimental => switch (this) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'package:dartx/dartx.dart';
 import 'package:http/http.dart' as http;
@@ -86,7 +87,8 @@ class HomePage extends HookConsumerWidget {
         children: [
           Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 640),
+              // Windows/desktop — compact Mullvad-style 480px; mobile — wider 640.
+              constraints: BoxConstraints(maxWidth: Platform.isWindows || Platform.isLinux || Platform.isMacOS ? 480 : 640),
               child: CustomScrollView(
                 slivers: [
                   const SliverToBoxAdapter(child: _UpdateAvailableBanner()),

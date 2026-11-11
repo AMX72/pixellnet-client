@@ -12,8 +12,10 @@ import 'package:window_manager/window_manager.dart';
 
 part 'window_notifier.g.dart';
 
-const minimumWindowSize = Size(368, 568);
-const defaultWindowSize = Size(868, 668);
+// v0.1.78: dashboard redesign — compact mobile-like window (Mullvad/WireGuard pattern).
+// Min width 640 ensures MyAdaptiveLayout never falls back to bottom-nav on desktop.
+const minimumWindowSize = Size(640, 640);
+const defaultWindowSize = Size(640, 760);
 
 @Riverpod(keepAlive: true)
 class WindowNotifier extends _$WindowNotifier with AppLogger {

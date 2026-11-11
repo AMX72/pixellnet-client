@@ -147,9 +147,11 @@ abstract class Preferences {
 
   static final storeReviewedByUser = PreferencesNotifier.create<bool, bool>("store_reviewed_by_user", false);
 
+  // v0.1.78: default hide-to-tray (вместо модального 'ask'). VPN продолжает
+  // работать в фоне, ярлык остаётся в tray. Поведение Mullvad/WireGuard/Tailscale.
   static final actionAtClose = PreferencesNotifier.create<ActionsAtClosing, String>(
     "action_at_close",
-    ActionsAtClosing.ask,
+    ActionsAtClosing.hide,
     mapFrom: ActionsAtClosing.values.byName,
     mapTo: (value) => value.name,
   );
