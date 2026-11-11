@@ -1051,12 +1051,11 @@ class _TrafficSection extends ConsumerWidget {
     final conn = ref.watch(connectionNotifierProvider).valueOrNull;
     if (conn is! Connected) return const SizedBox.shrink();
 
-    final active = ref.watch(activeProxyNotifierProvider).valueOrNull;
     final stats = ref.watch(statsNotifierProvider).valueOrNull;
     final upSpeed = (stats?.uplink.toInt() ?? 0).toDouble();
     final downSpeed = (stats?.downlink.toInt() ?? 0).toDouble();
-    final totalUp = active?.upload.toInt() ?? 0;
-    final totalDown = active?.download.toInt() ?? 0;
+    final totalUp = stats?.uplinkTotal.toInt() ?? 0;
+    final totalDown = stats?.downlinkTotal.toInt() ?? 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
