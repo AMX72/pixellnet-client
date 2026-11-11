@@ -7,6 +7,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/localization/locale_preferences.dart';
@@ -1156,6 +1158,9 @@ class _SubscriptionSheetBody extends ConsumerWidget {
       return 0;
     });
     final title = profiles.length > 1 ? 'Ключи' : 'Ключ';
+    final activeList = sorted.where((p) => p.active).toList();
+    final active = activeList.isEmpty ? null : activeList.first;
+    final activeIndex = active == null ? 0 : sorted.indexOf(active);
 
     return SafeArea(
       child: Column(
@@ -1163,16 +1168,48 @@ class _SubscriptionSheetBody extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: theme.colorScheme.onSurface,
-              ),
+            padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.content_paste_outlined, size: 20),
+                  tooltip: 'Вставить из буфера',
+                  color: theme.colorScheme.onSurfaceVariant,
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.all(6),
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  onPressed: () async {
+                    final data = await Clipboard.getData('text/plain');
+                    final text = data?.text?.trim();
+                    if (text == null || text.isEmpty) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('В буфере нет ключа')),
+                      );
+                      return;
+                    }
+                    await ref.read(addProfileNotifierProvider.notifier).addClipboard(text);
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Добавлено')),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
+          if (active != null)
+            _ActiveKeyHero(profile: active, displayName: _profileDisplayName(active, activeIndex)),
           Flexible(
             child: SingleChildScrollView(
               child: Column(
@@ -1209,6 +1246,182 @@ class _SubscriptionSheetBody extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _ActiveKeyHero extends StatefulWidget {
+  const _ActiveKeyHero({required this.profile, required this.displayName});
+  final ProfileEntity profile;
+  final String displayName;
+
+  @override
+  State<_ActiveKeyHero> createState() => _ActiveKeyHeroState();
+}
+
+class _ActiveKeyHeroState extends State<_ActiveKeyHero> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final keyOrUrl = widget.profile is RemoteProfileEntity
+        ? (widget.profile as RemoteProfileEntity).url
+        : widget.profile.name;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Активный ключ · ${widget.displayName}',
+            style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+          ),
+          const Gap(6),
+          GestureDetector(
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1F2022),
+                border: Border.all(color: const Color(0xFF2E2F31), width: 1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: SelectableText(
+                keyOrUrl,
+                maxLines: _expanded ? null : 3,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontFamily: 'Consolas',
+                  color: theme.colorScheme.onSurface,
+                  height: 1.3,
+                ),
+              ),
+            ),
+          ),
+          const Gap(10),
+          Row(
+            children: [
+              Expanded(
+                child: _HeroAction(
+                  icon: Icons.copy_outlined,
+                  label: 'Копировать',
+                  onTap: () async {
+                    await Clipboard.setData(ClipboardData(text: keyOrUrl));
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Скопировано'), duration: Duration(seconds: 2)),
+                    );
+                  },
+                ),
+              ),
+              Expanded(
+                child: _HeroAction(
+                  icon: Icons.ios_share_outlined,
+                  label: 'Поделиться',
+                  onTap: () async {
+                    await Share.share(keyOrUrl, subject: 'PIXELLNET · ${widget.displayName}');
+                  },
+                ),
+              ),
+              Expanded(
+                child: _HeroAction(
+                  icon: Icons.qr_code_outlined,
+                  label: 'QR-код',
+                  onTap: () => _showQrSheet(context, keyOrUrl, widget.displayName),
+                ),
+              ),
+            ],
+          ),
+          const Gap(10),
+          Divider(height: 0.5, color: theme.colorScheme.outlineVariant),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroAction extends StatelessWidget {
+  const _HeroAction({required this.icon, required this.label, required this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 20, color: theme.colorScheme.primary),
+            const Gap(4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+void _showQrSheet(BuildContext context, String data, String displayName) {
+  showDialog<void>(
+    context: context,
+    barrierColor: Colors.black87,
+    builder: (ctx) {
+      final theme = Theme.of(ctx);
+      return Dialog(
+        insetPadding: const EdgeInsets.all(24),
+        backgroundColor: Colors.transparent,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: QrImageView(
+                data: data,
+                size: 280,
+                backgroundColor: Colors.white,
+                errorCorrectionLevel: QrErrorCorrectLevel.M,
+              ),
+            ),
+            const Gap(16),
+            Text(
+              displayName,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),
+            ),
+            const Gap(6),
+            const Text(
+              'Сканируйте другим устройством',
+              style: TextStyle(fontSize: 13, color: Colors.white70),
+            ),
+            const Gap(16),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              style: TextButton.styleFrom(foregroundColor: theme.colorScheme.primary),
+              child: const Text('Закрыть'),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }
 
 class _ProfileRow extends ConsumerWidget {
@@ -1292,7 +1505,6 @@ class _ProfileRow extends ConsumerWidget {
               tooltip: '',
               onSelected: (value) => _onAction(context, ref, value),
               itemBuilder: (ctx) => [
-                const PopupMenuItem(value: 'copy', child: Text('Копировать ключ')),
                 if (profile is RemoteProfileEntity)
                   const PopupMenuItem(value: 'refresh', child: Text('Обновить')),
                 PopupMenuItem(
@@ -1310,13 +1522,6 @@ class _ProfileRow extends ConsumerWidget {
 
   Future<void> _onAction(BuildContext context, WidgetRef ref, String action) async {
     switch (action) {
-      case 'copy':
-        await Clipboard.setData(ClipboardData(text: profile.name));
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Скопировано'), duration: Duration(seconds: 2)),
-        );
-        break;
       case 'refresh':
         if (profile is RemoteProfileEntity) {
           await ref
