@@ -71,7 +71,7 @@ class TrialExpiredPage extends ConsumerWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
             onPressed: () => launchUrl(
-              Uri.parse('https://pixellnet.com/pricing'),
+              Uri.parse('https://t.me/pixellnet_bot?start=renew'),
               mode: LaunchMode.externalApplication,
             ),
             child: const Text(

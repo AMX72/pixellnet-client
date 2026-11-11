@@ -91,6 +91,7 @@ class HomePage extends HookConsumerWidget {
                   const SliverToBoxAdapter(child: _PostUpdateBanner()),
                   const SliverToBoxAdapter(child: _StatusHero()),
                   const SliverToBoxAdapter(child: _SubscriptionSection()),
+                  const SliverToBoxAdapter(child: _ExpirySection()),
                   const SliverToBoxAdapter(child: _ConnectionSection()),
                   const SliverToBoxAdapter(child: _TrafficSection()),
                   const SliverToBoxAdapter(child: _SettingsSection()),
@@ -1139,6 +1140,138 @@ class _HeroInlineRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Row «Срок» на главной — сразу под Ключ. Показывает expiry с color-code
+/// по оставшимся дням (>30 muted, 7-30 accent, <7 warning, ≤0 error).
+/// Tap → renew bottom-sheet.
+class _ExpirySection extends ConsumerWidget {
+  const _ExpirySection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final activeProfile = ref.watch(activeProfileProvider).valueOrNull;
+    if (activeProfile is! RemoteProfileEntity) return const SizedBox.shrink();
+    final sub = activeProfile.subInfo;
+    if (sub == null) return const SizedBox.shrink();
+
+    final now = DateTime.now();
+    final daysLeft = sub.expire.difference(now).inDays;
+    final (color, valueText) = _expiryStyle(sub.expire, daysLeft, theme);
+
+    return InkWell(
+      onTap: () => _showRenewSheet(context, activeProfile, sub),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 36),
+        padding: const EdgeInsets.symmetric(horizontal: _kRowPadH, vertical: 7),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Срок',
+                style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
+              ),
+            ),
+            Flexible(
+              child: Text(
+                valueText,
+                textAlign: TextAlign.right,
+                style: TextStyle(fontSize: 14, color: color),
+              ),
+            ),
+            const Gap(6),
+            Icon(Icons.chevron_right_outlined, size: 18, color: theme.colorScheme.onSurfaceVariant),
+          ],
+        ),
+      ),
+    );
+  }
+
+  (Color, String) _expiryStyle(DateTime expire, int daysLeft, ThemeData theme) {
+    final dateText = _ProfileRow._fmtDate(expire);
+    if (daysLeft <= 0) {
+      return (PixellnetBrand.error, 'срок истёк');
+    }
+    final suffix = _daysWord(daysLeft);
+    final text = 'до $dateText · $daysLeft $suffix';
+    // Highlight only when running out (<7 days). Otherwise neutral muted.
+    if (daysLeft < 7) return (PixellnetBrand.warning, text);
+    return (theme.colorScheme.onSurfaceVariant, text);
+  }
+
+  static String _daysWord(int n) {
+    final mod10 = n % 10;
+    final mod100 = n % 100;
+    if (mod10 == 1 && mod100 != 11) return 'день';
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'дня';
+    return 'дней';
+  }
+}
+
+void _showRenewSheet(BuildContext context, RemoteProfileEntity profile, SubscriptionInfo sub) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (ctx) {
+      final theme = Theme.of(ctx);
+      final daysLeft = sub.expire.difference(DateTime.now()).inDays;
+      final masked = _maskProfile(profile.name);
+      final dateStr = _ProfileRow._fmtDate(sub.expire);
+      final subtitleText = daysLeft <= 0
+          ? 'Ключ $masked · срок истёк'
+          : 'Ключ $masked истекает через $daysLeft ${_ExpirySection._daysWord(daysLeft)} ($dateStr)';
+
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Продление подписки',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface),
+              ),
+              const Gap(8),
+              Text(
+                subtitleText,
+                style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant),
+              ),
+              const Gap(20),
+              SizedBox(
+                height: 48,
+                child: FilledButton.icon(
+                  icon: const Icon(Icons.send_outlined, size: 18),
+                  label: const Text('Продлить в Telegram'),
+                  onPressed: () async {
+                    Navigator.of(ctx).pop();
+                    final uri = Uri.parse('https://t.me/pixellnet_bot?start=renew');
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  },
+                ),
+              ),
+              const Gap(10),
+              Text(
+                'Другие тарифы и способы оплаты — в @pixellnet_bot',
+                style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                textAlign: TextAlign.center,
+              ),
+              const Gap(8),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Отмена'),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 /// Row «Ключ» в основном списке (под кнопкой Подключить).
