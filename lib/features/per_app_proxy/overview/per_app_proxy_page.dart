@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartx/dartx.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -35,11 +37,58 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
   }
 
   Future<Set<AppPackageInfo>> getApps(bool hideSystem) async {
-    if (!PlatformUtils.isAndroid) return {};
-    return (await InstalledApps.getInstalledApps(
-      hideSystem,
-      true,
-    )).map((e) => AppPackageInfo(packageName: e.packageName, name: e.name, icon: e.icon)).toSet();
+    if (PlatformUtils.isAndroid) {
+      return (await InstalledApps.getInstalledApps(
+        hideSystem,
+        true,
+      )).map((e) => AppPackageInfo(packageName: e.packageName, name: e.name, icon: e.icon)).toSet();
+    }
+    if (Platform.isWindows) {
+      return _getWindowsProcesses(hideSystem);
+    }
+    return {};
+  }
+
+  /// Scan running Windows processes via `tasklist /FO CSV /NH`.
+  /// ~100-200ms, run on-demand when the screen opens — not in background.
+  /// Returns unique .exe names (deduped). Icons not supported (would need PE
+  /// resource extraction via FFI — skipped for MVP).
+  Future<Set<AppPackageInfo>> _getWindowsProcesses(bool hideSystem) async {
+    const systemExes = <String>{
+      'system idle process', 'system', 'registry', 'memory compression',
+      'smss.exe', 'csrss.exe', 'wininit.exe', 'winlogon.exe', 'services.exe',
+      'lsass.exe', 'fontdrvhost.exe', 'dwm.exe', 'svchost.exe', 'conhost.exe',
+      'runtimebroker.exe', 'searchhost.exe', 'searchindexer.exe', 'searchprotocolhost.exe',
+      'sihost.exe', 'ctfmon.exe', 'applicationframehost.exe', 'startmenuexperiencehost.exe',
+      'shellexperiencehost.exe', 'taskhostw.exe', 'smartscreen.exe', 'audiodg.exe',
+      'spoolsv.exe', 'wmiprvse.exe', 'backgroundtaskhost.exe', 'backgroundtransferhost.exe',
+      'dllhost.exe', 'wudfhost.exe', 'nissrv.exe', 'msmpeng.exe', 'securityhealthservice.exe',
+      'crashpad_handler.exe', 'vctip.exe', 'vssvc.exe', 'perfhost.exe',
+      // PIXELLNET self:
+      'pixellnet.exe', 'pixellnetagent.exe', 'hiddifycli.exe',
+    };
+    try {
+      final result = await Process.run('tasklist', ['/FO', 'CSV', '/NH']);
+      if (result.exitCode != 0) return {};
+      final lines = (result.stdout as String).split(RegExp(r'\r?\n'));
+      final processes = <String, AppPackageInfo>{};
+      final matcher = RegExp(r'^"([^"]+)"');
+      for (final line in lines) {
+        if (line.trim().isEmpty) continue;
+        final m = matcher.firstMatch(line);
+        if (m == null) continue;
+        final exe = m.group(1)!.trim();
+        final key = exe.toLowerCase();
+        if (hideSystem && systemExes.contains(key)) continue;
+        if (processes.containsKey(key)) continue;
+        final friendly = exe.replaceAll(RegExp(r'\.exe$', caseSensitive: false), '');
+        processes[key] = AppPackageInfo(packageName: exe, name: friendly, icon: null);
+      }
+      return processes.values.toSet();
+    } catch (e) {
+      loggy.warning('Windows tasklist failed', e);
+      return {};
+    }
   }
 
   @override
