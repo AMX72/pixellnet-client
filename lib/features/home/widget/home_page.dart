@@ -8,14 +8,9 @@ import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/localization/translations.dart';
-import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
 import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
-import 'package:hiddify/features/home/widget/connection_button.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
-import 'package:hiddify/features/profile/widget/profile_tile.dart';
-import 'package:hiddify/features/proxy/active/active_proxy_card.dart';
-import 'package:hiddify/features/proxy/active/active_proxy_delay_indicator.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
@@ -24,18 +19,15 @@ import 'package:hiddify/features/profile/notifier/auto_profile_refresh_notifier.
 import 'package:hiddify/features/updater/auto_update_notifier.dart';
 import 'package:hiddify/features/updater/changelog_sheet.dart';
 import 'package:hiddify/features/updater/update_dialog.dart';
-import 'package:hiddify/features/updater/updater_service.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hiddify/features/connection/notifier/vpn_permission_recovery.dart';
 import 'package:hiddify/features/onboarding/welcome_page.dart';
-import 'package:hiddify/features/profile/data/profile_data_providers.dart';
 import 'package:hiddify/features/trial/auto_trial_provider.dart';
 import 'package:hiddify/features/trial/trial_service.dart';
 import 'package:hiddify/features/trial/widget/trial_expired_page.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 
 class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
@@ -44,191 +36,164 @@ class HomePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final t = ref.watch(translationsProvider).requireValue;
-    // final hasAnyProfile = ref.watch(hasAnyProfileProvider);
-    final activeProfile = ref.watch(activeProfileProvider);
-    // v0.1.49: показать welcome page при первом запуске (юзер сам выбирает
-    // trial или ввод ключа — не автозапускать trial молча).
     final showWelcome = ref.watch(showWelcomeProvider).value ?? false;
     final hasProfile = ref.watch(hasAnyProfileProvider).value ?? false;
-    // Zero-config: при первом запуске автоматически получаем trial через
-    // pixellnet-api и импортируем как активный профиль. Только если юзер
-    // явно нажал «Попробовать» в welcome (welcome помечен shown).
     final autoTrial = showWelcome ? const AsyncValue<TrialInfo?>.data(null) : ref.watch(autoTrialProvider);
-    // v0.1.26: активация тихой автопроверки обновлений при первом mount Home.
     ref.watch(autoUpdateStateProvider);
-    // v0.1.38: активация авто-обновления прокси-каналов (Marzban subscription).
     // ignore: unused_local_variable
     final profileRefreshState = ref.watch(autoProfileRefreshProvider);
-    // v0.1.38: bottom sheet «Обновить прокси?» при mode=ask
     ref.listen<AutoProfileRefreshState>(autoProfileRefreshProvider, (prev, next) {
       if (next.pendingAsk && !(prev?.pendingAsk ?? false)) {
         _showProfileRefreshAskSheet(context, ref);
       }
     });
-    // v0.1.34: запуск авто-мониторинга VPN permission. При детекте
-    // MissingVpnPermission провайдер автоматически показывает системный диалог.
     final vpnPermState = ref.watch(vpnPermissionRecoveryProvider);
 
     return Scaffold(
       appBar: AppBar(
-        // leading: (RootScaffold.stateKey.currentState?.hasDrawer ?? false) && showDrawerButton(context)
-        //     ? DrawerButton(
-        //         onPressed: () {
-        //           RootScaffold.stateKey.currentState?.openDrawer();
-        //         },
-        //       )
-        //     : null,
-        // v0.1.19: bimodal spec — чистый AppBar только с логотипом и названием.
-        // Убрано: «+» кнопка (импорт ключа переехал в «Ключи»), version chip.
         title: Row(
           children: [
-            Assets.images.logo.svg(height: 22),
-            const Gap(8),
+            Assets.images.logo.svg(height: 20),
+            const Gap(10),
             Text(t.common.appTitle),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert_outlined),
+            tooltip: 'Меню',
+            onPressed: () => _showOverflowSheet(context, ref),
+          ),
+          const Gap(4),
+        ],
       ),
       body: Stack(
-          alignment: Alignment.center,
-          children: [
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 600, // Set the maximum width here
-                ),
-                child: CustomScrollView(
-                  slivers: [
-                    // switch (activeProfile) {
-                    // AsyncData(value: final profile?) =>
-                    MultiSliver(
-                      children: [
-                        // v0.1.26: banner «Есть свежая версия» — над всем.
-                        // Подхватывается автопроверкой; тап → скачать/установить.
-                        const SliverToBoxAdapter(child: _UpdateAvailableBanner()),
-                        // v0.1.26: banner «Обновлено до X · Что нового →»
-                        // Показывается 3 дня после успешной установки.
-                        const SliverToBoxAdapter(child: _PostUpdateBanner()),
-                        switch (activeProfile) {
-                          AsyncData(value: final profile?) => ProfileTile(
-                            profile: profile,
-                            isMain: true,
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            color: Theme.of(context).colorScheme.surfaceContainer,
-                          ),
-                          _ => const Text(""),
-                        },
-                        const SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [ConnectionButton(), ActiveProxyDelayIndicator()],
-                                ),
-                              ),
-                              ActiveProxyFooter(),
-                              Gap(32),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    // AsyncData() => switch (hasAnyProfile) {
-                    //     AsyncData(value: true) => const EmptyActiveProfileHomeBody(),
-                    //     _ => const EmptyProfilesHomeBody(),
-                    //   },
-                    // AsyncError(:final error) => SliverErrorBodyPlaceholder(t.presentShortError(error)),
-                    // _ => const SliverToBoxAdapter(),
-                    // },
-                  ],
-                ),
+        children: [
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: CustomScrollView(
+                slivers: [
+                  const SliverToBoxAdapter(child: _UpdateAvailableBanner()),
+                  const SliverToBoxAdapter(child: _PostUpdateBanner()),
+                  const SliverToBoxAdapter(child: _StatusHero()),
+                  const SliverToBoxAdapter(child: _ConnectionSection()),
+                  const SliverToBoxAdapter(child: _TrafficSection()),
+                  const SliverToBoxAdapter(child: _SubscriptionSection()),
+                  const SliverToBoxAdapter(child: _SettingsSection()),
+                  const SliverToBoxAdapter(child: _FooterRow()),
+                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                ],
               ),
             ),
-            // v0.1.49: welcome page для fresh install (перекрывает всё до выбора юзера)
-            if (showWelcome && !hasProfile)
-              const Positioned.fill(child: WelcomePage()),
-            // Zero-config auto-trial overlay: показывается пока идёт запрос
-            // на pixellnet-api /api/trial при первом запуске.
-            if (autoTrial.isLoading)
+          ),
+          if (showWelcome && !hasProfile)
+            const Positioned.fill(child: WelcomePage()),
+          if (autoTrial.isLoading)
+            Container(
+              color: theme.scaffoldBackgroundColor.withValues(alpha: 0.9),
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(width: 44, height: 44, child: CircularProgressIndicator(strokeWidth: 2.5)),
+                  const Gap(20),
+                  Text('Готовим пробный период',
+                      style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
+                  const Gap(6),
+                  Text('Одна секунда',
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                ],
+              ),
+            ),
+          if (autoTrial.hasError)
+            if (autoTrial.error is TrialException && (autoTrial.error as TrialException).isExpired)
+              const TrialExpiredPage()
+            else
               Container(
-                color: theme.scaffoldBackgroundColor.withValues(alpha: 0.85),
+                color: theme.scaffoldBackgroundColor.withValues(alpha: 0.95),
                 alignment: Alignment.center,
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(width: 48, height: 48, child: CircularProgressIndicator(strokeWidth: 3)),
-                    const Gap(24),
-                    Text('Готовим ваш пробный период (7 дней)',
+                    Icon(Icons.wifi_off_outlined, size: 44, color: theme.colorScheme.error),
+                    const Gap(16),
+                    Text('Не получилось создать пробный доступ',
                         style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
-                    const Gap(8),
-                    Text('Одна секунда, и всё готово',
-                        style: theme.textTheme.bodySmall
-                            ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                    const Gap(6),
+                    Text(
+                      autoTrial.error is TrialException
+                          ? (autoTrial.error as TrialException).message
+                          : 'Проверьте интернет и попробуйте снова',
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                    const Gap(20),
+                    OutlinedButton(
+                      onPressed: () => ref.invalidate(autoTrialProvider),
+                      child: const Text('Повторить'),
+                    ),
                   ],
                 ),
               ),
-            if (autoTrial.hasError)
-              // v0.1.48: HTTP 410 = trial уже использован → отдельный дружественный экран
-              // с CTA «Ввести ключ» / «Купить подписку». «Повторить» бесполезен для 410.
-              if (autoTrial.error is TrialException && (autoTrial.error as TrialException).isExpired)
-                const TrialExpiredPage()
-              else
-                Container(
-                  color: theme.scaffoldBackgroundColor.withValues(alpha: 0.9),
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.wifi_off_rounded, size: 48, color: theme.colorScheme.error),
-                      const Gap(16),
-                      Text('Не получилось создать пробный доступ',
-                          style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
-                      const Gap(8),
-                      Text(
-                        autoTrial.error is TrialException
-                            ? (autoTrial.error as TrialException).message
-                            : 'Проверьте интернет и попробуйте снова',
-                        style: theme.textTheme.bodySmall
-                            ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                        textAlign: TextAlign.center,
-                      ),
-                      const Gap(24),
-                      FilledButton.icon(
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('Повторить'),
-                        onPressed: () => ref.invalidate(autoTrialProvider),
-                      ),
-                    ],
-                  ),
-                ),
-            // v0.1.34: VPN permission recovery banner.
-            // Показывается когда sing-box упал с "permission denied":
-            //   - requesting: системный диалог уже открыт (авто), показываем spinner
-            //   - needsPermission: юзер закрыл диалог, нужна ручная кнопка
-            if (vpnPermState != VpnPermissionState.ok)
-              Positioned(
-                left: 16,
-                right: 16,
-                top: 8,
-                child: _VpnPermissionBanner(state: vpnPermState),
+          if (vpnPermState != VpnPermissionState.ok)
+            Positioned(
+              left: 16,
+              right: 16,
+              top: 8,
+              child: _VpnPermissionBanner(state: vpnPermState),
+            ),
+        ],
+      ),
+    );
+  }
+
+  static void _showOverflowSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.show_chart_outlined, size: 20),
+                title: const Text('Диагностика'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  // TODO: route to diagnostics screen
+                },
               ),
-            // v0.1.19: bimodal spec — тонкий info-strip внизу для IT-юзеров.
-            // 11sp Mono muted — домохозяйке не мешает (как EXIF под фото),
-            // IT-юзер сразу видит нужное: страна, ping, protocol, трафик.
-            // Тап → та же логика что server card (открывает детали).
-            if (ref.watch(hasAnyProfileProvider).value ?? false)
-              const Positioned(
-                left: 16,
-                right: 16,
-                bottom: 8,
-                child: _InfoStrip(),
+              const Divider(height: 0.5, indent: 20),
+              ListTile(
+                leading: const Icon(Icons.description_outlined, size: 20),
+                title: const Text('Логи'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  // TODO: route to logs
+                },
               ),
-          ],
-        ),
+              const Divider(height: 0.5, indent: 20),
+              ListTile(
+                leading: const Icon(Icons.info_outline, size: 20),
+                title: const Text('О программе'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  // TODO: show about sheet
+                },
+              ),
+              const Gap(8),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -483,6 +448,422 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
     if (b < 1024 * 1024) return '${(b / 1024).toStringAsFixed(1)}KB';
     if (b < 1024 * 1024 * 1024) return '${(b / (1024 * 1024)).toStringAsFixed(1)}MB';
     return '${(b / (1024 * 1024 * 1024)).toStringAsFixed(2)}GB';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// v5 Dashboard sections (Material 3 Dark / AI Studio aesthetic).
+// Table-row layout, hairline dividers, Google Sans Text + mono values.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const double _kRowPadH = 20;
+const double _kSectionGap = 28;
+
+Widget _sectionHeader(BuildContext context, String title) {
+  final theme = Theme.of(context);
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(_kRowPadH, _kSectionGap, _kRowPadH, 10),
+    child: Text(
+      title,
+      style: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+        color: theme.colorScheme.onSurfaceVariant,
+        letterSpacing: 0.3,
+      ),
+    ),
+  );
+}
+
+Widget _hairline(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.only(left: _kRowPadH),
+    child: Divider(
+      height: 0.5,
+      thickness: 0.5,
+      color: Theme.of(context).colorScheme.outlineVariant,
+    ),
+  );
+}
+
+class _Row extends StatelessWidget {
+  const _Row({
+    required this.label,
+    this.value,
+    this.valueWidget,
+    this.mono = false,
+    this.trailing,
+    this.onTap,
+  });
+
+  final String label;
+  final String? value;
+  final Widget? valueWidget;
+  final bool mono;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 52),
+        padding: const EdgeInsets.symmetric(horizontal: _kRowPadH, vertical: 14),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+            if (valueWidget != null)
+              valueWidget!
+            else if (value != null)
+              Flexible(
+                child: Text(
+                  value!,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: mono ? 13 : 14,
+                    fontWeight: FontWeight.w400,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontFamily: mono ? 'JetBrainsMono' : null,
+                    fontFamilyFallback: mono ? const ['Consolas', 'monospace'] : null,
+                    fontFeatures: mono ? const [FontFeature.tabularFigures()] : null,
+                  ),
+                ),
+              ),
+            if (trailing != null) ...[
+              const Gap(6),
+              trailing!,
+            ] else if (onTap != null) ...[
+              const Gap(6),
+              Icon(Icons.chevron_right_outlined,
+                  size: 18, color: theme.colorScheme.onSurfaceVariant),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Hero секция сверху: dot + статус + sublabel + pill-кнопка.
+class _StatusHero extends ConsumerWidget {
+  const _StatusHero();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final conn = ref.watch(connectionNotifierProvider).valueOrNull;
+    final active = ref.watch(activeProxyNotifierProvider).valueOrNull;
+
+    // 4 состояния.
+    Color dotColor;
+    String statusTitle;
+    String subtitle;
+    String buttonLabel;
+    bool buttonFilled;
+    bool animateDot = false;
+
+    if (conn is Connected) {
+      dotColor = PixellnetBrand.success;
+      statusTitle = 'Подключено';
+      final name = active?.tagDisplay.isNotEmpty == true
+          ? active!.tagDisplay
+          : (active?.tag ?? '—');
+      final delay = active?.urlTestDelay ?? 0;
+      final delayPart = delay > 0 && delay < 65000 ? ' · $delay мс' : '';
+      subtitle = '$name$delayPart';
+      buttonLabel = 'Отключить';
+      buttonFilled = false;
+    } else if (conn is Connecting) {
+      dotColor = PixellnetBrand.warning;
+      statusTitle = 'Подключение…';
+      subtitle = 'Устанавливаем соединение';
+      buttonLabel = 'Отмена';
+      buttonFilled = false;
+      animateDot = true;
+    } else {
+      dotColor = theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5);
+      statusTitle = 'Не подключено';
+      subtitle = 'Нажмите чтобы подключиться';
+      buttonLabel = 'Подключить';
+      buttonFilled = true;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(_kRowPadH, 24, _kRowPadH, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              _StatusDot(color: dotColor, animate: animateDot),
+              const Gap(10),
+              Expanded(
+                child: Text(
+                  statusTitle,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w400,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Gap(4),
+          Padding(
+            padding: const EdgeInsets.only(left: 20),
+            child: Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 13,
+                color: theme.colorScheme.onSurfaceVariant,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
+          const Gap(20),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: buttonFilled
+                ? FilledButton(
+                    onPressed: () =>
+                        ref.read(connectionNotifierProvider.notifier).toggleConnection(),
+                    child: Text(buttonLabel),
+                  )
+                : OutlinedButton(
+                    onPressed: () =>
+                        ref.read(connectionNotifierProvider.notifier).toggleConnection(),
+                    child: Text(buttonLabel),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusDot extends StatefulWidget {
+  const _StatusDot({required this.color, this.animate = false});
+  final Color color;
+  final bool animate;
+
+  @override
+  State<_StatusDot> createState() => _StatusDotState();
+}
+
+class _StatusDotState extends State<_StatusDot> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    if (widget.animate) _ctrl.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(covariant _StatusDot old) {
+    super.didUpdateWidget(old);
+    if (widget.animate && !_ctrl.isAnimating) {
+      _ctrl.repeat(reverse: true);
+    } else if (!widget.animate && _ctrl.isAnimating) {
+      _ctrl.stop();
+      _ctrl.value = 1.0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: widget.animate
+          ? Tween<double>(begin: 0.4, end: 1.0).animate(_ctrl)
+          : const AlwaysStoppedAnimation(1.0),
+      child: Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
+      ),
+    );
+  }
+}
+
+class _ConnectionSection extends ConsumerWidget {
+  const _ConnectionSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(activeProxyNotifierProvider).valueOrNull;
+    final serverName = active?.tagDisplay.isNotEmpty == true
+        ? active!.tagDisplay
+        : (active?.tag ?? '—');
+    final delay = active?.urlTestDelay ?? 0;
+    final delayPart = delay > 0 && delay < 65000 ? ' · $delay мс' : '';
+    final protocol = active?.type.isNotEmpty == true ? active!.type : 'Авто';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _sectionHeader(context, 'Соединение'),
+        _hairline(context),
+        _Row(label: 'Сервер', value: '$serverName$delayPart', mono: true, onTap: () {}),
+        _hairline(context),
+        _Row(label: 'Протокол', value: protocol, onTap: () {}),
+        _hairline(context),
+        _Row(label: 'Режим', value: 'VPN (TUN)', onTap: () {}),
+      ],
+    );
+  }
+}
+
+class _TrafficSection extends ConsumerWidget {
+  const _TrafficSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final conn = ref.watch(connectionNotifierProvider).valueOrNull;
+    if (conn is! Connected) return const SizedBox.shrink();
+
+    final active = ref.watch(activeProxyNotifierProvider).valueOrNull;
+    final stats = ref.watch(statsNotifierProvider).valueOrNull;
+    final upSpeed = (stats?.uplink.toInt() ?? 0).toDouble();
+    final downSpeed = (stats?.downlink.toInt() ?? 0).toDouble();
+    final totalUp = active?.upload.toInt() ?? 0;
+    final totalDown = active?.download.toInt() ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _sectionHeader(context, 'Трафик'),
+        _hairline(context),
+        _Row(
+          label: 'Сегодня',
+          value: '↓ ${_bytesCompact(totalDown)}   ↑ ${_bytesCompact(totalUp)}',
+          mono: true,
+        ),
+        _hairline(context),
+        _Row(
+          label: 'Скорость',
+          value: '↓ ${_speedCompact(downSpeed)}   ↑ ${_speedCompact(upSpeed)}',
+          mono: true,
+        ),
+      ],
+    );
+  }
+
+  static String _bytesCompact(int b) {
+    if (b < 1024) return '${b} Б';
+    if (b < 1024 * 1024) return '${(b / 1024).toStringAsFixed(1)} КБ';
+    if (b < 1024 * 1024 * 1024) return '${(b / (1024 * 1024)).toStringAsFixed(1)} МБ';
+    return '${(b / (1024 * 1024 * 1024)).toStringAsFixed(2)} ГБ';
+  }
+
+  static String _speedCompact(double bps) {
+    if (bps < 1024) return '${bps.toInt()} Б/с';
+    if (bps < 1024 * 1024) return '${(bps / 1024).toStringAsFixed(0)} КБ/с';
+    return '${(bps / (1024 * 1024)).toStringAsFixed(1)} МБ/с';
+  }
+}
+
+class _SubscriptionSection extends ConsumerWidget {
+  const _SubscriptionSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final activeProfile = ref.watch(activeProfileProvider).valueOrNull;
+    final rawName = activeProfile?.name ?? '';
+    // Mask: show last 4 characters only.
+    final masked = rawName.length > 4
+        ? '•••• ${rawName.substring(rawName.length - 4)}'
+        : (rawName.isEmpty ? '—' : rawName);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _sectionHeader(context, 'Подписка'),
+        _hairline(context),
+        _Row(
+          label: 'Ключ',
+          value: masked,
+          mono: true,
+          trailing: Icon(Icons.copy_outlined,
+              size: 18, color: theme.colorScheme.onSurfaceVariant),
+          onTap: () async {
+            if (rawName.isNotEmpty) {
+              await Clipboard.setData(ClipboardData(text: rawName));
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Скопировано')),
+              );
+            }
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _SettingsSection extends ConsumerWidget {
+  const _SettingsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _sectionHeader(context, 'Настройки'),
+        _hairline(context),
+        _Row(
+          label: 'Автоподключение при запуске',
+          valueWidget: Switch(value: false, onChanged: (_) {}),
+        ),
+        _hairline(context),
+        _Row(label: 'Язык', value: 'Русский', onTap: () {}),
+        _hairline(context),
+        _Row(label: 'Для разработчика', onTap: () {}),
+      ],
+    );
+  }
+}
+
+class _FooterRow extends ConsumerWidget {
+  const _FooterRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final version = ref.watch(appInfoProvider).valueOrNull?.presentVersion ?? '';
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(_kRowPadH, 32, _kRowPadH, 12),
+      child: Text(
+        'v$version · Поддержка @pixellnet_support',
+        style: TextStyle(
+          fontSize: 12,
+          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+        ),
+      ),
+    );
   }
 }
 

@@ -1,55 +1,69 @@
 import 'package:flutter/material.dart';
 
+/// PIXELLNET brand tokens — Material 3 Dark (AI Studio aesthetic) v5, 2026-11-11.
+///
+/// Dark primary: bg #131314 near-black, surface #1E1F20, accent #8AB4F8
+/// (Google Material Dynamic blue). Table-row layout, hairline dividers,
+/// zero cards with borders. Light secondary (auto-follow system) — AI Studio Light.
 abstract class PixellnetBrand {
   static const String appName = 'PIXELLNET';
   static const String appTagline = 'Стабильное соединение в один клик';
   static const String homepage = 'https://pixellnet.com';
   static const String supportEmail = 'support@pixellnet.com';
 
-  // ─── iOS Settings palette (v4, 2026-11-11) ───
-  // Переход с warm-charcoal/mocha на системные iOS-цвета. Референс — Settings.app
-  // на iOS 17: #F2F2F7 grouped bg, #FFF card, #007AFF tint, #8E8E93 secondary text.
-  // В dark — #000 bg, #1C1C1E card, #0A84FF tint, #AEAEB2 secondary. Контрасты AA.
+  // ─── Dark palette (primary) ───
+  static const Color bgScaffold = Color(0xFF131314);
+  static const Color bgSurface = Color(0xFF1E1F20);
+  static const Color bgElevated = Color(0xFF2A2B2D);
 
-  // Backgrounds — grouped-table style (один из двух фонов по iOS-стандарту)
-  static const Color bgLight = Color(0xFFF2F2F7);         // iOS systemGroupedBackground
-  static const Color bgDark = Color(0xFF000000);          // iOS systemGroupedBackground dark
-  static const Color surfaceLight = Color(0xFFFFFFFF);    // iOS secondarySystemGroupedBackground
-  static const Color surface = Color(0xFF1C1C1E);         // iOS secondarySystemGroupedBackground dark
-  static const Color surfaceElevated = Color(0xFF2C2C2E); // iOS tertiarySystemGroupedBackground dark
-  static const Color surfaceHover = Color(0xFF3A3A3C);    // tap feedback dark
+  static const Color textPrimary = Color(0xFFE3E3E3);
+  static const Color textSecondary = Color(0xFF9AA0A6);
+  static const Color textMuted = Color(0xFF737377);
 
-  // Tint (accent) — iOS system blue
-  static const Color tintLight = Color(0xFF007AFF);
-  static const Color tintDark = Color(0xFF0A84FF);
+  static const Color accent = Color(0xFF8AB4F8);
+  static const Color accentHover = Color(0xFFA8C7FA);
+  static const Color accentBg = Color(0x1F8AB4F8); // 12% alpha chip bg
 
-  // Semantic (iOS system colors)
-  static const Color amberLight = Color(0xFFFF9500);      // iOS systemOrange
-  static const Color amberDark = Color(0xFFFF9F0A);
-  static const Color greenLight = Color(0xFF34C759);      // iOS systemGreen — connected
-  static const Color greenDark = Color(0xFF30D158);
-  static const Color redLight = Color(0xFFFF3B30);        // iOS systemRed — error
-  static const Color redDark = Color(0xFFFF453A);
+  static const Color success = Color(0xFF81C995);
+  static const Color warning = Color(0xFFFDD663);
+  static const Color error = Color(0xFFF28B82);
 
-  // Text
-  static const Color textPrimary = Color(0xFFFFFFFF);     // dark mode primary (contrast 21:1 on #000)
-  static const Color textPrimaryLight = Color(0xFF000000);
-  static const Color textSecondary = Color(0xFFAEAEB2);   // iOS secondaryLabel dark
-  static const Color textSecondaryLight = Color(0xFF8E8E93); // iOS secondaryLabel
-  static const Color textMuted = Color(0xFF8E8E93);       // iOS tertiaryLabel ~
-  static const Color separatorLight = Color(0xFFC6C6C8);  // iOS separator
-  static const Color separatorDark = Color(0xFF38383A);
+  static const Color dividerHairline = Color(0x14FFFFFF); // ~8% white
+  static const Color dividerStrong = Color(0xFF3C4043);
+
+  // ─── Light palette (secondary, auto-follow system) — AI Studio Light ───
+  static const Color bgScaffoldLight = Color(0xFFFFFFFF);
+  static const Color bgSurfaceLight = Color(0xFFF8F9FA);
+  static const Color bgElevatedLight = Color(0xFFF1F3F4);
+
+  static const Color textPrimaryLight = Color(0xFF202124);
+  static const Color textSecondaryLight = Color(0xFF5F6368);
+  static const Color textMutedLight = Color(0xFF80868B);
+
+  static const Color accentLight = Color(0xFF1A73E8);
+  static const Color accentHoverLight = Color(0xFF1765CC);
+  static const Color accentBgLight = Color(0xFFE8F0FE);
+
+  static const Color successLight = Color(0xFF1E8E3E);
+  static const Color warningLight = Color(0xFFB06000);
+  static const Color errorLight = Color(0xFFC5221F);
+
+  static const Color dividerHairlineLight = Color(0xFFE8EAED);
+  static const Color dividerStrongLight = Color(0xFFDADCE0);
 
   // ─── Backward-compat aliases (чтоб старый код не ломался) ───
-  static const Color mocha = tintDark;                    // primary action
-  static const Color mochaOnDark = tintDark;
-  static const Color mochaDark = tintLight;               // pressed state → light tint
-  static const Color amber = amberDark;                   // connecting/trial
-  static const Color olive = greenDark;                   // success/connected
-  static const Color coral = redDark;                     // error
-  static const Color coralOnDark = redDark;
-  static const Color blue = tintDark;                     // info/links
-  static const Color primary = tintDark;
-  static const Color accent = tintDark;
+  static const Color mocha = accent;
+  static const Color mochaOnDark = accent;
+  static const Color mochaDark = accentHover;
+  static const Color amber = warning;
+  static const Color olive = success;
+  static const Color coral = error;
+  static const Color coralOnDark = error;
+  static const Color blue = accent;
+  static const Color primary = accent;
+  static const Color bgDark = bgScaffold;
+  static const Color surface = bgSurface;
+  static const Color surfaceElevated = bgElevated;
+  static const Color surfaceHover = bgElevated;
   static const Color textOnDark = textPrimary;
 }
