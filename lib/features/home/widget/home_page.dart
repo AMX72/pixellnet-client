@@ -14,8 +14,12 @@ import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/gen/translations.g.dart' show AppLocale;
 import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
+import 'package:hiddify/features/settings/data/config_option_repository.dart';
+import 'package:hiddify/singbox/model/singbox_config_enum.dart';
+import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
+import 'package:hiddify/features/proxy/overview/proxies_overview_notifier.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
 import 'package:hiddify/features/home/widget/ping_graph.dart';
@@ -698,6 +702,8 @@ class _ConnectionSection extends ConsumerWidget {
     final delay = active?.urlTestDelay ?? 0;
     final delayPart = delay > 0 && delay < 65000 ? ' · $delay мс' : '';
     final protocol = active?.type.isNotEmpty == true ? active!.type : 'Auto';
+    final mode = ref.watch(ConfigOptions.serviceMode);
+    final modeLabel = _serviceModeLabel(mode);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -707,20 +713,258 @@ class _ConnectionSection extends ConsumerWidget {
           label: t.pages.home.server,
           value: '$serverName$delayPart',
           mono: true,
-          onTap: () => _showPlaceholderSheet(context, t.pages.home.server, t.pages.home.serverSoon),
+          onTap: () => _showServerSheet(context, ref),
         ),
         _Row(
           label: t.pages.home.protocol,
           value: protocol,
-          onTap: () => _showPlaceholderSheet(context, t.pages.home.protocol, t.pages.home.protocolSoon),
+          onTap: () => _showPlaceholderSheet(context, t.pages.home.protocol,
+              'Протокол определяется автоматически для каждого сервера. Для смены — выберите другой сервер выше.'),
         ),
         _Row(
           label: t.pages.home.mode,
-          value: t.pages.home.vpnTun,
-          onTap: () => _showPlaceholderSheet(context, t.pages.home.mode, t.pages.home.modeSoon),
+          value: modeLabel,
+          onTap: () => _showModeSheet(context, ref),
         ),
       ],
     );
+  }
+}
+
+String _serviceModeLabel(ServiceMode m) {
+  switch (m) {
+    case ServiceMode.tun: return 'VPN (TUN)';
+    case ServiceMode.systemProxy: return 'Системный прокси';
+    case ServiceMode.proxy: return 'Прокси-порт';
+  }
+}
+
+void _showModeSheet(BuildContext context, WidgetRef ref) {
+  final current = ref.read(ConfigOptions.serviceMode);
+  final choices = ServiceMode.choices;
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (ctx) {
+      final theme = Theme.of(ctx);
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Text(
+                'Режим работы',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+            for (final m in choices)
+              InkWell(
+                onTap: () async {
+                  Navigator.of(ctx).pop();
+                  if (m != current) {
+                    await ref.read(ConfigOptions.serviceMode.notifier).update(m);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _serviceModeLabel(m),
+                              style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
+                            ),
+                            if (m == ServiceMode.tun)
+                              Text('Рекомендуется — работает со всеми приложениями',
+                                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
+                            if (m == ServiceMode.systemProxy)
+                              Text('Только HTTP/HTTPS, ломает Node.js и Docker',
+                                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
+                            if (m == ServiceMode.proxy)
+                              Text('Для продвинутых — SOCKS5 порт',
+                                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
+                          ],
+                        ),
+                      ),
+                      if (m == current)
+                        Icon(Icons.check_outlined, size: 18, color: theme.colorScheme.primary),
+                    ],
+                  ),
+                ),
+              ),
+            const Gap(8),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+void _showServerSheet(BuildContext context, WidgetRef ref) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    constraints: BoxConstraints(
+      maxHeight: MediaQuery.of(context).size.height * 0.75,
+    ),
+    builder: (ctx) {
+      return const _ServerPickerBody();
+    },
+  );
+}
+
+class _ServerPickerBody extends ConsumerWidget {
+  const _ServerPickerBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final proxies = ref.watch(proxiesOverviewNotifierProvider);
+
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Text(
+              'Выбор сервера',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ),
+          Flexible(
+            child: switch (proxies) {
+              AsyncData(value: final group?) => _ServerList(group: group),
+              AsyncData() => _ServerEmpty(msg: 'Нет серверов — добавьте ключ подписки.'),
+              AsyncError(:final error) => _ServerEmpty(
+                  msg: error.toString().contains('ServiceNotRunning')
+                      ? 'Подключитесь, чтобы увидеть список серверов'
+                      : 'Ошибка загрузки: $error',
+                ),
+              _ => const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                ),
+            },
+          ),
+          const Gap(8),
+        ],
+      ),
+    );
+  }
+}
+
+class _ServerEmpty extends StatelessWidget {
+  const _ServerEmpty({required this.msg});
+  final String msg;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+      child: Text(
+        msg,
+        style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+      ),
+    );
+  }
+}
+
+class _ServerList extends ConsumerWidget {
+  const _ServerList({required this.group});
+  final OutboundGroup group;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final items = group.items;
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final item in items)
+            InkWell(
+              onTap: () async {
+                Navigator.of(context).pop();
+                if (item.tag != group.selected) {
+                  await ref
+                      .read(proxiesOverviewNotifierProvider.notifier)
+                      .changeProxy(group.tag, item.tag);
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.tagDisplay.isNotEmpty ? item.tagDisplay : item.tag,
+                            style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
+                          ),
+                          if (item.type.isNotEmpty)
+                            Text(item.type,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                )),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      item.urlTestDelay > 0 && item.urlTestDelay < 65000
+                          ? '${item.urlTestDelay} мс'
+                          : '—',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontFamily: 'Consolas',
+                        color: _pingColor(item.urlTestDelay, theme),
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                    const Gap(10),
+                    if (item.tag == group.selected)
+                      Icon(Icons.check_outlined, size: 18, color: theme.colorScheme.primary)
+                    else
+                      const SizedBox(width: 18),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Color _pingColor(int delayMs, ThemeData theme) {
+    if (delayMs <= 0 || delayMs >= 65000) return theme.colorScheme.onSurfaceVariant;
+    if (delayMs < 80) return PixellnetBrand.success;
+    if (delayMs < 250) return theme.colorScheme.onSurface;
+    return PixellnetBrand.warning;
   }
 }
 
@@ -851,13 +1095,23 @@ class _SettingsSection extends ConsumerWidget {
     final t = ref.watch(translationsProvider).requireValue;
     final locale = ref.watch(localePreferencesProvider);
     final langLabel = _localeLabel(locale);
+    final autoStart = ref.watch(autoStartNotifierProvider).valueOrNull ?? false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 10),
         _Row(
           label: t.pages.home.autoConnect,
-          valueWidget: Switch(value: false, onChanged: (_) {}),
+          valueWidget: Switch(
+            value: autoStart,
+            onChanged: (v) async {
+              if (v) {
+                await ref.read(autoStartNotifierProvider.notifier).enable();
+              } else {
+                await ref.read(autoStartNotifierProvider.notifier).disable();
+              }
+            },
+          ),
         ),
         _Row(
           label: t.pages.home.language,
