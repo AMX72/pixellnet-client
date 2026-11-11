@@ -457,12 +457,12 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const double _kRowPadH = 20;
-const double _kSectionGap = 28;
+const double _kSectionGap = 18;
 
 Widget _sectionHeader(BuildContext context, String title) {
   final theme = Theme.of(context);
   return Padding(
-    padding: const EdgeInsets.fromLTRB(_kRowPadH, _kSectionGap, _kRowPadH, 10),
+    padding: const EdgeInsets.fromLTRB(_kRowPadH, _kSectionGap, _kRowPadH, 4),
     child: Text(
       title,
       style: TextStyle(
@@ -509,8 +509,8 @@ class _Row extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        constraints: const BoxConstraints(minHeight: 52),
-        padding: const EdgeInsets.symmetric(horizontal: _kRowPadH, vertical: 14),
+        constraints: const BoxConstraints(minHeight: 42),
+        padding: const EdgeInsets.symmetric(horizontal: _kRowPadH, vertical: 9),
         child: Row(
           children: [
             Expanded(
@@ -600,7 +600,7 @@ class _StatusHero extends ConsumerWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(_kRowPadH, 24, _kRowPadH, 20),
+      padding: const EdgeInsets.fromLTRB(_kRowPadH, 16, _kRowPadH, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -612,7 +612,7 @@ class _StatusHero extends ConsumerWidget {
                 child: Text(
                   statusTitle,
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 20,
                     fontWeight: FontWeight.w400,
                     color: theme.colorScheme.onSurface,
                   ),
@@ -620,7 +620,7 @@ class _StatusHero extends ConsumerWidget {
               ),
             ],
           ),
-          const Gap(4),
+          const Gap(2),
           Padding(
             padding: const EdgeInsets.only(left: 20),
             child: Text(
@@ -632,10 +632,10 @@ class _StatusHero extends ConsumerWidget {
               ),
             ),
           ),
-          const Gap(20),
+          const Gap(14),
           SizedBox(
             width: double.infinity,
-            height: 44,
+            height: 42,
             child: buttonFilled
                 ? FilledButton(
                     onPressed: () =>
@@ -727,9 +727,7 @@ class _ConnectionSection extends ConsumerWidget {
         _sectionHeader(context, 'Соединение'),
         _hairline(context),
         _Row(label: 'Сервер', value: '$serverName$delayPart', mono: true, onTap: () {}),
-        _hairline(context),
         _Row(label: 'Протокол', value: protocol, onTap: () {}),
-        _hairline(context),
         _Row(label: 'Режим', value: 'VPN (TUN)', onTap: () {}),
       ],
     );
@@ -761,7 +759,6 @@ class _TrafficSection extends ConsumerWidget {
           value: '↓ ${_bytesCompact(totalDown)}   ↑ ${_bytesCompact(totalUp)}',
           mono: true,
         ),
-        _hairline(context),
         _Row(
           label: 'Скорость',
           value: '↓ ${_speedCompact(downSpeed)}   ↑ ${_speedCompact(upSpeed)}',
@@ -838,9 +835,7 @@ class _SettingsSection extends ConsumerWidget {
           label: 'Автоподключение при запуске',
           valueWidget: Switch(value: false, onChanged: (_) {}),
         ),
-        _hairline(context),
         _Row(label: 'Язык', value: 'Русский', onTap: () {}),
-        _hairline(context),
         _Row(label: 'Для разработчика', onTap: () {}),
       ],
     );
@@ -855,7 +850,7 @@ class _FooterRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final version = ref.watch(appInfoProvider).valueOrNull?.presentVersion ?? '';
     return Padding(
-      padding: const EdgeInsets.fromLTRB(_kRowPadH, 32, _kRowPadH, 12),
+      padding: const EdgeInsets.fromLTRB(_kRowPadH, 20, _kRowPadH, 10),
       child: Text(
         'v$version · Поддержка @pixellnet_support',
         style: TextStyle(
