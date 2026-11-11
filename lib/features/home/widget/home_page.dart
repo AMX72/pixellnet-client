@@ -82,27 +82,13 @@ class HomePage extends HookConsumerWidget {
         // Убрано: «+» кнопка (импорт ключа переехал в «Ключи»), version chip.
         title: Row(
           children: [
-            Assets.images.logo.svg(height: 24),
+            Assets.images.logo.svg(height: 22),
             const Gap(8),
-            Text(t.common.appTitle, style: const TextStyle(letterSpacing: 1.2)),
+            Text(t.common.appTitle),
           ],
         ),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: const AssetImage('assets/images/world_map.png'), // Replace with your image path
-            fit: BoxFit.cover,
-            opacity: 0.09,
-            colorFilter: theme.brightness == Brightness.dark
-                ? ColorFilter.mode(Colors.white.withValues(alpha: .15), BlendMode.srcIn) //
-                : ColorFilter.mode(
-                    Colors.grey.withValues(alpha: 1),
-                    BlendMode.srcATop,
-                  ), // Apply white tint in dark mode
-          ),
-        ),
-        child: Stack(
+      body: Stack(
           alignment: Alignment.center,
           children: [
             Center(
@@ -243,7 +229,6 @@ class HomePage extends HookConsumerWidget {
               ),
           ],
         ),
-      ),
     );
   }
 

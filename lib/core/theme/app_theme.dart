@@ -9,59 +9,68 @@ class AppTheme {
   final AppThemeMode mode;
   final String fontFamily;
 
-  static const _radiusButton = 12.0;
-  static const _radiusCard = 16.0;
+  // iOS corner radii: кнопки 10, карточки/группы 10, chip 6.
+  static const _radiusButton = 10.0;
+  static const _radiusCard = 10.0;
   static const _radiusChip = 6.0;
 
-  // Palette v3 — единая warm/mocha схема для light и dark.
-  // Light theme в MVP не используется, но описан для совместимости.
-  ColorScheme get _v3Dark => const ColorScheme.dark(
-        primary: PixellnetBrand.mocha,
-        onPrimary: Color(0xFF1A1917),
-        primaryContainer: PixellnetBrand.mochaDark,
-        onPrimaryContainer: PixellnetBrand.textPrimary,
-        secondary: PixellnetBrand.amber,
-        onSecondary: Color(0xFF1A1917),
-        tertiary: PixellnetBrand.olive,
-        onTertiary: Color(0xFF1A1917),
-        error: PixellnetBrand.coral,
-        onError: Color(0xFF1A1917),
-        surface: PixellnetBrand.surface,
+  // Palette v4 (2026-11-11) — iOS Settings system colors.
+  ColorScheme get _iosDark => const ColorScheme.dark(
+        primary: PixellnetBrand.tintDark,
+        onPrimary: Colors.white,
+        primaryContainer: PixellnetBrand.tintLight,
+        onPrimaryContainer: Colors.white,
+        secondary: PixellnetBrand.tintDark,
+        onSecondary: Colors.white,
+        tertiary: PixellnetBrand.greenDark,
+        onTertiary: Colors.white,
+        error: PixellnetBrand.redDark,
+        onError: Colors.white,
+        surface: PixellnetBrand.surface,              // card bg #1C1C1E
         onSurface: PixellnetBrand.textPrimary,
-        surfaceContainerLowest: PixellnetBrand.bgDark,
-        surfaceContainerLow: PixellnetBrand.surface,
-        surfaceContainer: PixellnetBrand.surfaceElevated,
+        surfaceContainerLowest: PixellnetBrand.bgDark,    // scaffold #000
+        surfaceContainerLow: PixellnetBrand.bgDark,
+        surfaceContainer: PixellnetBrand.surface,         // table card
         surfaceContainerHigh: PixellnetBrand.surfaceElevated,
         surfaceContainerHighest: PixellnetBrand.surfaceHover,
         onSurfaceVariant: PixellnetBrand.textSecondary,
-        outline: PixellnetBrand.textMuted,
-        outlineVariant: Color(0xFF3C3A36),
+        outline: PixellnetBrand.separatorDark,
+        outlineVariant: PixellnetBrand.separatorDark,
       );
 
-  ColorScheme get _v3Light => const ColorScheme.light(
-        primary: PixellnetBrand.mochaDark,
-        onPrimary: Color(0xFFFFFDF9),
-        secondary: PixellnetBrand.mocha,
-        onSecondary: Color(0xFFFFFDF9),
-        tertiary: PixellnetBrand.olive,
-        error: PixellnetBrand.coral,
-        surface: Color(0xFFF7F3EC),
-        onSurface: Color(0xFF1A1917),
+  ColorScheme get _iosLight => const ColorScheme.light(
+        primary: PixellnetBrand.tintLight,
+        onPrimary: Colors.white,
+        primaryContainer: PixellnetBrand.tintDark,
+        onPrimaryContainer: Colors.white,
+        secondary: PixellnetBrand.tintLight,
+        onSecondary: Colors.white,
+        tertiary: PixellnetBrand.greenLight,
+        onTertiary: Colors.white,
+        error: PixellnetBrand.redLight,
+        onError: Colors.white,
+        surface: PixellnetBrand.surfaceLight,              // card bg #FFFFFF
+        onSurface: PixellnetBrand.textPrimaryLight,
+        surfaceContainerLowest: PixellnetBrand.bgLight,    // scaffold #F2F2F7
+        surfaceContainerLow: PixellnetBrand.bgLight,
+        surfaceContainer: PixellnetBrand.surfaceLight,
+        surfaceContainerHigh: PixellnetBrand.surfaceLight,
+        surfaceContainerHighest: PixellnetBrand.surfaceLight,
+        onSurfaceVariant: PixellnetBrand.textSecondaryLight,
+        outline: PixellnetBrand.separatorLight,
+        outlineVariant: PixellnetBrand.separatorLight,
       );
 
-  ThemeData lightTheme(ColorScheme? _) {
-    return _buildTheme(_v3Light, Brightness.light);
-  }
-
-  ThemeData darkTheme(ColorScheme? _) {
-    return _buildTheme(_v3Dark, Brightness.dark);
-  }
+  ThemeData lightTheme(ColorScheme? _) => _buildTheme(_iosLight, Brightness.light);
+  ThemeData darkTheme(ColorScheme? _) => _buildTheme(_iosDark, Brightness.dark);
 
   ThemeData _buildTheme(ColorScheme scheme, Brightness brightness) {
     final bool isDark = brightness == Brightness.dark;
+    // scaffold = системный grouped-table фон (отличается от карточек).
     final Color scaffoldBg = isDark
         ? (mode.trueBlack ? Colors.black : PixellnetBrand.bgDark)
-        : scheme.surface;
+        : PixellnetBrand.bgLight;
+    final Color cardBg = isDark ? PixellnetBrand.surface : PixellnetBrand.surfaceLight;
 
     final base = ThemeData(
       useMaterial3: true,
@@ -82,15 +91,15 @@ class AppTheme {
         centerTitle: false,
         titleTextStyle: TextStyle(
           fontFamily: fontFamily,
-          fontSize: 18,
+          fontSize: 17,
           fontWeight: FontWeight.w600,
-          letterSpacing: 1.2,
           color: scheme.onSurface,
+          // iOS не использует letterSpacing в tytle, убрано.
         ),
-        iconTheme: IconThemeData(color: scheme.primary, size: 24),
+        iconTheme: IconThemeData(color: scheme.primary, size: 22),
       ),
       cardTheme: CardThemeData(
-        color: isDark ? PixellnetBrand.surfaceElevated : scheme.surface,
+        color: cardBg,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radiusCard)),
@@ -99,59 +108,58 @@ class AppTheme {
         style: FilledButton.styleFrom(
           backgroundColor: scheme.primary,
           foregroundColor: scheme.onPrimary,
-          minimumSize: const Size(0, 48),
+          minimumSize: const Size(0, 50),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radiusButton)),
           textStyle: TextStyle(
             fontFamily: fontFamily,
-            fontSize: 15,
+            fontSize: 17,
             fontWeight: FontWeight.w600,
-            letterSpacing: 0.3,
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.primary,
-          side: BorderSide(color: scheme.primary, width: 1.5),
-          minimumSize: const Size(0, 48),
+          side: BorderSide(color: scheme.primary, width: 1),
+          minimumSize: const Size(0, 50),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radiusButton)),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: scheme.onSurfaceVariant,
-          minimumSize: const Size(0, 40),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          foregroundColor: scheme.primary,
+          minimumSize: const Size(0, 44),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
       ),
       listTileTheme: ListTileThemeData(
         iconColor: scheme.primary,
         textColor: scheme.onSurface,
+        tileColor: cardBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radiusChip)),
       ),
       dividerTheme: DividerThemeData(
         color: scheme.outlineVariant,
-        thickness: 1,
-        space: 1,
+        thickness: 0.5, // iOS hairline (1px @2x)
+        space: 0.5,
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: scheme.secondary.withValues(alpha: 0.18),
+        backgroundColor: scheme.primary.withValues(alpha: 0.15),
         labelStyle: TextStyle(
           fontFamily: fontFamily,
-          color: scheme.secondary,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
+          color: scheme.primary,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radiusChip)),
         side: BorderSide.none,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: scheme.secondary,
+        color: scheme.primary,
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: PixellnetBrand.surfaceElevated,
-        contentTextStyle: TextStyle(fontFamily: fontFamily, color: scheme.onSurface, fontSize: 14),
+        backgroundColor: cardBg,
+        contentTextStyle: TextStyle(fontFamily: fontFamily, color: scheme.onSurface, fontSize: 15),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radiusButton)),
         behavior: SnackBarBehavior.floating,
       ),
