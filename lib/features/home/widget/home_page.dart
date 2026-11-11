@@ -20,6 +20,7 @@ import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
+import 'package:hiddify/features/profile/overview/profiles_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/proxy/overview/proxies_overview_notifier.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
@@ -1093,37 +1094,384 @@ class _SubscriptionSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final activeProfile = ref.watch(activeProfileProvider).valueOrNull;
-    final rawName = activeProfile?.name ?? '';
-    // Mask: show last 4 characters only.
-    final masked = rawName.length > 4
-        ? '•••• ${rawName.substring(rawName.length - 4)}'
-        : (rawName.isEmpty ? '—' : rawName);
-
     final t = ref.watch(translationsProvider).requireValue;
+    final activeProfile = ref.watch(activeProfileProvider).valueOrNull;
+    final all = ref.watch(profilesNotifierProvider).valueOrNull ?? const [];
+    final extraCount = (all.length - 1).clamp(0, 99);
+    final rawName = activeProfile?.name ?? '';
+    final masked = _maskProfile(rawName);
+    final valueText = extraCount > 0 ? '$masked · +$extraCount' : masked;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 10),
         _Row(
           label: t.pages.home.key,
-          value: masked,
+          value: valueText,
           mono: true,
-          trailing: Icon(Icons.copy_outlined,
-              size: 18, color: theme.colorScheme.onSurfaceVariant),
-          onTap: () async {
-            if (rawName.isNotEmpty) {
-              await Clipboard.setData(ClipboardData(text: rawName));
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(t.pages.home.copied)),
-              );
-            }
-          },
+          onTap: () => _showSubscriptionSheet(context, ref),
         ),
       ],
     );
+  }
+}
+
+String _maskProfile(String name) {
+  if (name.isEmpty) return '—';
+  if (name.length <= 4) return name;
+  return '•••• ${name.substring(name.length - 4)}';
+}
+
+String _profileDisplayName(ProfileEntity p, int index) {
+  if (p.name.trim().isNotEmpty && !p.name.startsWith('http')) return p.name;
+  return 'Подписка ${index + 1}';
+}
+
+void _showSubscriptionSheet(BuildContext context, WidgetRef ref) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    constraints: BoxConstraints(
+      maxHeight: MediaQuery.of(context).size.height * 0.75,
+    ),
+    builder: (ctx) => const _SubscriptionSheetBody(),
+  );
+}
+
+class _SubscriptionSheetBody extends ConsumerWidget {
+  const _SubscriptionSheetBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final profiles = ref.watch(profilesNotifierProvider).valueOrNull ?? const [];
+    // Active first, rest by order (upstream sorts by lastUpdate).
+    final sorted = [...profiles]..sort((a, b) {
+      if (a.active && !b.active) return -1;
+      if (!a.active && b.active) return 1;
+      return 0;
+    });
+    final title = profiles.length > 1 ? 'Ключи' : 'Ключ';
+
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (int i = 0; i < sorted.length; i++)
+                    _ProfileRow(profile: sorted[i], index: i),
+                ],
+              ),
+            ),
+          ),
+          const Divider(height: 0.5),
+          InkWell(
+            onTap: () => _showAddSubscriptionSheet(context, ref),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Row(
+                children: [
+                  Icon(Icons.add_outlined, size: 20, color: theme.colorScheme.primary),
+                  const Gap(12),
+                  Text(
+                    'Добавить подписку',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const Gap(4),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileRow extends ConsumerWidget {
+  const _ProfileRow({required this.profile, required this.index});
+  final ProfileEntity profile;
+  final int index;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final displayName = _profileDisplayName(profile, index);
+    final masked = _maskProfile(profile.name);
+    String? subLine;
+    if (profile is RemoteProfileEntity) {
+      final rp = profile as RemoteProfileEntity;
+      final sub = rp.subInfo;
+      if (sub != null) {
+        final days = sub.expire.difference(DateTime.now()).inDays;
+        if (days > 0) {
+          subLine = 'действует до ${_fmtDate(sub.expire)}';
+        } else if (days < 0) {
+          subLine = 'срок истёк';
+        }
+      }
+      subLine ??= Uri.tryParse(rp.url)?.host;
+    }
+
+    return InkWell(
+      onTap: profile.active
+          ? null
+          : () async {
+              await ref.read(profilesNotifierProvider.notifier).selectActiveProfile(profile.id);
+            },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Row(
+          children: [
+            Icon(
+              profile.active ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+              size: 20,
+              color: profile.active ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+            ),
+            const Gap(14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          displayName,
+                          style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        masked,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontFamily: 'Consolas',
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (subLine != null) ...[
+                    const Gap(2),
+                    Text(
+                      subLine,
+                      style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            PopupMenuButton<String>(
+              icon: Icon(Icons.more_vert_outlined, size: 20, color: theme.colorScheme.onSurfaceVariant),
+              padding: EdgeInsets.zero,
+              tooltip: '',
+              onSelected: (value) => _onAction(context, ref, value),
+              itemBuilder: (ctx) => [
+                const PopupMenuItem(value: 'copy', child: Text('Копировать ключ')),
+                if (profile is RemoteProfileEntity)
+                  const PopupMenuItem(value: 'refresh', child: Text('Обновить')),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Text('Удалить',
+                      style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onAction(BuildContext context, WidgetRef ref, String action) async {
+    switch (action) {
+      case 'copy':
+        await Clipboard.setData(ClipboardData(text: profile.name));
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Скопировано'), duration: Duration(seconds: 2)),
+        );
+        break;
+      case 'refresh':
+        if (profile is RemoteProfileEntity) {
+          await ref
+              .read(updateProfileNotifierProvider(profile.id).notifier)
+              .updateProfile(profile as RemoteProfileEntity);
+        }
+        break;
+      case 'delete':
+        await _confirmAndDelete(context, ref, profile);
+        break;
+    }
+  }
+
+  static String _fmtDate(DateTime d) {
+    const months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+    return '${d.day} ${months[d.month - 1]}';
+  }
+}
+
+Future<void> _confirmAndDelete(BuildContext context, WidgetRef ref, ProfileEntity profile) async {
+  final all = ref.read(profilesNotifierProvider).valueOrNull ?? const [];
+  final isLast = all.length <= 1;
+  final isActive = profile.active;
+  final others = all.where((p) => p.id != profile.id).toList();
+
+  if (isLast || isActive) {
+    final msg = isLast
+        ? 'После удаления приложение потребует новый ключ. Удалить?'
+        : 'Активной станет "${_profileDisplayName(others.first, 0)}". Это действие нельзя отменить.';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Удалить "${_profileDisplayName(profile, 0)}"?'),
+        content: Text(msg),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Отмена')),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Theme.of(ctx).colorScheme.error),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Удалить'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+  }
+
+  await ref.read(profilesNotifierProvider.notifier).deleteProfile(profile);
+  if (!context.mounted) return;
+  if (!isLast && !isActive) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Подписка удалена'),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'Отменить',
+          onPressed: () async {
+            if (profile is RemoteProfileEntity) {
+              await ref.read(addProfileNotifierProvider.notifier).addClipboard(profile.url);
+            }
+          },
+        ),
+      ),
+    );
+  }
+}
+
+void _showAddSubscriptionSheet(BuildContext context, WidgetRef ref) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (ctx) {
+      final theme = Theme.of(ctx);
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Text(
+                'Добавить подписку',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.content_paste_outlined, size: 20),
+              title: const Text('Вставить из буфера', style: TextStyle(fontSize: 14)),
+              onTap: () async {
+                final data = await Clipboard.getData('text/plain');
+                final text = data?.text?.trim();
+                if (text == null || text.isEmpty) {
+                  if (!ctx.mounted) return;
+                  Navigator.of(ctx).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Буфер пуст')),
+                  );
+                  return;
+                }
+                if (!ctx.mounted) return;
+                Navigator.of(ctx).pop();
+                await ref.read(addProfileNotifierProvider.notifier).addClipboard(text);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit_outlined, size: 20),
+              title: const Text('Ввести вручную', style: TextStyle(fontSize: 14)),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _showManualEntryDialog(context, ref);
+              },
+            ),
+            const Gap(8),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Future<void> _showManualEntryDialog(BuildContext context, WidgetRef ref) async {
+  final controller = TextEditingController();
+  final result = await showDialog<String>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Новая подписка'),
+      content: TextField(
+        controller: controller,
+        autofocus: true,
+        decoration: const InputDecoration(
+          hintText: 'Ключ или URL подписки',
+          border: OutlineInputBorder(),
+        ),
+        maxLines: 2,
+        minLines: 1,
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Отмена')),
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+          child: const Text('Активировать'),
+        ),
+      ],
+    ),
+  );
+  if (result != null && result.isNotEmpty) {
+    await ref.read(addProfileNotifierProvider.notifier).addClipboard(result);
   }
 }
 
