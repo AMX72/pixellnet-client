@@ -90,6 +90,7 @@ class HomePage extends HookConsumerWidget {
                   const SliverToBoxAdapter(child: _UpdateAvailableBanner()),
                   const SliverToBoxAdapter(child: _PostUpdateBanner()),
                   const SliverToBoxAdapter(child: _StatusHero()),
+                  const SliverToBoxAdapter(child: _SubscriptionSection()),
                   const SliverToBoxAdapter(child: _ConnectionSection()),
                   const SliverToBoxAdapter(child: _TrafficSection()),
                   const SliverToBoxAdapter(child: _SettingsSection()),
@@ -619,16 +620,10 @@ class _StatusHero extends ConsumerWidget {
           ),
           const Gap(10),
           _HeroInlineRow(
-            label: 'Сервер',
+            label: null,
             value: '$serverName$delayPart',
             mono: true,
             onTap: () => _showServerSheet(context, ref),
-          ),
-          _HeroInlineRow(
-            label: 'Ключ',
-            value: keyText,
-            mono: true,
-            onTap: () => _showSubscriptionSheet(context, ref),
           ),
           const Gap(14),
           SizedBox(
@@ -1096,13 +1091,13 @@ class _TrafficSection extends ConsumerWidget {
 /// Used for Сервер/Ключ shortcuts above the Connect button.
 class _HeroInlineRow extends StatelessWidget {
   const _HeroInlineRow({
-    required this.label,
+    this.label,
     required this.value,
     this.mono = false,
     required this.onTap,
   });
 
-  final String label;
+  final String? label;
   final String value;
   final bool mono;
   final VoidCallback onTap;
@@ -1117,18 +1112,16 @@ class _HeroInlineRow extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 7, 8, 7),
         child: Row(
           children: [
-            Text(
-              '$label: ',
-              style: TextStyle(
-                fontSize: 13,
-                color: theme.colorScheme.onSurfaceVariant,
+            if (label != null)
+              Text(
+                '${label!}: ',
+                style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant),
               ),
-            ),
             Expanded(
               child: Text(
                 value,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   color: theme.colorScheme.onSurface,
                   fontFamily: mono ? 'Consolas' : null,
                   fontFeatures: mono ? const [FontFeature.tabularFigures()] : null,
@@ -1141,6 +1134,28 @@ class _HeroInlineRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Row «Ключ» в основном списке (под кнопкой Подключить).
+class _SubscriptionSection extends ConsumerWidget {
+  const _SubscriptionSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(translationsProvider).requireValue;
+    final activeProfile = ref.watch(activeProfileProvider).valueOrNull;
+    final all = ref.watch(profilesNotifierProvider).valueOrNull ?? const [];
+    final extraCount = (all.length - 1).clamp(0, 99);
+    final rawName = activeProfile?.name ?? '';
+    final masked = _maskProfile(rawName);
+    final valueText = extraCount > 0 ? '$masked · +$extraCount' : masked;
+    return _Row(
+      label: t.pages.home.key,
+      value: valueText,
+      mono: true,
+      onTap: () => _showSubscriptionSheet(context, ref),
     );
   }
 }
