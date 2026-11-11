@@ -104,7 +104,25 @@
   "pages": {
     "home": {
       "title": "Главная",
-      "quickSettings": "Опции быстрых настроек"
+      "quickSettings": "Опции быстрых настроек",
+      "server": "Сервер",
+      "protocol": "Протокол",
+      "mode": "Режим",
+      "vpnTun": "VPN (TUN)",
+      "key": "Ключ",
+      "autoConnect": "Автоподключение при запуске",
+      "language": "Язык",
+      "developer": "Для разработчика",
+      "notConnected": "Не подключено",
+      "establishing": "Устанавливаем соединение",
+      "cancel": "Отмена",
+      "support": "Поддержка",
+      "languageTitle": "Язык интерфейса",
+      "copied": "Скопировано",
+      "serverSoon": "Список серверов — скоро",
+      "protocolSoon": "Выбор протокола — скоро",
+      "modeSoon": "VPN (TUN) · Системный прокси — скоро",
+      "developerSoon": "Логи, DNS, MTU, экспорт — скоро"
     },
     "proxies": {
       "title": "Прокси",

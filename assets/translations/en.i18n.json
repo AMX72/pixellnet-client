@@ -100,7 +100,25 @@
   "pages": {
     "home": {
       "title": "Home",
-      "quickSettings": "Quick setting options"
+      "quickSettings": "Quick setting options",
+      "server": "Server",
+      "protocol": "Protocol",
+      "mode": "Mode",
+      "vpnTun": "VPN (TUN)",
+      "key": "Key",
+      "autoConnect": "Auto-connect on startup",
+      "language": "Language",
+      "developer": "Developer options",
+      "notConnected": "Not connected",
+      "establishing": "Establishing connection",
+      "cancel": "Cancel",
+      "support": "Support",
+      "languageTitle": "Interface language",
+      "copied": "Copied",
+      "serverSoon": "Server list — coming soon",
+      "protocolSoon": "Protocol selection — coming soon",
+      "modeSoon": "VPN (TUN) · System proxy — coming soon",
+      "developerSoon": "Logs, DNS, MTU, export — coming soon"
     },
     "proxies": {
       "title": "Proxies",

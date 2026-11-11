@@ -549,29 +549,30 @@ class _StatusHero extends ConsumerWidget {
     bool buttonFilled;
     bool animateDot = false;
 
+    final t = ref.watch(translationsProvider).requireValue;
     if (conn is Connected) {
       dotColor = PixellnetBrand.success;
-      statusTitle = 'Подключено';
+      statusTitle = t.connection.connected;
       final name = active?.tagDisplay.isNotEmpty == true
           ? active!.tagDisplay
           : (active?.tag ?? '—');
       final delay = active?.urlTestDelay ?? 0;
       final delayPart = delay > 0 && delay < 65000 ? ' · $delay мс' : '';
       subtitle = '$name$delayPart';
-      buttonLabel = 'Отключить';
+      buttonLabel = t.connection.disconnect;
       buttonFilled = false;
     } else if (conn is Connecting) {
       dotColor = PixellnetBrand.warning;
-      statusTitle = 'Подключение…';
-      subtitle = 'Устанавливаем соединение';
-      buttonLabel = 'Отмена';
+      statusTitle = t.connection.connecting;
+      subtitle = t.pages.home.establishing;
+      buttonLabel = t.pages.home.cancel;
       buttonFilled = false;
       animateDot = true;
     } else {
       dotColor = theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5);
-      statusTitle = 'Не подключено';
-      subtitle = 'Нажмите чтобы подключиться';
-      buttonLabel = 'Подключить';
+      statusTitle = t.pages.home.notConnected;
+      subtitle = t.connection.tapToConnect;
+      buttonLabel = t.connection.connect;
       buttonFilled = true;
     }
 
@@ -689,33 +690,34 @@ class _ConnectionSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(translationsProvider).requireValue;
     final active = ref.watch(activeProxyNotifierProvider).valueOrNull;
     final serverName = active?.tagDisplay.isNotEmpty == true
         ? active!.tagDisplay
         : (active?.tag ?? '—');
     final delay = active?.urlTestDelay ?? 0;
     final delayPart = delay > 0 && delay < 65000 ? ' · $delay мс' : '';
-    final protocol = active?.type.isNotEmpty == true ? active!.type : 'Авто';
+    final protocol = active?.type.isNotEmpty == true ? active!.type : 'Auto';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 10),
         _Row(
-          label: 'Сервер',
+          label: t.pages.home.server,
           value: '$serverName$delayPart',
           mono: true,
-          onTap: () => _showPlaceholderSheet(context, 'Выбор сервера', 'Список серверов — скоро'),
+          onTap: () => _showPlaceholderSheet(context, t.pages.home.server, t.pages.home.serverSoon),
         ),
         _Row(
-          label: 'Протокол',
+          label: t.pages.home.protocol,
           value: protocol,
-          onTap: () => _showPlaceholderSheet(context, 'Протокол', 'Выбор протокола — скоро'),
+          onTap: () => _showPlaceholderSheet(context, t.pages.home.protocol, t.pages.home.protocolSoon),
         ),
         _Row(
-          label: 'Режим',
-          value: 'VPN (TUN)',
-          onTap: () => _showPlaceholderSheet(context, 'Режим', 'VPN (TUN) · Системный прокси — скоро'),
+          label: t.pages.home.mode,
+          value: t.pages.home.vpnTun,
+          onTap: () => _showPlaceholderSheet(context, t.pages.home.mode, t.pages.home.modeSoon),
         ),
       ],
     );
@@ -815,12 +817,13 @@ class _SubscriptionSection extends ConsumerWidget {
         ? '•••• ${rawName.substring(rawName.length - 4)}'
         : (rawName.isEmpty ? '—' : rawName);
 
+    final t = ref.watch(translationsProvider).requireValue;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 10),
         _Row(
-          label: 'Ключ',
+          label: t.pages.home.key,
           value: masked,
           mono: true,
           trailing: Icon(Icons.copy_outlined,
@@ -830,7 +833,7 @@ class _SubscriptionSection extends ConsumerWidget {
               await Clipboard.setData(ClipboardData(text: rawName));
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Скопировано')),
+                SnackBar(content: Text(t.pages.home.copied)),
               );
             }
           },
@@ -845,6 +848,7 @@ class _SettingsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(translationsProvider).requireValue;
     final locale = ref.watch(localePreferencesProvider);
     final langLabel = _localeLabel(locale);
     return Column(
@@ -852,17 +856,17 @@ class _SettingsSection extends ConsumerWidget {
       children: [
         const SizedBox(height: 10),
         _Row(
-          label: 'Автоподключение при запуске',
+          label: t.pages.home.autoConnect,
           valueWidget: Switch(value: false, onChanged: (_) {}),
         ),
         _Row(
-          label: 'Язык',
+          label: t.pages.home.language,
           value: langLabel,
           onTap: () => _showLanguageSheet(context, ref),
         ),
         _Row(
-          label: 'Для разработчика',
-          onTap: () => _showPlaceholderSheet(context, 'Для разработчика', 'Логи, DNS, MTU, экспорт — скоро'),
+          label: t.pages.home.developer,
+          onTap: () => _showPlaceholderSheet(context, t.pages.home.developer, t.pages.home.developerSoon),
         ),
       ],
     );
@@ -870,22 +874,38 @@ class _SettingsSection extends ConsumerWidget {
 }
 
 String _localeLabel(AppLocale locale) {
-  switch (locale) {
-    case AppLocale.ru:
-      return 'Русский';
-    case AppLocale.en:
-      return 'English';
-    default:
-      return locale.languageCode.toUpperCase();
-  }
+  // Native name per locale; keep fallback for any future AppLocale added upstream.
+  const names = <String, String>{
+    'ru': 'Русский',
+    'en': 'English',
+    'ar': 'العربية',
+    'es': 'Español',
+    'fa': 'فارسی',
+    'fr': 'Français',
+    'id': 'Bahasa Indonesia',
+    'tr': 'Türkçe',
+    'pt-BR': 'Português (BR)',
+    'pt_BR': 'Português (BR)',
+    'zh-CN': '中文 (简体)',
+    'zh_CN': '中文 (简体)',
+    'de': 'Deutsch',
+    'it': 'Italiano',
+    'ja': '日本語',
+    'ko': '한국어',
+    'vi': 'Tiếng Việt',
+    'uk': 'Українська',
+    'pl': 'Polski',
+  };
+  final key = locale.languageTag;
+  return names[key] ?? names[locale.languageCode] ?? key.toUpperCase();
 }
 
 void _showLanguageSheet(BuildContext context, WidgetRef ref) {
+  final t = ref.read(translationsProvider).requireValue;
   final current = ref.read(localePreferencesProvider);
-  final options = <(AppLocale, String)>[
-    (AppLocale.ru, 'Русский'),
-    (AppLocale.en, 'English'),
-  ];
+  final options = AppLocale.values
+      .map((l) => (l, _localeLabel(l)))
+      .toList();
   showModalBottomSheet<void>(
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
@@ -902,7 +922,7 @@ void _showLanguageSheet(BuildContext context, WidgetRef ref) {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
               child: Text(
-                'Язык интерфейса',
+                t.pages.home.languageTitle,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -954,6 +974,7 @@ class _FooterRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
     final version = ref.watch(appInfoProvider).valueOrNull?.presentVersion ?? '';
     final mutedColor = theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7);
     return Padding(
@@ -962,7 +983,7 @@ class _FooterRow extends ConsumerWidget {
         TextSpan(
           style: TextStyle(fontSize: 12, color: mutedColor),
           children: [
-            TextSpan(text: 'v$version · Поддержка '),
+            TextSpan(text: 'v$version · ${t.pages.home.support} '),
             TextSpan(
               text: '@pixellnet_support',
               style: TextStyle(color: theme.colorScheme.primary),
