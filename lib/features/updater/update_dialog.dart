@@ -29,13 +29,13 @@ class _UpdateDialogState extends State<UpdateDialog> {
     switch (_oem) {
       case OemFamily.xiaomi:
         return 'MIUI/HyperOS покажет: «Приложение содержит риски». '
-            'Нажми «Установить всё равно» → «Готово».';
+            'Нажмите «Установить всё равно» → «Готово».';
       case OemFamily.huawei:
-        return 'EMUI спросит подтверждение установки. '
-            'Отмечай «Разрешить» на всех запросах.';
+        return 'EMUI запросит подтверждение установки. '
+            'Выбирайте «Разрешить» на всех запросах.';
       case OemFamily.oppo:
-        return 'ColorOS/PurityScan может флажить как «риск». '
-            'Нажми «Установить всё равно».';
+        return 'ColorOS/PurityScan может пометить как «риск». '
+            'Нажмите «Установить всё равно».';
       case OemFamily.vivo:
       case OemFamily.samsung:
       case OemFamily.other:
@@ -138,13 +138,13 @@ class _UpdateDialogState extends State<UpdateDialog> {
   }
 
   bool get _needsPermission =>
-      _error != null && _error!.contains('Разреши установку');
+      _error != null && _error!.contains('Разрешите установку');
 
   Future<void> _openSettings() async {
     await openInstallUnknownAppsSettings();
     if (mounted) {
       setState(() {
-        _error = 'Разреши установку → вернись → Повторить';
+        _error = 'Разрешите установку → вернитесь → Повторить';
       });
     }
   }

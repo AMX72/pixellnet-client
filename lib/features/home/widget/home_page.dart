@@ -191,7 +191,7 @@ class HomePage extends HookConsumerWidget {
                       Text(
                         autoTrial.error is TrialException
                             ? (autoTrial.error as TrialException).message
-                            : 'Проверь интернет и попробуй снова',
+                            : 'Проверьте интернет и попробуйте снова',
                         style: theme.textTheme.bodySmall
                             ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                         textAlign: TextAlign.center,

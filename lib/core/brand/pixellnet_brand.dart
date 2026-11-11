@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 abstract class PixellnetBrand {
   static const String appName = 'PIXELLNET';
-  static const String appTagline = 'Один тап — и ты в сети';
+  static const String appTagline = 'Стабильное соединение в один клик';
   static const String homepage = 'https://pixellnet.com';
   static const String supportEmail = 'support@pixellnet.com';
 

@@ -121,7 +121,7 @@ class ShareBottomSheet extends StatelessWidget {
       primaryLink: deepLink,
       qrPayload: deepLink,
       messengerPreamble:
-          'Скачай PIXELLNET (pixellnet.com) и открой эту ссылку — все каналы подключатся автоматически:',
+          'Скачайте PIXELLNET (pixellnet.com) и откройте эту ссылку — все каналы подключатся автоматически:',
       profileName: profileName,
     );
   }

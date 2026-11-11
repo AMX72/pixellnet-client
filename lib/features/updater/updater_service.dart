@@ -16,7 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class InstallPermissionDeniedException implements Exception {
   @override
   String toString() =>
-      'Разреши установку приложений из этого источника в настройках Android';
+      'Разрешите установку приложений из этого источника в настройках Android';
 }
 
 const _platformChannel = MethodChannel('com.hiddify.app/platform');
