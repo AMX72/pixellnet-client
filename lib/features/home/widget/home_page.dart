@@ -509,8 +509,8 @@ class _Row extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        constraints: const BoxConstraints(minHeight: 42),
-        padding: const EdgeInsets.symmetric(horizontal: _kRowPadH, vertical: 9),
+        constraints: const BoxConstraints(minHeight: 36),
+        padding: const EdgeInsets.symmetric(horizontal: _kRowPadH, vertical: 7),
         child: Row(
           children: [
             Expanded(
@@ -724,8 +724,7 @@ class _ConnectionSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _sectionHeader(context, 'Соединение'),
-        _hairline(context),
+        const SizedBox(height: 10),
         _Row(label: 'Сервер', value: '$serverName$delayPart', mono: true, onTap: () {}),
         _Row(label: 'Протокол', value: protocol, onTap: () {}),
         _Row(label: 'Режим', value: 'VPN (TUN)', onTap: () {}),
@@ -752,8 +751,7 @@ class _TrafficSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _sectionHeader(context, 'Трафик'),
-        _hairline(context),
+        const SizedBox(height: 10),
         _Row(
           label: 'Сегодня',
           value: '↓ ${_bytesCompact(totalDown)}   ↑ ${_bytesCompact(totalUp)}',
@@ -798,8 +796,7 @@ class _SubscriptionSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _sectionHeader(context, 'Подписка'),
-        _hairline(context),
+        const SizedBox(height: 10),
         _Row(
           label: 'Ключ',
           value: masked,
@@ -829,8 +826,7 @@ class _SettingsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _sectionHeader(context, 'Настройки'),
-        _hairline(context),
+        const SizedBox(height: 10),
         _Row(
           label: 'Автоподключение при запуске',
           valueWidget: Switch(value: false, onChanged: (_) {}),
