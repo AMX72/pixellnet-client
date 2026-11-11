@@ -1,0 +1,26 @@
+{
+  "pages": {
+    "home": {
+      "title": "Головна",
+      "server": "Сервер",
+      "protocol": "Протокол",
+      "mode": "Режим",
+      "key": "Ключ",
+      "autoConnect": "Автопідключення при запуску",
+      "language": "Мова",
+      "developer": "Для розробника",
+      "notConnected": "Не підключено",
+      "cancel": "Скасувати",
+      "support": "Підтримка",
+      "languageTitle": "Мова інтерфейсу",
+      "copied": "Скопійовано"
+    }
+  },
+  "connection": {
+    "connect": "Підключити",
+    "connected": "Підключено",
+    "connecting": "Підключення…",
+    "disconnect": "Відключити",
+    "tapToConnect": "Натисніть, щоб підключитися"
+  }
+}

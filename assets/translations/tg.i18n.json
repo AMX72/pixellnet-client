@@ -1,0 +1,26 @@
+{
+  "pages": {
+    "home": {
+      "title": "Саҳифаи асосӣ",
+      "server": "Сервер",
+      "protocol": "Протокол",
+      "mode": "Реҷа",
+      "key": "Калид",
+      "autoConnect": "Пайвасти худкор ҳангоми оғоз",
+      "language": "Забон",
+      "developer": "Барои таҳиягар",
+      "notConnected": "Пайваст нашуда",
+      "cancel": "Бекор кардан",
+      "support": "Дастгирӣ",
+      "languageTitle": "Забони интерфейс",
+      "copied": "Нусхабардорӣ шуд"
+    }
+  },
+  "connection": {
+    "connect": "Пайваст шудан",
+    "connected": "Пайваст шуд",
+    "connecting": "Пайвастшавӣ…",
+    "disconnect": "Қатъ кардан",
+    "tapToConnect": "Барои пайваст шудан пахш кунед"
+  }
+}

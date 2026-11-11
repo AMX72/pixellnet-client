@@ -1,0 +1,26 @@
+{
+  "pages": {
+    "home": {
+      "title": "Baş sahypa",
+      "server": "Server",
+      "protocol": "Protokol",
+      "mode": "Režim",
+      "key": "Açar",
+      "autoConnect": "Başlanda awtomatik birikme",
+      "language": "Dil",
+      "developer": "Işläp düzüji üçin",
+      "notConnected": "Birigen däl",
+      "cancel": "Goý boluň",
+      "support": "Goldaw",
+      "languageTitle": "Interfeýs dili",
+      "copied": "Göçürildi"
+    }
+  },
+  "connection": {
+    "connect": "Birikmek",
+    "connected": "Birikdi",
+    "connecting": "Birikdirilýär…",
+    "disconnect": "Üzmek",
+    "tapToConnect": "Birikmek üçin basyň"
+  }
+}

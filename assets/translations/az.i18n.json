@@ -1,0 +1,26 @@
+{
+  "pages": {
+    "home": {
+      "title": "Ana səhifə",
+      "server": "Server",
+      "protocol": "Protokol",
+      "mode": "Rejim",
+      "key": "Açar",
+      "autoConnect": "Başladıqda avto qoşulma",
+      "language": "Dil",
+      "developer": "Developer üçün",
+      "notConnected": "Qoşulmayıb",
+      "cancel": "Ləğv et",
+      "support": "Dəstək",
+      "languageTitle": "İnterfeys dili",
+      "copied": "Kopyalandı"
+    }
+  },
+  "connection": {
+    "connect": "Qoşul",
+    "connected": "Qoşuldu",
+    "connecting": "Qoşulur…",
+    "disconnect": "Ayrıl",
+    "tapToConnect": "Qoşulmaq üçün basın"
+  }
+}

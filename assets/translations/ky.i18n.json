@@ -1,0 +1,26 @@
+{
+  "pages": {
+    "home": {
+      "title": "Башкы бет",
+      "server": "Сервер",
+      "protocol": "Протокол",
+      "mode": "Режим",
+      "key": "Ачкыч",
+      "autoConnect": "Иштеп баштаганда авто туташуу",
+      "language": "Тил",
+      "developer": "Иштеп чыгуучу үчүн",
+      "notConnected": "Туташпаган",
+      "cancel": "Жокко чыгаруу",
+      "support": "Колдоо",
+      "languageTitle": "Интерфейс тили",
+      "copied": "Көчүрүлдү"
+    }
+  },
+  "connection": {
+    "connect": "Туташуу",
+    "connected": "Туташты",
+    "connecting": "Туташууда…",
+    "disconnect": "Ажыратуу",
+    "tapToConnect": "Туташуу үчүн басыңыз"
+  }
+}

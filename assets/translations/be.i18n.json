@@ -1,0 +1,26 @@
+{
+  "pages": {
+    "home": {
+      "title": "Галоўная",
+      "server": "Сервер",
+      "protocol": "Пратакол",
+      "mode": "Рэжым",
+      "key": "Ключ",
+      "autoConnect": "Аўтападлучэнне пры запуску",
+      "language": "Мова",
+      "developer": "Для распрацоўшчыка",
+      "notConnected": "Не падлучана",
+      "cancel": "Скасаваць",
+      "support": "Падтрымка",
+      "languageTitle": "Мова інтэрфейсу",
+      "copied": "Скапіравана"
+    }
+  },
+  "connection": {
+    "connect": "Падлучыць",
+    "connected": "Падлучана",
+    "connecting": "Падлучэнне…",
+    "disconnect": "Адлучыць",
+    "tapToConnect": "Націсніце, каб падлучыцца"
+  }
+}

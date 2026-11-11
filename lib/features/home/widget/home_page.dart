@@ -874,9 +874,21 @@ class _SettingsSection extends ConsumerWidget {
 }
 
 String _localeLabel(AppLocale locale) {
-  // Native name per locale; keep fallback for any future AppLocale added upstream.
+  // Native name per locale; CIS languages first, then existing upstream.
   const names = <String, String>{
+    // CIS pack
     'ru': 'Русский',
+    'uk': 'Українська',
+    'be': 'Беларуская',
+    'kk': 'Қазақша',
+    'ky': 'Кыргызча',
+    'uz': 'Oʻzbekcha',
+    'tg': 'Тоҷикӣ',
+    'tk': 'Türkmençe',
+    'az': 'Azərbaycanca',
+    'hy': 'Հայերեն',
+    'ka': 'ქართული',
+    // Upstream
     'en': 'English',
     'ar': 'العربية',
     'es': 'Español',
@@ -888,12 +900,13 @@ String _localeLabel(AppLocale locale) {
     'pt_BR': 'Português (BR)',
     'zh-CN': '中文 (简体)',
     'zh_CN': '中文 (简体)',
+    'zh-TW': '中文 (繁體)',
+    'zh_TW': '中文 (繁體)',
     'de': 'Deutsch',
     'it': 'Italiano',
     'ja': '日本語',
     'ko': '한국어',
     'vi': 'Tiếng Việt',
-    'uk': 'Українська',
     'pl': 'Polski',
   };
   final key = locale.languageTag;

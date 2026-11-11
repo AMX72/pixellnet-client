@@ -1,0 +1,26 @@
+{
+  "pages": {
+    "home": {
+      "title": "Գլխավոր",
+      "server": "Սերվեր",
+      "protocol": "Արձանագրություն",
+      "mode": "Ռեժիմ",
+      "key": "Բանալի",
+      "autoConnect": "Ավտոմատ միացում",
+      "language": "Լեզու",
+      "developer": "Մշակողի համար",
+      "notConnected": "Չի միացված",
+      "cancel": "Չեղարկել",
+      "support": "Աջակցություն",
+      "languageTitle": "Ինտերֆեյսի լեզու",
+      "copied": "Պատճենվեց"
+    }
+  },
+  "connection": {
+    "connect": "Միացնել",
+    "connected": "Միացված է",
+    "connecting": "Միացում…",
+    "disconnect": "Անջատել",
+    "tapToConnect": "Սեղմեք միանալու համար"
+  }
+}

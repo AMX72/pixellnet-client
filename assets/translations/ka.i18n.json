@@ -1,0 +1,26 @@
+{
+  "pages": {
+    "home": {
+      "title": "მთავარი",
+      "server": "სერვერი",
+      "protocol": "პროტოკოლი",
+      "mode": "რეჟიმი",
+      "key": "გასაღები",
+      "autoConnect": "ავტომატური დაკავშირება",
+      "language": "ენა",
+      "developer": "დეველოპერისთვის",
+      "notConnected": "არ არის დაკავშირებული",
+      "cancel": "გაუქმება",
+      "support": "მხარდაჭერა",
+      "languageTitle": "ინტერფეისის ენა",
+      "copied": "დაკოპირდა"
+    }
+  },
+  "connection": {
+    "connect": "დაკავშირება",
+    "connected": "დაკავშირებულია",
+    "connecting": "მიმდინარეობს დაკავშირება…",
+    "disconnect": "გათიშვა",
+    "tapToConnect": "დაკავშირებისთვის დააჭირეთ"
+  }
+}

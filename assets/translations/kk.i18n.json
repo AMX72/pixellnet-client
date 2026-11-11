@@ -1,0 +1,26 @@
+{
+  "pages": {
+    "home": {
+      "title": "Басты бет",
+      "server": "Сервер",
+      "protocol": "Хаттама",
+      "mode": "Режим",
+      "key": "Кілт",
+      "autoConnect": "Қосылу қосылған кезде",
+      "language": "Тіл",
+      "developer": "Әзірлеуші үшін",
+      "notConnected": "Қосылмаған",
+      "cancel": "Болдырмау",
+      "support": "Қолдау",
+      "languageTitle": "Интерфейс тілі",
+      "copied": "Көшірілді"
+    }
+  },
+  "connection": {
+    "connect": "Қосылу",
+    "connected": "Қосылды",
+    "connecting": "Қосылуда…",
+    "disconnect": "Ажырату",
+    "tapToConnect": "Қосылу үшін басыңыз"
+  }
+}

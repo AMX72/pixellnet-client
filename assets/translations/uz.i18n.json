@@ -1,0 +1,26 @@
+{
+  "pages": {
+    "home": {
+      "title": "Bosh sahifa",
+      "server": "Server",
+      "protocol": "Protokol",
+      "mode": "Rejim",
+      "key": "Kalit",
+      "autoConnect": "Ishga tushganda avtomatik ulanish",
+      "language": "Til",
+      "developer": "Dasturchi uchun",
+      "notConnected": "Ulanmagan",
+      "cancel": "Bekor qilish",
+      "support": "Qo'llab-quvvatlash",
+      "languageTitle": "Interfeys tili",
+      "copied": "Nusxalandi"
+    }
+  },
+  "connection": {
+    "connect": "Ulash",
+    "connected": "Ulangan",
+    "connecting": "Ulanmoqda…",
+    "disconnect": "Uzish",
+    "tapToConnect": "Ulanish uchun bosing"
+  }
+}
