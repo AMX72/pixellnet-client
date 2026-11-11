@@ -1398,7 +1398,6 @@ class _SubscriptionSheetBody extends ConsumerWidget {
               ),
             ),
           ),
-          const Divider(height: 0.5),
           InkWell(
             onTap: () => _showAddSubscriptionSheet(context, ref),
             child: Container(
@@ -1511,7 +1510,6 @@ class _ActiveKeyHeroState extends State<_ActiveKeyHero> {
             ],
           ),
           const Gap(10),
-          Divider(height: 0.5, color: theme.colorScheme.outlineVariant),
         ],
       ),
     );
