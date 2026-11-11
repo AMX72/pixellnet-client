@@ -916,14 +916,28 @@ String _localeLabel(AppLocale locale) {
 void _showLanguageSheet(BuildContext context, WidgetRef ref) {
   final t = ref.read(translationsProvider).requireValue;
   final current = ref.read(localePreferencesProvider);
-  final options = AppLocale.values
-      .map((l) => (l, _localeLabel(l)))
-      .toList();
+  // Order: Russian first, CIS pack, then rest alphabetical.
+  const priority = <String>['ru', 'uk', 'be', 'kk', 'ky', 'uz', 'tg', 'tk', 'az', 'hy', 'ka'];
+  int rank(AppLocale l) {
+    final tag = l.languageTag;
+    final code = l.languageCode;
+    final i = priority.indexOf(code);
+    if (i >= 0) return i;
+    final j = priority.indexOf(tag);
+    if (j >= 0) return j;
+    return 1000 + code.codeUnitAt(0);
+  }
+  final sorted = [...AppLocale.values]..sort((a, b) => rank(a).compareTo(rank(b)));
+  final options = sorted.map((l) => (l, _localeLabel(l))).toList();
   showModalBottomSheet<void>(
     context: context,
+    isScrollControlled: true,
     backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    constraints: BoxConstraints(
+      maxHeight: MediaQuery.of(context).size.height * 0.75,
     ),
     builder: (ctx) {
       final theme = Theme.of(ctx);
@@ -943,36 +957,45 @@ void _showLanguageSheet(BuildContext context, WidgetRef ref) {
                 ),
               ),
             ),
-            for (final opt in options)
-              InkWell(
-                onTap: () async {
-                  Navigator.of(ctx).pop();
-                  if (opt.$1 != current) {
-                    await ref
-                        .read(localePreferencesProvider.notifier)
-                        .changeLocale(opt.$1);
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          opt.$2,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: theme.colorScheme.onSurface,
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final opt in options)
+                      InkWell(
+                        onTap: () async {
+                          Navigator.of(ctx).pop();
+                          if (opt.$1 != current) {
+                            await ref
+                                .read(localePreferencesProvider.notifier)
+                                .changeLocale(opt.$1);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  opt.$2,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                              if (opt.$1 == current)
+                                Icon(Icons.check_outlined,
+                                    size: 18, color: theme.colorScheme.primary),
+                            ],
                           ),
                         ),
                       ),
-                      if (opt.$1 == current)
-                        Icon(Icons.check_outlined,
-                            size: 18, color: theme.colorScheme.primary),
-                    ],
-                  ),
+                  ],
                 ),
               ),
+            ),
             const Gap(8),
           ],
         ),
