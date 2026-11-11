@@ -92,7 +92,6 @@ class HomePage extends HookConsumerWidget {
                   const SliverToBoxAdapter(child: _StatusHero()),
                   const SliverToBoxAdapter(child: _ConnectionSection()),
                   const SliverToBoxAdapter(child: _TrafficSection()),
-                  const SliverToBoxAdapter(child: _SubscriptionSection()),
                   const SliverToBoxAdapter(child: _SettingsSection()),
                   const SliverToBoxAdapter(child: _FooterRow()),
                   const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -585,6 +584,18 @@ class _StatusHero extends ConsumerWidget {
       buttonFilled = true;
     }
 
+    // Данные для inline-ссылок Сервер/Ключ.
+    final serverName = active?.tagDisplay.isNotEmpty == true
+        ? active!.tagDisplay
+        : (active?.tag.isNotEmpty == true ? active!.tag : 'Авто');
+    final delay = active?.urlTestDelay ?? 0;
+    final delayPart = delay > 0 && delay < 65000 ? ' · $delay мс' : '';
+    final activeProfile = ref.watch(activeProfileProvider).valueOrNull;
+    final all = ref.watch(profilesNotifierProvider).valueOrNull ?? const [];
+    final extraCount = (all.length - 1).clamp(0, 99);
+    final keyMasked = _maskProfile(activeProfile?.name ?? '');
+    final keyText = extraCount > 0 ? '$keyMasked · +$extraCount' : keyMasked;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(_kRowPadH, 16, _kRowPadH, 14),
       child: Column(
@@ -606,17 +617,18 @@ class _StatusHero extends ConsumerWidget {
               ),
             ],
           ),
-          const Gap(2),
-          Padding(
-            padding: const EdgeInsets.only(left: 20),
-            child: Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 13,
-                color: theme.colorScheme.onSurfaceVariant,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
+          const Gap(10),
+          _HeroInlineRow(
+            label: 'Сервер',
+            value: '$serverName$delayPart',
+            mono: true,
+            onTap: () => _showServerSheet(context, ref),
+          ),
+          _HeroInlineRow(
+            label: 'Ключ',
+            value: keyText,
+            mono: true,
+            onTap: () => _showSubscriptionSheet(context, ref),
           ),
           const Gap(14),
           SizedBox(
@@ -701,11 +713,6 @@ class _ConnectionSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
     final active = ref.watch(activeProxyNotifierProvider).valueOrNull;
-    final serverName = active?.tagDisplay.isNotEmpty == true
-        ? active!.tagDisplay
-        : (active?.tag ?? '—');
-    final delay = active?.urlTestDelay ?? 0;
-    final delayPart = delay > 0 && delay < 65000 ? ' · $delay мс' : '';
     final protocol = active?.type.isNotEmpty == true ? active!.type : 'Auto';
     final mode = ref.watch(ConfigOptions.serviceMode);
     final modeLabel = _serviceModeLabel(mode);
@@ -714,12 +721,6 @@ class _ConnectionSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 10),
-        _Row(
-          label: t.pages.home.server,
-          value: '$serverName$delayPart',
-          mono: true,
-          onTap: () => _showServerSheet(context, ref),
-        ),
         _Row(
           label: t.pages.home.protocol,
           value: protocol,
@@ -1091,29 +1092,55 @@ class _TrafficSection extends ConsumerWidget {
   }
 }
 
-class _SubscriptionSection extends ConsumerWidget {
-  const _SubscriptionSection();
+/// Compact inline row inside the status hero (label · value › ).
+/// Used for Сервер/Ключ shortcuts above the Connect button.
+class _HeroInlineRow extends StatelessWidget {
+  const _HeroInlineRow({
+    required this.label,
+    required this.value,
+    this.mono = false,
+    required this.onTap,
+  });
+
+  final String label;
+  final String value;
+  final bool mono;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = ref.watch(translationsProvider).requireValue;
-    final activeProfile = ref.watch(activeProfileProvider).valueOrNull;
-    final all = ref.watch(profilesNotifierProvider).valueOrNull ?? const [];
-    final extraCount = (all.length - 1).clamp(0, 99);
-    final rawName = activeProfile?.name ?? '';
-    final masked = _maskProfile(rawName);
-    final valueText = extraCount > 0 ? '$masked · +$extraCount' : masked;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: 10),
-        _Row(
-          label: t.pages.home.key,
-          value: valueText,
-          mono: true,
-          onTap: () => _showSubscriptionSheet(context, ref),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 7, 8, 7),
+        child: Row(
+          children: [
+            Text(
+              '$label: ',
+              style: TextStyle(
+                fontSize: 13,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: theme.colorScheme.onSurface,
+                  fontFamily: mono ? 'Consolas' : null,
+                  fontFeatures: mono ? const [FontFeature.tabularFigures()] : null,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Icon(Icons.chevron_right_outlined,
+                size: 16, color: theme.colorScheme.onSurfaceVariant),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
