@@ -17,7 +17,9 @@ import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
+import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
+import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/proxy/overview/proxies_overview_notifier.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
@@ -844,14 +846,52 @@ class _ServerPickerBody extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Text(
-              'Выбор сервера',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: theme.colorScheme.onSurface,
-              ),
+            padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Выбор сервера',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh_outlined, size: 20),
+                  tooltip: 'Обновить список',
+                  color: theme.colorScheme.onSurfaceVariant,
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.all(6),
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  onPressed: () async {
+                    final active = ref.read(activeProfileProvider).valueOrNull;
+                    if (active is RemoteProfileEntity) {
+                      await ref
+                          .read(updateProfileNotifierProvider(active.id).notifier)
+                          .updateProfile(active);
+                    }
+                  },
+                ),
+                if (proxies.valueOrNull != null)
+                  IconButton(
+                    icon: const Icon(Icons.speed_outlined, size: 20),
+                    tooltip: 'Проверить пинг',
+                    color: theme.colorScheme.onSurfaceVariant,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.all(6),
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    onPressed: () async {
+                      final g = proxies.valueOrNull;
+                      if (g == null) return;
+                      await ref
+                          .read(proxiesOverviewNotifierProvider.notifier)
+                          .urlTest(g.tag);
+                    },
+                  ),
+              ],
             ),
           ),
           Flexible(
