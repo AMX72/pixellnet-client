@@ -218,11 +218,21 @@ class SettingsSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      subtitle: subtitle,
-      trailing: const Icon(Icons.chevron_right_outlined),
+      dense: true,
+      visualDensity: VisualDensity.compact,
+      minLeadingWidth: 0,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+      leading: Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
+      title: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
+      subtitle: subtitle == null
+          ? null
+          : DefaultTextStyle.merge(
+              style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+              child: subtitle!,
+            ),
+      trailing: Icon(Icons.chevron_right_outlined, size: 16, color: theme.colorScheme.onSurfaceVariant),
       onTap: () => context.go(namedLocation),
     );
   }

@@ -3,9 +3,11 @@ import 'dart:convert';
 
 import 'package:dartx/dartx.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/features/connection/model/connection_status.dart';
@@ -457,34 +459,6 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const double _kRowPadH = 20;
-const double _kSectionGap = 18;
-
-Widget _sectionHeader(BuildContext context, String title) {
-  final theme = Theme.of(context);
-  return Padding(
-    padding: const EdgeInsets.fromLTRB(_kRowPadH, _kSectionGap, _kRowPadH, 4),
-    child: Text(
-      title,
-      style: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w500,
-        color: theme.colorScheme.onSurfaceVariant,
-        letterSpacing: 0.3,
-      ),
-    ),
-  );
-}
-
-Widget _hairline(BuildContext context) {
-  return Padding(
-    padding: const EdgeInsets.only(left: _kRowPadH),
-    child: Divider(
-      height: 0.5,
-      thickness: 0.5,
-      color: Theme.of(context).colorScheme.outlineVariant,
-    ),
-  );
-}
 
 class _Row extends StatelessWidget {
   const _Row({
@@ -725,12 +699,58 @@ class _ConnectionSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 10),
-        _Row(label: 'Сервер', value: '$serverName$delayPart', mono: true, onTap: () {}),
-        _Row(label: 'Протокол', value: protocol, onTap: () {}),
-        _Row(label: 'Режим', value: 'VPN (TUN)', onTap: () {}),
+        _Row(
+          label: 'Сервер',
+          value: '$serverName$delayPart',
+          mono: true,
+          onTap: () => _showPlaceholderSheet(context, 'Выбор сервера', 'Список серверов — скоро'),
+        ),
+        _Row(
+          label: 'Протокол',
+          value: protocol,
+          onTap: () => _showPlaceholderSheet(context, 'Протокол', 'Выбор протокола — скоро'),
+        ),
+        _Row(
+          label: 'Режим',
+          value: 'VPN (TUN)',
+          onTap: () => _showPlaceholderSheet(context, 'Режим', 'VPN (TUN) · Системный прокси — скоро'),
+        ),
       ],
     );
   }
+}
+
+void _showPlaceholderSheet(BuildContext context, String title, String msg) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (ctx) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(ctx).colorScheme.onSurface,
+                )),
+            const Gap(8),
+            Text(msg,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                )),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _TrafficSection extends ConsumerWidget {
@@ -831,8 +851,15 @@ class _SettingsSection extends ConsumerWidget {
           label: 'Автоподключение при запуске',
           valueWidget: Switch(value: false, onChanged: (_) {}),
         ),
-        _Row(label: 'Язык', value: 'Русский', onTap: () {}),
-        _Row(label: 'Для разработчика', onTap: () {}),
+        _Row(
+          label: 'Язык',
+          value: 'Русский',
+          onTap: () => _showPlaceholderSheet(context, 'Язык', 'Русский · English · Қазақша — скоро'),
+        ),
+        _Row(
+          label: 'Для разработчика',
+          onTap: () => _showPlaceholderSheet(context, 'Для разработчика', 'Логи, DNS, MTU, экспорт — скоро'),
+        ),
       ],
     );
   }
@@ -845,16 +872,31 @@ class _FooterRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final version = ref.watch(appInfoProvider).valueOrNull?.presentVersion ?? '';
+    final mutedColor = theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7);
     return Padding(
       padding: const EdgeInsets.fromLTRB(_kRowPadH, 20, _kRowPadH, 10),
-      child: Text(
-        'v$version · Поддержка @pixellnet_support',
-        style: TextStyle(
-          fontSize: 12,
-          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+      child: Text.rich(
+        TextSpan(
+          style: TextStyle(fontSize: 12, color: mutedColor),
+          children: [
+            TextSpan(text: 'v$version · Поддержка '),
+            TextSpan(
+              text: '@pixellnet_support',
+              style: TextStyle(color: theme.colorScheme.primary),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => _openTelegramSupport(),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Future<void> _openTelegramSupport() async {
+    final uri = Uri.parse('https://t.me/pixellnet_support');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 }
 
