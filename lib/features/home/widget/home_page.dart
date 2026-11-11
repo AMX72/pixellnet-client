@@ -187,7 +187,6 @@ class HomePage extends HookConsumerWidget {
                   // TODO: route to diagnostics screen
                 },
               ),
-              const Divider(height: 0.5, indent: 20),
               ListTile(
                 leading: const Icon(Icons.description_outlined, size: 20),
                 title: const Text('Логи'),
@@ -196,7 +195,19 @@ class HomePage extends HookConsumerWidget {
                   // TODO: route to logs
                 },
               ),
-              const Divider(height: 0.5, indent: 20),
+              ListTile(
+                leading: const Icon(Icons.cloud_download_outlined, size: 20),
+                title: const Text('Скачать другие версии'),
+                subtitle: const Text('Windows · iOS · macOS · Linux',
+                    style: TextStyle(fontSize: 12)),
+                onTap: () async {
+                  Navigator.of(ctx).pop();
+                  await launchUrl(
+                    Uri.parse('https://drive.google.com/drive/folders/1Q2o9ZoKASQ87O7R3gX5APPEyBvf7Svtp'),
+                    mode: LaunchMode.externalApplication,
+                  );
+                },
+              ),
               ListTile(
                 leading: const Icon(Icons.info_outline, size: 20),
                 title: const Text('О программе'),
