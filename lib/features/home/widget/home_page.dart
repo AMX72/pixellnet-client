@@ -1889,7 +1889,7 @@ class _SettingsSection extends ConsumerWidget {
           onTap: () => _showLanguageSheet(context, ref),
         ),
         _Row(
-          label: 'Приложения в туннеле',
+          label: 'Приложения через VPN',
           onTap: () => context.pushNamed('perAppProxy'),
         ),
         _Row(
