@@ -303,7 +303,10 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
           padding: const EdgeInsets.only(bottom: 88),
           controller: scrollController,
           itemBuilder: (context, index) {
-            final package = packages[index];
+            if (index == 0) {
+              return _buildExplanation(context, ref.watch(Preferences.perAppProxyMode));
+            }
+            final package = packages[index - 1];
             final flag = selectedApps.requireValue[package.packageName];
             return CheckboxListTile.adaptive(
               title: Row(
@@ -332,10 +335,44 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
                   : Image.memory(package.icon!, width: 48, height: 48, cacheWidth: 48, cacheHeight: 48),
             );
           },
-          itemCount: packages.length,
+          itemCount: packages.length + 1,
         ),
         error: (error, _) => SliverErrorBodyPlaceholder(error.toString()),
         loading: () => const Center(child: CircularProgressIndicator()),
+      ),
+    );
+  }
+
+  Widget _buildExplanation(BuildContext context, PerAppProxyMode mode) {
+    final theme = Theme.of(context);
+    final (title, hint) = switch (mode) {
+      PerAppProxyMode.off => (
+        'Все приложения через VPN',
+        'VPN работает для всех программ. Нажмите на режим вверху ⋮, чтобы выбрать по-другому.',
+      ),
+      PerAppProxyMode.include => (
+        'Только отмеченные приложения через VPN',
+        'VPN работает только для отмеченных ✓ приложений. Остальные выходят в интернет напрямую.',
+      ),
+      PerAppProxyMode.exclude => (
+        'Все приложения через VPN, кроме отмеченных',
+        'Отмеченные ✓ приложения выходят в интернет напрямую (без VPN). Удобно для банков, госуслуг, Ozon — они часто блокируют VPN.',
+      ),
+    };
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface)),
+          const Gap(6),
+          Text(hint, style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant, height: 1.4)),
+        ],
       ),
     );
   }
