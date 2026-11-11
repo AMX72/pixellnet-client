@@ -9,7 +9,9 @@ import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
+import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/gen/translations.g.dart' show AppLocale;
 import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
@@ -843,6 +845,8 @@ class _SettingsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localePreferencesProvider);
+    final langLabel = _localeLabel(locale);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -853,8 +857,8 @@ class _SettingsSection extends ConsumerWidget {
         ),
         _Row(
           label: 'Язык',
-          value: 'Русский',
-          onTap: () => _showPlaceholderSheet(context, 'Язык', 'Русский · English · Қазақша — скоро'),
+          value: langLabel,
+          onTap: () => _showLanguageSheet(context, ref),
         ),
         _Row(
           label: 'Для разработчика',
@@ -863,6 +867,85 @@ class _SettingsSection extends ConsumerWidget {
       ],
     );
   }
+}
+
+String _localeLabel(AppLocale locale) {
+  switch (locale) {
+    case AppLocale.ru:
+      return 'Русский';
+    case AppLocale.en:
+      return 'English';
+    default:
+      return locale.languageCode.toUpperCase();
+  }
+}
+
+void _showLanguageSheet(BuildContext context, WidgetRef ref) {
+  final current = ref.read(localePreferencesProvider);
+  final options = <(AppLocale, String)>[
+    (AppLocale.ru, 'Русский'),
+    (AppLocale.en, 'English'),
+  ];
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (ctx) {
+      final theme = Theme.of(ctx);
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Text(
+                'Язык интерфейса',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+            for (final opt in options)
+              InkWell(
+                onTap: () async {
+                  Navigator.of(ctx).pop();
+                  if (opt.$1 != current) {
+                    await ref
+                        .read(localePreferencesProvider.notifier)
+                        .changeLocale(opt.$1);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          opt.$2,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      if (opt.$1 == current)
+                        Icon(Icons.check_outlined,
+                            size: 18, color: theme.colorScheme.primary),
+                    ],
+                  ),
+                ),
+              ),
+            const Gap(8),
+          ],
+        ),
+      );
+    },
+  );
 }
 
 class _FooterRow extends ConsumerWidget {
