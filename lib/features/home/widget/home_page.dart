@@ -529,10 +529,10 @@ class _Row extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: _kRowPadH, vertical: 7),
         child: Row(
           children: [
-            // Label compact on the left; value column gets most of the width
-            // so stat lines like "↓ 2.9 МБ   ↑ 200.5 КБ" fit on one line.
-            Flexible(
-              flex: 2,
+            // Fixed-width label column so every row's value column begins at
+            // the same x — right side no longer jumps per row length.
+            SizedBox(
+              width: 140,
               child: Text(
                 label,
                 style: TextStyle(
@@ -540,18 +540,18 @@ class _Row extends StatelessWidget {
                   fontWeight: FontWeight.w400,
                   color: theme.colorScheme.onSurface,
                 ),
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Gap(8),
+            const Gap(12),
             if (valueWidget != null)
               valueWidget!
             else if (value != null)
               Expanded(
-                flex: 5,
                 child: Text(
                   value!,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.left,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   softWrap: false,
