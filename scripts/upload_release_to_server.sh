@@ -106,6 +106,31 @@ ssh $SSH_OPTS "$USER@$HOST" "
   ls -la | grep -vE '^(total|d)' | sort
 "
 
+echo "==> rolling out to stable channel (updates.json manifest)"
+if [ -n "${PIXELLNET_ADMIN_TOKEN:-}" ]; then
+  python3 -c "
+import json, urllib.request
+payload = json.dumps({
+  'channel': 'stable',
+  'version': '$VER',
+  'apk_url': 'https://pixellnet.com/download/pixellnet-latest-arm64.apk',
+  'changelog': 'Автоматический релиз v$VER',
+}).encode('utf-8')
+req = urllib.request.Request(
+  'https://pixellnet.com/api/admin/rollout/apply',
+  data=payload,
+  headers={
+    'X-Admin-Token': '${PIXELLNET_ADMIN_TOKEN}',
+    'Content-Type': 'application/json; charset=utf-8',
+  },
+  method='POST',
+)
+print(urllib.request.urlopen(req).read().decode())
+"
+else
+  echo "  (skip — PIXELLNET_ADMIN_TOKEN not set; in-app updater will stay on old version)"
+fi
+
 echo "==> purging Cloudflare cache"
 if [ -n "${CLOUDFLARE_MASTER_KEY:-}" ] && [ -n "${CLOUDFLARE_EMAIL:-}" ]; then
   curl -sfS -X POST "https://api.cloudflare.com/client/v4/zones/71ae649cd50e2ef8f51111836bfade3e/purge_cache" \
