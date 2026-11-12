@@ -1,0 +1,51 @@
+name: Upload release to pixellnet.com
+
+# Triggers after Build Android + Build Windows attach assets to a GitHub Release.
+# Downloads those assets and uploads to https://pixellnet.com/download/ via SSH,
+# updates latest-* symlinks, rotates to keep last 3 per platform, purges Cloudflare cache.
+
+on:
+  release:
+    types: [published, edited]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v0.1.80)'
+        required: true
+
+concurrency:
+  group: upload-server-${{ github.event.release.tag_name || github.event.inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ -n "${{ github.event.release.tag_name }}" ]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Wait a minute so both builds finish attaching assets
+        run: sleep 60
+
+      - name: Upload to server
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SERVER_SSH_KEY: ${{ secrets.NETCUP_SSH_KEY }}
+          SERVER_HOST: ${{ secrets.NETCUP_HOST }}
+          SERVER_USER: ${{ secrets.NETCUP_USER }}
+          CLOUDFLARE_MASTER_KEY: ${{ secrets.CLOUDFLARE_MASTER_KEY }}
+          CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+        run: |
+          chmod +x scripts/upload_release_to_server.sh
+          scripts/upload_release_to_server.sh ${{ steps.tag.outputs.tag }}

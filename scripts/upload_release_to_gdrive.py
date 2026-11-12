@@ -9,9 +9,11 @@ GDRIVE_SA_FILE (filesystem path), fallback local _secrets.
 """
 from __future__ import annotations
 import argparse
+import gc
 import json
 import os
 import re
+import shutil
 import sys
 import tempfile
 import urllib.request
@@ -196,7 +198,8 @@ def main():
     exe_installer = None
     universal_apk = None
 
-    with tempfile.TemporaryDirectory() as tmpd:
+    tmpd = tempfile.mkdtemp(prefix="pxl-rel-")
+    try:
         tmp = Path(tmpd)
         for a in assets:
             name = a["name"]
@@ -230,6 +233,9 @@ def main():
         if exe_installer:
             upload_to_drive(drive, exe_installer, "pixellnet-setup-latest.exe", ROOT_FOLDER_ID,
                             "application/x-msdownload")
+    finally:
+        gc.collect()  # release MediaFileUpload handles on Windows
+        shutil.rmtree(tmpd, ignore_errors=True)
 
     print(f"==> rotating old versions (keeping last {KEEP_LAST})")
     rotate_folder(drive, android_folder, KEEP_LAST)

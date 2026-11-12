@@ -207,8 +207,7 @@ class HomePage extends HookConsumerWidget {
                   await Share.share(
                     'PIXELLNET VPN — быстрый и приватный доступ к Интернету\n\n'
                     'Скачать для Android и Windows:\n'
-                    '• Сайт: https://pixellnet.com/download\n'
-                    '• Резервное зеркало (Google Drive): https://drive.google.com/drive/folders/1Q2o9ZoKASQ87O7R3gX5APPEyBvf7Svtp',
+                    'https://pixellnet.com/download',
                     subject: 'PIXELLNET VPN',
                   );
                 },
@@ -216,12 +215,12 @@ class HomePage extends HookConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.cloud_download_outlined, size: 20),
                 title: const Text('Скачать другие версии'),
-                subtitle: const Text('Windows · iOS · macOS · Linux',
+                subtitle: const Text('Windows · старые версии',
                     style: TextStyle(fontSize: 12)),
                 onTap: () async {
                   Navigator.of(ctx).pop();
                   await launchUrl(
-                    Uri.parse('https://drive.google.com/drive/folders/1Q2o9ZoKASQ87O7R3gX5APPEyBvf7Svtp'),
+                    Uri.parse('https://pixellnet.com/download'),
                     mode: LaunchMode.externalApplication,
                   );
                 },
