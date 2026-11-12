@@ -55,6 +55,7 @@ jobs:
           SERVER_USER: ${{ secrets.NETCUP_USER }}
           CLOUDFLARE_MASTER_KEY: ${{ secrets.CLOUDFLARE_MASTER_KEY }}
           CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+          PIXELLNET_ADMIN_TOKEN: ${{ secrets.PIXELLNET_ADMIN_TOKEN }}
         run: |
           chmod +x scripts/upload_release_to_server.sh
           scripts/upload_release_to_server.sh ${{ steps.tag.outputs.tag }}
