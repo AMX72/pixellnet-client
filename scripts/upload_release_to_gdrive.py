@@ -25,6 +25,9 @@ from googleapiclient.errors import HttpError
 ROOT_FOLDER_ID = os.environ.get("GDRIVE_FOLDER_ID", "1Q2o9ZoKASQ87O7R3gX5APPEyBvf7Svtp")
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 REPO = "AMX72/pixellnet-client"
+KEEP_LAST = int(os.environ.get("GDRIVE_KEEP_LAST", "3"))
+
+VERSION_RE = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 
 
 def load_sa_credentials():
@@ -64,6 +67,48 @@ def find_by_name(drive, name: str, parent: str):
     res = drive.files().list(q=q, fields="files(id,size)", supportsAllDrives=True,
                              includeItemsFromAllDrives=True).execute()
     return res.get("files", [])
+
+
+def parse_version(name: str):
+    """Extract (major, minor, patch) from a filename; None if no match."""
+    m = VERSION_RE.search(name)
+    if not m:
+        return None
+    return tuple(int(x) for x in m.groups())
+
+
+def rotate_folder(drive, folder_id: str, keep_last: int = KEEP_LAST):
+    """Keep only the last `keep_last` versioned files per base-name family.
+
+    Example: Android/ has pixellnet-0.1.78-arm64.apk, …-x86_64.apk, …
+    Groups by (base-name-without-version, extension), sorts by version desc,
+    trashes everything beyond keep_last per group.
+    """
+    res = drive.files().list(
+        q=f"'{folder_id}' in parents and trashed=false",
+        fields="files(id,name,createdTime)",
+        pageSize=200, supportsAllDrives=True, includeItemsFromAllDrives=True,
+    ).execute()
+    files = res.get("files", [])
+
+    groups: dict[str, list] = {}
+    for f in files:
+        ver = parse_version(f["name"])
+        if ver is None:
+            continue  # leave non-versioned files alone
+        # group by filename with version stripped out
+        key = VERSION_RE.sub("VER", f["name"])
+        groups.setdefault(key, []).append((ver, f))
+
+    for key, entries in groups.items():
+        entries.sort(key=lambda x: x[0], reverse=True)  # newest first
+        to_delete = entries[keep_last:]
+        for _, f in to_delete:
+            try:
+                drive.files().delete(fileId=f["id"], supportsAllDrives=True).execute()
+                print(f"  rotated out: {f['name']}")
+            except HttpError as e:
+                print(f"  WARN: could not delete {f['name']}: {e}")
 
 
 def upload_to_drive(drive, local_path: Path, drive_name: str, parent: str, mime: str):
@@ -185,6 +230,10 @@ def main():
         if exe_installer:
             upload_to_drive(drive, exe_installer, "pixellnet-setup-latest.exe", ROOT_FOLDER_ID,
                             "application/x-msdownload")
+
+    print(f"==> rotating old versions (keeping last {KEEP_LAST})")
+    rotate_folder(drive, android_folder, KEEP_LAST)
+    rotate_folder(drive, windows_folder, KEEP_LAST)
 
     print(f"==> done, v{version} published to Google Drive")
 
