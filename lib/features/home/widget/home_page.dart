@@ -198,6 +198,22 @@ class HomePage extends HookConsumerWidget {
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.ios_share_outlined, size: 20),
+                title: const Text('Поделиться приложением'),
+                subtitle: const Text('Отправить ссылку друзьям',
+                    style: TextStyle(fontSize: 12)),
+                onTap: () async {
+                  Navigator.of(ctx).pop();
+                  await Share.share(
+                    'PIXELLNET VPN — быстрый и приватный доступ к Интернету\n\n'
+                    'Скачать для Android и Windows:\n'
+                    '• Сайт: https://pixellnet.com/download\n'
+                    '• Резервное зеркало (Google Drive): https://drive.google.com/drive/folders/1Q2o9ZoKASQ87O7R3gX5APPEyBvf7Svtp',
+                    subject: 'PIXELLNET VPN',
+                  );
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.cloud_download_outlined, size: 20),
                 title: const Text('Скачать другие версии'),
                 subtitle: const Text('Windows · iOS · macOS · Linux',

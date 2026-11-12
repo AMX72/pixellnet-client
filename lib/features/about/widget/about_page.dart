@@ -18,6 +18,13 @@ import 'package:hiddify/features/updater/updater_service.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
+
+const String kPixellnetShareText =
+    'PIXELLNET VPN — быстрый и приватный доступ к Интернету\n\n'
+    'Скачать для Android и Windows:\n'
+    '• Сайт: https://pixellnet.com/download\n'
+    '• Резервное зеркало (Google Drive): https://drive.google.com/drive/folders/1Q2o9ZoKASQ87O7R3gX5APPEyBvf7Svtp';
 
 class AboutPage extends HookConsumerWidget {
   const AboutPage({super.key});
@@ -152,6 +159,14 @@ class AboutPage extends HookConsumerWidget {
             delegate: SliverChildListDelegate([
               ...conditionalTiles,
               if (conditionalTiles.isNotEmpty) const Divider(),
+              ListTile(
+                title: const Text('Поделиться приложением'),
+                subtitle: const Text('Отправить ссылку на скачивание друзьям'),
+                leading: const Icon(Icons.share_outlined),
+                onTap: () async {
+                  await Share.share(kPixellnetShareText, subject: 'PIXELLNET VPN');
+                },
+              ),
               ListTile(
                 title: Text(t.pages.about.sourceCode),
                 trailing: const Icon(FluentIcons.open_24_regular),
