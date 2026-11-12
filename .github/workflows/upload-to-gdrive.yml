@@ -1,0 +1,60 @@
+name: Upload release to Google Drive
+
+# Triggers after a Release has been published by Build Android/Windows
+# (softprops/action-gh-release creates/updates the release during tag builds).
+# Also exposes manual re-run via workflow_dispatch for backfill.
+
+on:
+  release:
+    types: [published, edited]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v0.1.80)'
+        required: true
+
+concurrency:
+  group: upload-gdrive-${{ github.event.release.tag_name || github.event.inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: pip install google-api-python-client google-auth
+
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ -n "${{ github.event.release.tag_name }}" ]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          fi
+
+      # Wait a bit so all CI runs (Android + Windows) finish uploading assets.
+      # Both builds append to the same release; Windows is usually last.
+      - name: Wait for all build assets (release 'edited' events can fire mid-upload)
+        run: |
+          sleep 60
+          curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.tag.outputs.tag }}" \
+            | grep -c '"name":' || true
+
+      - name: Upload to GDrive
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GDRIVE_SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: python scripts/upload_release_to_gdrive.py --tag ${{ steps.tag.outputs.tag }}
