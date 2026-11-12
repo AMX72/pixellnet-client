@@ -16,6 +16,7 @@ import 'package:hiddify/core/preferences/preferences_migration.dart';
 import 'package:hiddify/core/preferences/preferences_provider.dart';
 import 'package:hiddify/features/app/widget/app.dart';
 import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
+import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/chain/model/chain_enum.dart';
 import 'package:hiddify/features/chain/notifier/chain_profile_notifier.dart';
 
@@ -117,6 +118,25 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async
     if (PlatformUtils.isAndroid) {
       await _safeInit("android display mode", () async {
         await FlutterDisplayMode.setHighRefreshRate();
+      });
+    }
+  }
+
+  // Mobile auto-connect: if user enabled "Автоподключение при запуске",
+  // start the VPN once providers are ready and there is an active profile.
+  if (PlatformUtils.isMobile) {
+    final autoConnect = await AutoStartNotifier.isMobileAutoConnectEnabled();
+    if (autoConnect) {
+      Future.delayed(const Duration(milliseconds: 800), () async {
+        try {
+          final activeProfile = await container.read(activeProfileProvider.future);
+          if (activeProfile != null) {
+            Logger.bootstrap.info("mobile auto-connect: starting VPN for ${activeProfile.name}");
+            await container.read(connectionNotifierProvider.notifier).mayConnect();
+          }
+        } catch (e, st) {
+          Logger.bootstrap.warning("mobile auto-connect failed", e, st);
+        }
       });
     }
   }
