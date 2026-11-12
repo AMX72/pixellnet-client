@@ -40,17 +40,18 @@ fi
 SSH_OPTS="-i $KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 echo "==> fetching release $TAG metadata"
-JSON=$(curl -sfS -H "Authorization: Bearer ${GITHUB_TOKEN:?}" \
+curl -sfS -H "Authorization: Bearer ${GITHUB_TOKEN:?}" \
   -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/repos/$REPO/releases/tags/$TAG")
+  "https://api.github.com/repos/$REPO/releases/tags/$TAG" > "$TMP/release.json"
 
-# Parse assets list with python (robust vs jq that may be missing)
-python3 - <<PY > "$TMP/assets.tsv"
+# Parse assets list with python (robust vs jq that may be missing).
+# Reading from a file avoids heredoc issues with special chars in release body.
+python3 -c "
 import json
-d = json.loads('''$JSON''')
+d = json.load(open('$TMP/release.json', encoding='utf-8'))
 for a in d.get('assets', []):
-    print(f"{a['id']}\t{a['name']}\t{a['size']}")
-PY
+    print(f\"{a['id']}\t{a['name']}\t{a['size']}\")
+" > "$TMP/assets.tsv"
 
 echo "==> downloading assets"
 while IFS=$'\t' read -r id name size; do
