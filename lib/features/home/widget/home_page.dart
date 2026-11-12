@@ -2122,7 +2122,7 @@ class _SettingsSection extends ConsumerWidget {
           onTap: () => _showLanguageSheet(context, ref),
         ),
         _Row(
-          label: 'Выбор приложений',
+          label: 'Отключить для приложений',
           onTap: () => context.pushNamed('perAppProxy'),
         ),
         _Row(

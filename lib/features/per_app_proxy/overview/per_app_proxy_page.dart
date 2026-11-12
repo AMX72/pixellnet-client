@@ -164,6 +164,18 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
     final mode = ref.watch(Preferences.perAppProxyMode).toAppProxy();
     final selectedApps = ref.watch(PerAppProxyProvider(mode));
 
+    // Default to 'exclude' mode on first open — the primary use-case of this
+    // screen is 'route around VPN for some apps' (banks, Ozon, Gosuslugi);
+    // in off/all-through-VPN mode checkboxes have nowhere to write.
+    useEffect(() {
+      if (ref.read(Preferences.perAppProxyMode) == PerAppProxyMode.off) {
+        Future.microtask(() {
+          ref.read(Preferences.perAppProxyMode.notifier).update(PerAppProxyMode.exclude);
+        });
+      }
+      return null;
+    }, const []);
+
     final hideSystemApps = useState(false);
     final isSearching = useState(false);
     final searchQuery = useState("");
@@ -260,7 +272,7 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
               ),
             )
           : AppBar(
-              title: Text(t.pages.settings.routing.generalOptions.perAppProxy.title),
+              title: const Text('Отключить для приложений'),
               actions: [
                 IconButton(
                   icon: const Icon(FluentIcons.search_24_regular),
@@ -442,7 +454,18 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
               ),
               value: flag == null ? false : PkgFlag.checkboxValue(flag),
               tristate: true,
-              onChanged: (_) => ref.read(PerAppProxyProvider(mode).notifier).updatePkg(package.packageName),
+              onChanged: (_) async {
+                // If we are still in off-mode (useEffect hasn't flipped yet),
+                // flip first so the provider has somewhere to write.
+                var effectiveMode = mode;
+                if (effectiveMode == null) {
+                  await ref.read(Preferences.perAppProxyMode.notifier)
+                      .update(PerAppProxyMode.exclude);
+                  effectiveMode = AppProxyMode.exclude;
+                }
+                await ref.read(PerAppProxyProvider(effectiveMode).notifier)
+                    .updatePkg(package.packageName);
+              },
               secondary: package.icon == null
                   ? null
                   : Image.memory(package.icon!, width: 48, height: 48, cacheWidth: 48, cacheHeight: 48),
