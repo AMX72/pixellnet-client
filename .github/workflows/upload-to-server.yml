@@ -5,22 +5,31 @@ name: Upload release to pixellnet.com
 # updates latest-* symlinks, rotates to keep last 3 per platform, purges Cloudflare cache.
 
 on:
-  release:
-    types: [published, edited]
+  # Triggered after Build Windows completes successfully.
+  # (release:published trigger does not fire because the release
+  # is created by softprops/action-gh-release via GITHUB_TOKEN,
+  # which cannot start other workflows — recursion safety.)
+  workflow_run:
+    workflows: ["Build Windows"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (e.g. v0.1.80)'
+        description: 'Release tag (e.g. v0.1.81)'
         required: true
 
 concurrency:
-  group: upload-server-${{ github.event.release.tag_name || github.event.inputs.tag }}
+  group: upload-server
   cancel-in-progress: false
 
 jobs:
   upload:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       startsWith(github.event.workflow_run.head_branch, 'v'))
 
     steps:
       - name: Checkout
@@ -29,14 +38,14 @@ jobs:
       - name: Resolve tag
         id: tag
         run: |
-          if [ -n "${{ github.event.release.tag_name }}" ]; then
-            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          if [ -n "${{ github.event.workflow_run.head_branch }}" ]; then
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
           else
             echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Wait a minute so both builds finish attaching assets
-        run: sleep 60
+      - name: Wait for Android build + release to finalise
+        run: sleep 30
 
       - name: Upload to server
         env:
