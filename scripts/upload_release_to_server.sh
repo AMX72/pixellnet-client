@@ -71,8 +71,9 @@ declare -A RENAME=(
   ["pixellnet-windows-x64-$VER.zip"]="pxl-win-v$VER.zip"
 )
 for src in "${!RENAME[@]}"; do
-  if [ -f "$TMP/$src" ]; then
-    mv "$TMP/$src" "$TMP/${RENAME[$src]}"
+  dst="${RENAME[$src]}"
+  if [ -f "$TMP/$src" ] && [ "$src" != "$dst" ]; then
+    mv "$TMP/$src" "$TMP/$dst"
   fi
 done
 
