@@ -122,7 +122,7 @@ class AddProfileNotifier extends _$AddProfileNotifier with AppLogger {
             )
             .run();
         if (res.isRight()) return res;
-        res.leftMap((e) => lastErr = e);
+        res.match((e) => lastErr = e, (_) => null);
       }
       return left(lastErr ?? const ProfileFailure.unexpected());
     });
