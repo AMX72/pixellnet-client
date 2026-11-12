@@ -3,17 +3,23 @@
     "home": {
       "title": "Басты бет",
       "server": "Сервер",
-      "protocol": "Хаттама",
+      "protocol": "Протокол",
       "mode": "Режим",
+      "vpnTun": "VPN (TUN)",
       "key": "Кілт",
-      "autoConnect": "Қосылу қосылған кезде",
+      "autoConnect": "Іске қосқанда автоқосылу",
       "language": "Тіл",
-      "developer": "Әзірлеуші үшін",
+      "developer": "Әзірлеушіге",
       "notConnected": "Қосылмаған",
+      "establishing": "Байланыс орнатылуда",
       "cancel": "Болдырмау",
       "support": "Қолдау",
       "languageTitle": "Интерфейс тілі",
-      "copied": "Көшірілді"
+      "copied": "Көшірілді",
+      "serverSoon": "Серверлер тізімі — жақында",
+      "protocolSoon": "Протокол таңдау — жақында",
+      "modeSoon": "VPN (TUN) · Жүйелік прокси — жақында",
+      "developerSoon": "Журналдар, DNS, MTU, экспорт — жақында"
     }
   },
   "connection": {

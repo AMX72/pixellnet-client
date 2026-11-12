@@ -5,15 +5,21 @@
       "server": "სერვერი",
       "protocol": "პროტოკოლი",
       "mode": "რეჟიმი",
+      "vpnTun": "VPN (TUN)",
       "key": "გასაღები",
-      "autoConnect": "ავტომატური დაკავშირება",
+      "autoConnect": "ავტომატური დაკავშირება გაშვებისას",
       "language": "ენა",
       "developer": "დეველოპერისთვის",
       "notConnected": "არ არის დაკავშირებული",
+      "establishing": "მიმდინარეობს დაკავშირება",
       "cancel": "გაუქმება",
       "support": "მხარდაჭერა",
       "languageTitle": "ინტერფეისის ენა",
-      "copied": "დაკოპირდა"
+      "copied": "დაკოპირდა",
+      "serverSoon": "სერვერების სია — მალე",
+      "protocolSoon": "პროტოკოლის არჩევა — მალე",
+      "modeSoon": "VPN (TUN) · სისტემური პროქსი — მალე",
+      "developerSoon": "ლოგები, DNS, MTU, ექსპორტი — მალე"
     }
   },
   "connection": {
@@ -21,6 +27,6 @@
     "connected": "დაკავშირებულია",
     "connecting": "მიმდინარეობს დაკავშირება…",
     "disconnect": "გათიშვა",
-    "tapToConnect": "დაკავშირებისთვის დააჭირეთ"
+    "tapToConnect": "დასაკავშირებლად დააჭირეთ"
   }
 }

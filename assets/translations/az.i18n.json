@@ -5,22 +5,28 @@
       "server": "Server",
       "protocol": "Protokol",
       "mode": "Rejim",
+      "vpnTun": "VPN (TUN)",
       "key": "Açar",
-      "autoConnect": "Başladıqda avto qoşulma",
+      "autoConnect": "Başladıqda avtomatik qoşulma",
       "language": "Dil",
-      "developer": "Developer üçün",
+      "developer": "Tərtibatçı üçün",
       "notConnected": "Qoşulmayıb",
+      "establishing": "Bağlantı qurulur",
       "cancel": "Ləğv et",
       "support": "Dəstək",
       "languageTitle": "İnterfeys dili",
-      "copied": "Kopyalandı"
+      "copied": "Kopyalandı",
+      "serverSoon": "Serverlər siyahısı — tezliklə",
+      "protocolSoon": "Protokol seçimi — tezliklə",
+      "modeSoon": "VPN (TUN) · Sistem proksi — tezliklə",
+      "developerSoon": "Loglar, DNS, MTU, ixrac — tezliklə"
     }
   },
   "connection": {
     "connect": "Qoşul",
     "connected": "Qoşuldu",
     "connecting": "Qoşulur…",
-    "disconnect": "Ayrıl",
-    "tapToConnect": "Qoşulmaq üçün basın"
+    "disconnect": "Ayır",
+    "tapToConnect": "Qoşulmaq üçün toxunun"
   }
 }

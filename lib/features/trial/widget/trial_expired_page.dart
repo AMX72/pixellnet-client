@@ -13,62 +13,72 @@ class TrialExpiredPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     return Container(
-      color: theme.scaffoldBackgroundColor,
+      color: PixellnetBrand.bgScaffold,
       alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 40),
-          const Center(
-            child: Icon(
-              Icons.vpn_key_outlined,
-              size: 72,
-              color: PixellnetBrand.mocha,
+          const SizedBox(height: 32),
+          Center(
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: PixellnetBrand.accentBg,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.vpn_key_outlined,
+                size: 40,
+                color: PixellnetBrand.accent,
+              ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           Text(
             'Пробный период уже\nбыл использован',
             textAlign: TextAlign.center,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
               height: 1.25,
+              color: PixellnetBrand.textPrimary,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
-            'На это устройство мы уже выдавали бесплатные 7 дней. '
-            'Чтобы продолжить — введите платный ключ.',
+            'На это устройство мы уже выдавали 7 дней.\nЧтобы продолжить — введите платный ключ.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: PixellnetBrand.textSecondary,
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 36),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: PixellnetBrand.mocha,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              backgroundColor: PixellnetBrand.accent,
+              foregroundColor: const Color(0xFF131314),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
             ),
             onPressed: () {
               ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile();
             },
             child: const Text(
               'Ввести ключ',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ),
-          const SizedBox(height: 12),
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: PixellnetBrand.mocha, width: 1.5),
-              foregroundColor: PixellnetBrand.mocha,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          const SizedBox(height: 10),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: PixellnetBrand.textPrimary,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+              backgroundColor: PixellnetBrand.bgSurface,
             ),
             onPressed: () => launchUrl(
               Uri.parse('https://t.me/pixellnet_bot?start=renew'),
@@ -76,7 +86,7 @@ class TrialExpiredPage extends ConsumerWidget {
             ),
             child: const Text(
               'Купить подписку',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
           ),
           const SizedBox(height: 20),
@@ -88,22 +98,17 @@ class TrialExpiredPage extends ConsumerWidget {
               ),
               child: RichText(
                 textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
-                    fontSize: 13,
-                  ),
-                  children: const [
+                text: const TextSpan(
+                  style: TextStyle(color: PixellnetBrand.textMuted, fontSize: 13),
+                  children: [
                     TextSpan(text: 'Нет ключа? Напишите '),
                     TextSpan(
                       text: '@pixellnet_bot',
                       style: TextStyle(
-                        color: PixellnetBrand.olive,
-                        decoration: TextDecoration.underline,
-                        fontWeight: FontWeight.w600,
+                        color: PixellnetBrand.accent,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    TextSpan(text: ' — поможем купить'),
                   ],
                 ),
               ),

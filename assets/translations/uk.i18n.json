@@ -5,15 +5,21 @@
       "server": "Сервер",
       "protocol": "Протокол",
       "mode": "Режим",
+      "vpnTun": "VPN (TUN)",
       "key": "Ключ",
       "autoConnect": "Автопідключення при запуску",
       "language": "Мова",
       "developer": "Для розробника",
       "notConnected": "Не підключено",
+      "establishing": "Встановлюємо з'єднання",
       "cancel": "Скасувати",
       "support": "Підтримка",
       "languageTitle": "Мова інтерфейсу",
-      "copied": "Скопійовано"
+      "copied": "Скопійовано",
+      "serverSoon": "Список серверів — незабаром",
+      "protocolSoon": "Вибір протоколу — незабаром",
+      "modeSoon": "VPN (TUN) · Системний проксі — незабаром",
+      "developerSoon": "Журнали, DNS, MTU, експорт — незабаром"
     }
   },
   "connection": {
@@ -21,6 +27,6 @@
     "connected": "Підключено",
     "connecting": "Підключення…",
     "disconnect": "Відключити",
-    "tapToConnect": "Натисніть, щоб підключитися"
+    "tapToConnect": "Натисніть, щоб підключити"
   }
 }

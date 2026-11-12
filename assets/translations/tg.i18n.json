@@ -4,23 +4,29 @@
       "title": "Саҳифаи асосӣ",
       "server": "Сервер",
       "protocol": "Протокол",
-      "mode": "Реҷа",
+      "mode": "Усул",
+      "vpnTun": "VPN (TUN)",
       "key": "Калид",
       "autoConnect": "Пайвасти худкор ҳангоми оғоз",
       "language": "Забон",
-      "developer": "Барои таҳиягар",
-      "notConnected": "Пайваст нашуда",
+      "developer": "Барои таҳиякунанда",
+      "notConnected": "Пайваст нашудааст",
+      "establishing": "Пайвастшавӣ сохта мешавад",
       "cancel": "Бекор кардан",
       "support": "Дастгирӣ",
       "languageTitle": "Забони интерфейс",
-      "copied": "Нусхабардорӣ шуд"
+      "copied": "Нусхабардорӣ шуд",
+      "serverSoon": "Рӯйхати серверҳо — ба зудӣ",
+      "protocolSoon": "Интихоби протокол — ба зудӣ",
+      "modeSoon": "VPN (TUN) · Прокси системавӣ — ба зудӣ",
+      "developerSoon": "Логҳо, DNS, MTU, содирот — ба зудӣ"
     }
   },
   "connection": {
-    "connect": "Пайваст шудан",
+    "connect": "Пайваст кардан",
     "connected": "Пайваст шуд",
     "connecting": "Пайвастшавӣ…",
     "disconnect": "Қатъ кардан",
-    "tapToConnect": "Барои пайваст шудан пахш кунед"
+    "tapToConnect": "Барои пайваст пахш кунед"
   }
 }

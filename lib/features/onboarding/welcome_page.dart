@@ -82,82 +82,77 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
     final isCompact = size.height < 700;
 
     return Scaffold(
+      backgroundColor: PixellnetBrand.bgScaffold,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(height: isCompact ? 8 : 24),
-              // Icon + brand
+              SizedBox(height: isCompact ? 16 : 48),
               Center(
                 child: Container(
-                  width: 76,
-                  height: 76,
+                  width: 72,
+                  height: 72,
                   decoration: BoxDecoration(
-                    color: PixellnetBrand.mocha.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(22),
+                    color: PixellnetBrand.accentBg,
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   alignment: Alignment.center,
-                  child: const Icon(Icons.shield_moon_outlined, size: 44, color: PixellnetBrand.mocha),
+                  child: const Icon(Icons.shield_outlined, size: 40, color: PixellnetBrand.accent),
                 ),
               ),
               const SizedBox(height: 20),
               Text(
                 'Добро пожаловать',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: PixellnetBrand.textPrimary,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Стабильный доступ к зарубежным сервисам.\nВыберите как начать:',
+                'Стабильный доступ к зарубежным сервисам',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: PixellnetBrand.textSecondary,
                   height: 1.4,
                 ),
               ),
-              SizedBox(height: isCompact ? 24 : 40),
+              SizedBox(height: isCompact ? 32 : 56),
 
-              // Card 1 — Trial
-              _WelcomeCard(
+              _WelcomeRow(
                 icon: Icons.bolt_outlined,
-                iconColor: PixellnetBrand.olive,
-                iconBg: PixellnetBrand.olive.withValues(alpha: 0.16),
                 title: 'Попробовать 7 дней бесплатно',
-                subtitle: 'Без карты, без регистрации. Заработает через 1 секунду.',
-                cta: 'Начать',
+                subtitle: 'Без карты, без регистрации',
                 onTap: _startTrial,
+                primary: true,
               ),
               const SizedBox(height: 12),
-
-              // Card 2 — Enter key
-              _WelcomeCard(
+              _WelcomeRow(
                 icon: Icons.vpn_key_outlined,
-                iconColor: PixellnetBrand.mocha,
-                iconBg: PixellnetBrand.mocha.withValues(alpha: 0.14),
                 title: 'У меня уже есть ключ',
                 subtitle: _clipboardHint != null
-                    ? 'В буфере обмена найдена ссылка — использовать её?'
-                    : 'Введите ключ или ссылку подписки от друга/поддержки',
-                cta: _clipboardHint != null ? 'Вставить из буфера' : 'Ввести',
+                    ? 'В буфере обмена найдена ссылка'
+                    : 'Введите ключ или ссылку подписки',
                 onTap: () => _enterKey(prefilledUrl: _clipboardHint),
+                primary: false,
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
 
-              // Hint снизу
               Center(
                 child: Text.rich(
                   TextSpan(
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                      color: PixellnetBrand.textMuted,
                     ),
-                    children: [
-                      const TextSpan(text: 'Есть вопросы? Напишите '),
+                    children: const [
+                      TextSpan(text: 'Есть вопросы? Напишите '),
                       TextSpan(
                         text: '@pixellnet_bot',
-                        style: TextStyle(color: PixellnetBrand.olive, fontWeight: FontWeight.w600),
+                        style: TextStyle(color: PixellnetBrand.accent, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -173,49 +168,37 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
   }
 }
 
-class _WelcomeCard extends StatelessWidget {
-  const _WelcomeCard({
+class _WelcomeRow extends StatelessWidget {
+  const _WelcomeRow({
     required this.icon,
-    required this.iconColor,
-    required this.iconBg,
     required this.title,
     required this.subtitle,
-    required this.cta,
     required this.onTap,
+    required this.primary,
   });
 
   final IconData icon;
-  final Color iconColor;
-  final Color iconBg;
   final String title;
   final String subtitle;
-  final String cta;
   final VoidCallback onTap;
+  final bool primary;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final bg = primary ? PixellnetBrand.accent : PixellnetBrand.bgSurface;
+    final fg = primary ? const Color(0xFF131314) : PixellnetBrand.textPrimary;
+    final sub = primary ? const Color(0xB3131314) : PixellnetBrand.textSecondary;
     return Material(
-      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-      borderRadius: BorderRadius.circular(18),
+      color: bg,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                alignment: Alignment.center,
-                child: Icon(icon, size: 26, color: iconColor),
-              ),
+              Icon(icon, size: 24, color: fg),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -223,34 +206,26 @@ class _WelcomeCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        height: 1.35,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: fg,
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Text(
-                          cta,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: iconColor,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.arrow_forward_outlined, size: 16, color: iconColor),
-                      ],
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: sub,
+                        height: 1.3,
+                      ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
+              Icon(Icons.arrow_forward_outlined, size: 18, color: fg),
             ],
           ),
         ),

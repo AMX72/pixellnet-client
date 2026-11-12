@@ -5,15 +5,21 @@
       "server": "Сервер",
       "protocol": "Пратакол",
       "mode": "Рэжым",
+      "vpnTun": "VPN (TUN)",
       "key": "Ключ",
       "autoConnect": "Аўтападлучэнне пры запуску",
       "language": "Мова",
       "developer": "Для распрацоўшчыка",
       "notConnected": "Не падлучана",
-      "cancel": "Скасаваць",
+      "establishing": "Усталёўваем злучэнне",
+      "cancel": "Адмена",
       "support": "Падтрымка",
       "languageTitle": "Мова інтэрфейсу",
-      "copied": "Скапіравана"
+      "copied": "Скапіравана",
+      "serverSoon": "Спіс сервераў — хутка",
+      "protocolSoon": "Выбар пратакола — хутка",
+      "modeSoon": "VPN (TUN) · Сістэмны проксі — хутка",
+      "developerSoon": "Логі, DNS, MTU, экспарт — хутка"
     }
   },
   "connection": {
@@ -21,6 +27,6 @@
     "connected": "Падлучана",
     "connecting": "Падлучэнне…",
     "disconnect": "Адлучыць",
-    "tapToConnect": "Націсніце, каб падлучыцца"
+    "tapToConnect": "Націсніце, каб падлучыць"
   }
 }

@@ -186,7 +186,7 @@ class HomePage extends HookConsumerWidget {
                 title: const Text('Диагностика'),
                 onTap: () {
                   Navigator.of(ctx).pop();
-                  // TODO: route to diagnostics screen
+                  context.pushNamed('developer');
                 },
               ),
               ListTile(
@@ -194,7 +194,7 @@ class HomePage extends HookConsumerWidget {
                 title: const Text('Логи'),
                 onTap: () {
                   Navigator.of(ctx).pop();
-                  // TODO: route to logs
+                  context.pushNamed('logs');
                 },
               ),
               ListTile(
@@ -215,7 +215,7 @@ class HomePage extends HookConsumerWidget {
                 title: const Text('О программе'),
                 onTap: () {
                   Navigator.of(ctx).pop();
-                  // TODO: show about sheet
+                  context.pushNamed('about');
                 },
               ),
               const Gap(8),
@@ -1834,6 +1834,16 @@ void _showAddSubscriptionSheet(BuildContext context, WidgetRef ref) {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.data_object_outlined, size: 20),
+              title: const Text('Вставить JSON-конфиг', style: TextStyle(fontSize: 14)),
+              subtitle: const Text('sing-box · v2ray · raw-config',
+                  style: TextStyle(fontSize: 12)),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _showJsonEntryDialog(context, ref);
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.qr_code_scanner_outlined, size: 20),
               title: const Text('Сканировать QR-код', style: TextStyle(fontSize: 14)),
               onTap: () {
@@ -1996,6 +2006,66 @@ Future<void> _showManualEntryDialog(BuildContext context, WidgetRef ref) async {
   }
 }
 
+Future<void> _showJsonEntryDialog(BuildContext context, WidgetRef ref) async {
+  final controller = TextEditingController();
+  final result = await showDialog<String>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('JSON-конфиг'),
+      content: SizedBox(
+        width: 400,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Вставьте целиком JSON от поддержки (sing-box или v2ray).',
+              style: TextStyle(fontSize: 12),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: '{\n  "outbounds": [...]\n}',
+                hintStyle: TextStyle(fontFamily: 'monospace', fontSize: 12),
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+              maxLines: 12,
+              minLines: 8,
+              keyboardType: TextInputType.multiline,
+            ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              icon: const Icon(Icons.content_paste_outlined, size: 16),
+              label: const Text('Вставить из буфера', style: TextStyle(fontSize: 12)),
+              onPressed: () async {
+                final data = await Clipboard.getData('text/plain');
+                final text = data?.text?.trim();
+                if (text != null && text.isNotEmpty) {
+                  controller.text = text;
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Отмена')),
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+          child: const Text('Добавить'),
+        ),
+      ],
+    ),
+  );
+  if (result != null && result.isNotEmpty) {
+    await ref.read(addProfileNotifierProvider.notifier).addClipboard(result);
+  }
+}
+
 class _SettingsSection extends ConsumerWidget {
   const _SettingsSection();
 
@@ -2033,7 +2103,7 @@ class _SettingsSection extends ConsumerWidget {
         ),
         _Row(
           label: t.pages.home.developer,
-          onTap: () => _showPlaceholderSheet(context, t.pages.home.developer, t.pages.home.developerSoon),
+          onTap: () => context.pushNamed('developer'),
         ),
       ],
     );

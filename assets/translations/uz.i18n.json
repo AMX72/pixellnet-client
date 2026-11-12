@@ -5,20 +5,26 @@
       "server": "Server",
       "protocol": "Protokol",
       "mode": "Rejim",
+      "vpnTun": "VPN (TUN)",
       "key": "Kalit",
       "autoConnect": "Ishga tushganda avtomatik ulanish",
       "language": "Til",
       "developer": "Dasturchi uchun",
       "notConnected": "Ulanmagan",
+      "establishing": "Aloqa o'rnatilmoqda",
       "cancel": "Bekor qilish",
       "support": "Qo'llab-quvvatlash",
       "languageTitle": "Interfeys tili",
-      "copied": "Nusxalandi"
+      "copied": "Nusxalandi",
+      "serverSoon": "Serverlar ro'yxati — tez orada",
+      "protocolSoon": "Protokol tanlash — tez orada",
+      "modeSoon": "VPN (TUN) · Tizim proksi — tez orada",
+      "developerSoon": "Loglar, DNS, MTU, eksport — tez orada"
     }
   },
   "connection": {
-    "connect": "Ulash",
-    "connected": "Ulangan",
+    "connect": "Ulanish",
+    "connected": "Ulandi",
     "connecting": "Ulanmoqda…",
     "disconnect": "Uzish",
     "tapToConnect": "Ulanish uchun bosing"

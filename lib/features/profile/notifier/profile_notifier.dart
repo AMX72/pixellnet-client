@@ -60,20 +60,33 @@ class AddProfileNotifier extends _$AddProfileNotifier with AppLogger {
   ProfileRepository get _profilesRepo => ref.read(profileRepositoryProvider).requireValue;
   CancelToken? _cancelToken;
 
+  /// Mirror hosts для subscription URL — если primary блокируется DPI
+  /// (мобильный интернет у юзера), пробуем все по очереди.
+  /// Порядок: primary pixellnet.com → ms12.ru (Eurobyte legacy) → pixell.ru.
+  static const _mirrorHosts = ['pixellnet.com', 'ms12.ru', 'pixell.ru'];
+
+  Iterable<String> _mirrorUrls(String originalUrl) sync* {
+    yield originalUrl;
+    final uri = Uri.tryParse(originalUrl);
+    if (uri == null || !uri.hasAuthority) return;
+    final host = uri.host;
+    if (!_mirrorHosts.contains(host)) return;
+    for (final alt in _mirrorHosts) {
+      if (alt == host) continue;
+      yield uri.replace(host: alt).toString();
+    }
+  }
+
   Future<void> addClipboard(String rawInput) async {
     if (state.isLoading) return;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      // final activeProfile = await ref.read(activeProfileProvider.future);
-      // final markAsActive = activeProfile == null || ref.read(Preferences.markNewProfileActive);
       final TaskEither<ProfileFailure, Unit> task;
       if (LinkParser.parse(rawInput) case (final rs)?) {
         loggy.debug("adding profile, url: [${rs.url}]");
-        task = _profilesRepo.upsertRemote(
-          rs.url,
-          userOverride: rs.name.isNotEmpty ? UserOverride(name: rs.name) : null,
-          cancelToken: _cancelToken = CancelToken(),
-        );
+        // Пробуем primary URL, при сетевой ошибке — mirror hosts.
+        final userOverride = rs.name.isNotEmpty ? UserOverride(name: rs.name) : null;
+        task = _upsertRemoteWithMirrors(rs.url, userOverride);
       } else {
         loggy.debug("adding profile, content");
         task = _profilesRepo.addLocal(safeDecodeBase64(rawInput));
@@ -90,6 +103,28 @@ class AddProfileNotifier extends _$AddProfileNotifier with AppLogger {
             },
           )
           .run();
+    });
+  }
+
+  TaskEither<ProfileFailure, Unit> _upsertRemoteWithMirrors(String url, UserOverride? userOverride) {
+    final urls = _mirrorUrls(url).toList();
+    return TaskEither(() async {
+      ProfileFailure? lastErr;
+      for (final candidate in urls) {
+        if (candidate != urls.first) {
+          loggy.info("subscription primary host failed, retry via mirror: $candidate");
+        }
+        final res = await _profilesRepo
+            .upsertRemote(
+              candidate,
+              userOverride: userOverride,
+              cancelToken: _cancelToken = CancelToken(),
+            )
+            .run();
+        if (res.isRight()) return res;
+        res.leftMap((e) => lastErr = e);
+      }
+      return left(lastErr ?? const ProfileFailure.unexpected());
     });
   }
 
