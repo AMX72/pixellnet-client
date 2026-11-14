@@ -96,22 +96,38 @@ class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
     }
   }
 
+  /// v0.1.91: смена ключа сохраняет состояние VPN. Был подключён (или подключался) —
+  /// переподключаемся на новый ключ; был отключён — ничего не делаем.
+  /// Не in-place reconnect ядра: на Android он даёт `configure tun interface:
+  /// permission denied` (старый TUN ещё не отпущен, см. откат v0.1.87) и VPN
+  /// оставался «Не подключено». Полный цикл: отключить → дождаться Disconnected →
+  /// пауза, чтобы Android освободил TUN → подключить с новым активным ключом.
   Future<void> reconnect(ProfileEntity? profile) async {
-    if (state case AsyncData(:final value) when value == const Connected()) {
-      if (profile == null) {
-        loggy.info("no active profile, disconnecting");
-        return _disconnect();
-      }
-      loggy.info("active profile changed, reconnecting");
-      await ref.read(Preferences.startedByUser.notifier).update(true);
-      await _connectionRepo.reconnect(profile, ref.read(Preferences.disableMemoryLimit)).mapLeft((err) async {
-        loggy.warning("error reconnecting", err);
-        state = AsyncError(err, StackTrace.current);
-        await ref
-            .read(dialogNotifierProvider.notifier)
-            .showCustomAlertFromErr(err.present(ref.read(translationsProvider).requireValue));
-      }).run();
+    final wasActive = switch (state) {
+      AsyncData(value: Connected() || Connecting()) => true,
+      _ => false,
+    };
+    if (!wasActive) return;
+    if (profile == null) {
+      loggy.info("no active profile, disconnecting");
+      return _disconnect();
     }
+    loggy.info("active profile changed, reconnecting (stop -> wait -> start)");
+    DiagnosticsService.instance.event('vpn.profile_switch', {'to': profile.id});
+    await ref.read(Preferences.startedByUser.notifier).update(true);
+    await _disconnect();
+    await _waitForDisconnected(const Duration(seconds: 10));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    await _connect();
+  }
+
+  Future<void> _waitForDisconnected(Duration timeout) async {
+    final deadline = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(deadline)) {
+      if (state case AsyncData(value: Disconnected())) return;
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+    loggy.warning("disconnect did not finish within $timeout, connecting anyway");
   }
 
   Future<void> abortConnection() async {
