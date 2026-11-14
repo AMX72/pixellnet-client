@@ -39,6 +39,7 @@ class HiddifyCoreService with InfraLogger {
 
   CoreStatus currentState = const CoreStatus.stopped();
   final statusController = BehaviorSubject<CoreStatus>();
+  Timer? _pendingStop;
   final logController = BehaviorSubject<List<LogMessage>>();
   final CallOptions? grpcOptions = null; //CallOptions(timeout: const Duration(milliseconds: 10000));
   final Map<String, StreamSubscription?> subscriptions = {};
@@ -475,7 +476,26 @@ class HiddifyCoreService with InfraLogger {
           })
           .endWith(CoreInfoResponse(coreState: CoreStates.STOPPED))
           .map((event) {
-            currentState = CoreStatus.fromCoreInfo(event);
+            final next = CoreStatus.fromCoreInfo(event);
+            // v0.1.93: «мигание» «Не подключено» при сворачивании/возврате приложения:
+            // поток статуса переоткрывается и на мгновение отдаёт STOPPED, хотя VPN работает.
+            // STOPPED прямо после «работает» (без «останавливается») показываем с задержкой 2 с —
+            // если за это время пришло что-то другое, его не было. Ручное отключение идёт через
+            // Stopping / прямой stop() и отображается сразу; реальный обрыв — через 2 с.
+            final shown = statusController.valueOrNull;
+            if (next is CoreStopped && next.alert == null && shown is CoreStarted) {
+              _pendingStop?.cancel();
+              _pendingStop = Timer(const Duration(seconds: 2), () {
+                if (statusController.valueOrNull is CoreStarted) {
+                  currentState = next;
+                  statusController.add(next);
+                }
+              });
+              return next;
+            }
+            _pendingStop?.cancel();
+            _pendingStop = null;
+            currentState = next;
             statusController.add(currentState);
             return currentState;
           }),
