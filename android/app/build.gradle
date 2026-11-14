@@ -77,6 +77,13 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
+        // Тестовая сборка рядом с рабочим приложением (не обновляет его):
+        //   flutter build apk --android-project-arg=pixellnetIdSuffix=.core5 --android-project-arg=pixellnetLabel=PIXELLNET-β
+        // Без этих свойств (релизы) — обычные com.pixellnet.vpn и «PIXELLNET».
+        if (project.hasProperty('pixellnetIdSuffix')) {
+            applicationIdSuffix project.property('pixellnetIdSuffix')
+        }
+        manifestPlaceholders += [pixellnetLabel: project.findProperty('pixellnetLabel') ?: 'PIXELLNET']
     }
 
     splits {

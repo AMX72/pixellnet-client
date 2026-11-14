@@ -65,6 +65,15 @@ sealed class CoreStatus with _$CoreStatus {
         return const CoreStarting();
       case CoreStates.STARTED:
         return const CoreStarted();
+      // hiddify-core 5.x: ядро поднято и пропускает трафик, это не остановка.
+      // WAITING — ни у одного прокси ещё нет положительного пинга (сразу после старта);
+      // NO_AVAILABLE_PROXIES — все прокси проверены и не ответили (не ошибка, ждём пинг);
+      // HOT_RELOADING — применяется новый конфиг без разрыва (HotReload).
+      // Без этих веток 5.x шлёт WAITING сразу после старта, и приложение считало VPN упавшим.
+      case CoreStates.WAITING:
+      case CoreStates.NO_AVAILABLE_PROXIES:
+      case CoreStates.HOT_RELOADING:
+        return const CoreStarted();
       case CoreStates.STOPPING:
         return const CoreStopping();
       default:

@@ -639,6 +639,16 @@ class OutboundInfo extends $pb.GeneratedMessage {
     $fixnum.Int64? upload,
     $fixnum.Int64? download,
     $core.String? detour,
+    Status? status,
+    $fixnum.Int64? uploadSpeed,
+    $core.bool? uploadTesting,
+    $fixnum.Int64? downloadSpeed,
+    $core.bool? downloadTesting,
+    $core.bool? uploadSpeedCached,
+    $core.bool? downloadSpeedCached,
+    $core.String? error,
+    $core.int? sortDelay,
+    $core.bool? resting,
   }) {
     final result = create();
     if (tag != null) result.tag = tag;
@@ -659,6 +669,17 @@ class OutboundInfo extends $pb.GeneratedMessage {
     if (upload != null) result.upload = upload;
     if (download != null) result.download = download;
     if (detour != null) result.detour = detour;
+    if (status != null) result.status = status;
+    if (uploadSpeed != null) result.uploadSpeed = uploadSpeed;
+    if (uploadTesting != null) result.uploadTesting = uploadTesting;
+    if (downloadSpeed != null) result.downloadSpeed = downloadSpeed;
+    if (downloadTesting != null) result.downloadTesting = downloadTesting;
+    if (uploadSpeedCached != null) result.uploadSpeedCached = uploadSpeedCached;
+    if (downloadSpeedCached != null)
+      result.downloadSpeedCached = downloadSpeedCached;
+    if (error != null) result.error = error;
+    if (sortDelay != null) result.sortDelay = sortDelay;
+    if (resting != null) result.resting = resting;
     return result;
   }
 
@@ -693,6 +714,16 @@ class OutboundInfo extends $pb.GeneratedMessage {
     ..aInt64(15, _omitFieldNames ? '' : 'upload')
     ..aInt64(16, _omitFieldNames ? '' : 'download')
     ..aOS(17, _omitFieldNames ? '' : 'detour')
+    ..aE<Status>(18, _omitFieldNames ? '' : 'status', enumValues: Status.values)
+    ..aInt64(19, _omitFieldNames ? '' : 'uploadSpeed')
+    ..aOB(20, _omitFieldNames ? '' : 'uploadTesting')
+    ..aInt64(21, _omitFieldNames ? '' : 'downloadSpeed')
+    ..aOB(22, _omitFieldNames ? '' : 'downloadTesting')
+    ..aOB(23, _omitFieldNames ? '' : 'uploadSpeedCached')
+    ..aOB(24, _omitFieldNames ? '' : 'downloadSpeedCached')
+    ..aOS(25, _omitFieldNames ? '' : 'error')
+    ..aI(26, _omitFieldNames ? '' : 'sortDelay')
+    ..aOB(27, _omitFieldNames ? '' : 'resting')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -872,6 +903,96 @@ class OutboundInfo extends $pb.GeneratedMessage {
   $core.bool hasDetour() => $_has(16);
   @$pb.TagNumber(17)
   void clearDetour() => $_clearField(17);
+
+  @$pb.TagNumber(18)
+  Status get status => $_getN(17);
+  @$pb.TagNumber(18)
+  set status(Status value) => $_setField(18, value);
+  @$pb.TagNumber(18)
+  $core.bool hasStatus() => $_has(17);
+  @$pb.TagNumber(18)
+  void clearStatus() => $_clearField(18);
+
+  @$pb.TagNumber(19)
+  $fixnum.Int64 get uploadSpeed => $_getI64(18);
+  @$pb.TagNumber(19)
+  set uploadSpeed($fixnum.Int64 value) => $_setInt64(18, value);
+  @$pb.TagNumber(19)
+  $core.bool hasUploadSpeed() => $_has(18);
+  @$pb.TagNumber(19)
+  void clearUploadSpeed() => $_clearField(19);
+
+  @$pb.TagNumber(20)
+  $core.bool get uploadTesting => $_getBF(19);
+  @$pb.TagNumber(20)
+  set uploadTesting($core.bool value) => $_setBool(19, value);
+  @$pb.TagNumber(20)
+  $core.bool hasUploadTesting() => $_has(19);
+  @$pb.TagNumber(20)
+  void clearUploadTesting() => $_clearField(20);
+
+  @$pb.TagNumber(21)
+  $fixnum.Int64 get downloadSpeed => $_getI64(20);
+  @$pb.TagNumber(21)
+  set downloadSpeed($fixnum.Int64 value) => $_setInt64(20, value);
+  @$pb.TagNumber(21)
+  $core.bool hasDownloadSpeed() => $_has(20);
+  @$pb.TagNumber(21)
+  void clearDownloadSpeed() => $_clearField(21);
+
+  @$pb.TagNumber(22)
+  $core.bool get downloadTesting => $_getBF(21);
+  @$pb.TagNumber(22)
+  set downloadTesting($core.bool value) => $_setBool(21, value);
+  @$pb.TagNumber(22)
+  $core.bool hasDownloadTesting() => $_has(21);
+  @$pb.TagNumber(22)
+  void clearDownloadTesting() => $_clearField(22);
+
+  @$pb.TagNumber(23)
+  $core.bool get uploadSpeedCached => $_getBF(22);
+  @$pb.TagNumber(23)
+  set uploadSpeedCached($core.bool value) => $_setBool(22, value);
+  @$pb.TagNumber(23)
+  $core.bool hasUploadSpeedCached() => $_has(22);
+  @$pb.TagNumber(23)
+  void clearUploadSpeedCached() => $_clearField(23);
+
+  @$pb.TagNumber(24)
+  $core.bool get downloadSpeedCached => $_getBF(23);
+  @$pb.TagNumber(24)
+  set downloadSpeedCached($core.bool value) => $_setBool(23, value);
+  @$pb.TagNumber(24)
+  $core.bool hasDownloadSpeedCached() => $_has(23);
+  @$pb.TagNumber(24)
+  void clearDownloadSpeedCached() => $_clearField(24);
+
+  @$pb.TagNumber(25)
+  $core.String get error => $_getSZ(24);
+  @$pb.TagNumber(25)
+  set error($core.String value) => $_setString(24, value);
+  @$pb.TagNumber(25)
+  $core.bool hasError() => $_has(24);
+  @$pb.TagNumber(25)
+  void clearError() => $_clearField(25);
+
+  @$pb.TagNumber(26)
+  $core.int get sortDelay => $_getIZ(25);
+  @$pb.TagNumber(26)
+  set sortDelay($core.int value) => $_setSignedInt32(25, value);
+  @$pb.TagNumber(26)
+  $core.bool hasSortDelay() => $_has(25);
+  @$pb.TagNumber(26)
+  void clearSortDelay() => $_clearField(26);
+
+  @$pb.TagNumber(27)
+  $core.bool get resting => $_getBF(26);
+  @$pb.TagNumber(27)
+  set resting($core.bool value) => $_setBool(26, value);
+  @$pb.TagNumber(27)
+  $core.bool hasResting() => $_has(26);
+  @$pb.TagNumber(27)
+  void clearResting() => $_clearField(27);
 }
 
 class IpInfo extends $pb.GeneratedMessage {
@@ -885,6 +1006,7 @@ class IpInfo extends $pb.GeneratedMessage {
     $core.double? latitude,
     $core.double? longitude,
     $core.String? postalCode,
+    $core.bool? fromCache,
   }) {
     final result = create();
     if (ip != null) result.ip = ip;
@@ -896,6 +1018,7 @@ class IpInfo extends $pb.GeneratedMessage {
     if (latitude != null) result.latitude = latitude;
     if (longitude != null) result.longitude = longitude;
     if (postalCode != null) result.postalCode = postalCode;
+    if (fromCache != null) result.fromCache = fromCache;
     return result;
   }
 
@@ -921,6 +1044,7 @@ class IpInfo extends $pb.GeneratedMessage {
     ..aD(7, _omitFieldNames ? '' : 'latitude')
     ..aD(8, _omitFieldNames ? '' : 'longitude')
     ..aOS(9, _omitFieldNames ? '' : 'postal_code')
+    ..aOB(10, _omitFieldNames ? '' : 'from_cache')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1022,6 +1146,15 @@ class IpInfo extends $pb.GeneratedMessage {
   $core.bool hasPostalCode() => $_has(8);
   @$pb.TagNumber(9)
   void clearPostalCode() => $_clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.bool get fromCache => $_getBF(9);
+  @$pb.TagNumber(10)
+  set fromCache($core.bool value) => $_setBool(9, value);
+  @$pb.TagNumber(10)
+  $core.bool hasFromCache() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearFromCache() => $_clearField(10);
 }
 
 class OutboundGroup extends $pb.GeneratedMessage {
@@ -1032,6 +1165,7 @@ class OutboundGroup extends $pb.GeneratedMessage {
     $core.bool? selectable,
     $core.bool? isExpand,
     $core.Iterable<OutboundInfo>? items,
+    $core.bool? keepTopPicking,
   }) {
     final result = create();
     if (tag != null) result.tag = tag;
@@ -1040,6 +1174,7 @@ class OutboundGroup extends $pb.GeneratedMessage {
     if (selectable != null) result.selectable = selectable;
     if (isExpand != null) result.isExpand = isExpand;
     if (items != null) result.items.addAll(items);
+    if (keepTopPicking != null) result.keepTopPicking = keepTopPicking;
     return result;
   }
 
@@ -1063,6 +1198,7 @@ class OutboundGroup extends $pb.GeneratedMessage {
     ..aOB(5, _omitFieldNames ? '' : 'IsExpand', protoName: 'Is_expand')
     ..pPM<OutboundInfo>(6, _omitFieldNames ? '' : 'items',
         subBuilder: OutboundInfo.create)
+    ..aOB(7, _omitFieldNames ? '' : 'keepTopPicking')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1133,14 +1269,25 @@ class OutboundGroup extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(6)
   $pb.PbList<OutboundInfo> get items => $_getList(5);
+
+  @$pb.TagNumber(7)
+  $core.bool get keepTopPicking => $_getBF(6);
+  @$pb.TagNumber(7)
+  set keepTopPicking($core.bool value) => $_setBool(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasKeepTopPicking() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearKeepTopPicking() => $_clearField(7);
 }
 
 class OutboundGroupList extends $pb.GeneratedMessage {
   factory OutboundGroupList({
     $core.Iterable<OutboundGroup>? items,
+    OutboundInfo? chainHop,
   }) {
     final result = create();
     if (items != null) result.items.addAll(items);
+    if (chainHop != null) result.chainHop = chainHop;
     return result;
   }
 
@@ -1159,6 +1306,8 @@ class OutboundGroupList extends $pb.GeneratedMessage {
       createEmptyInstance: create)
     ..pPM<OutboundGroup>(1, _omitFieldNames ? '' : 'items',
         subBuilder: OutboundGroup.create)
+    ..aOM<OutboundInfo>(2, _omitFieldNames ? '' : 'chainHop',
+        subBuilder: OutboundInfo.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1184,6 +1333,17 @@ class OutboundGroupList extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $pb.PbList<OutboundGroup> get items => $_getList(0);
+
+  @$pb.TagNumber(2)
+  OutboundInfo get chainHop => $_getN(1);
+  @$pb.TagNumber(2)
+  set chainHop(OutboundInfo value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasChainHop() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearChainHop() => $_clearField(2);
+  @$pb.TagNumber(2)
+  OutboundInfo ensureChainHop() => $_ensure(1);
 }
 
 class WarpAccount extends $pb.GeneratedMessage {
@@ -1958,9 +2118,11 @@ class SelectOutboundRequest extends $pb.GeneratedMessage {
 class UrlTestRequest extends $pb.GeneratedMessage {
   factory UrlTestRequest({
     $core.String? tag,
+    $core.Iterable<$core.String>? tags,
   }) {
     final result = create();
     if (tag != null) result.tag = tag;
+    if (tags != null) result.tags.addAll(tags);
     return result;
   }
 
@@ -1978,6 +2140,7 @@ class UrlTestRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'tag')
+    ..pPS(2, _omitFieldNames ? '' : 'tags')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2009,6 +2172,77 @@ class UrlTestRequest extends $pb.GeneratedMessage {
   $core.bool hasTag() => $_has(0);
   @$pb.TagNumber(1)
   void clearTag() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<$core.String> get tags => $_getList(1);
+}
+
+class SpeedTestRequest extends $pb.GeneratedMessage {
+  factory SpeedTestRequest({
+    $core.String? tag,
+    $fixnum.Int64? size,
+  }) {
+    final result = create();
+    if (tag != null) result.tag = tag;
+    if (size != null) result.size = size;
+    return result;
+  }
+
+  SpeedTestRequest._();
+
+  factory SpeedTestRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SpeedTestRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SpeedTestRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'tag')
+    ..aInt64(2, _omitFieldNames ? '' : 'size')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SpeedTestRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SpeedTestRequest copyWith(void Function(SpeedTestRequest) updates) =>
+      super.copyWith((message) => updates(message as SpeedTestRequest))
+          as SpeedTestRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SpeedTestRequest create() => SpeedTestRequest._();
+  @$core.override
+  SpeedTestRequest createEmptyInstance() => create();
+  static $pb.PbList<SpeedTestRequest> createRepeated() =>
+      $pb.PbList<SpeedTestRequest>();
+  @$core.pragma('dart2js:noInline')
+  static SpeedTestRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SpeedTestRequest>(create);
+  static SpeedTestRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get tag => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set tag($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasTag() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTag() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get size => $_getI64(1);
+  @$pb.TagNumber(2)
+  set size($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSize() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSize() => $_clearField(2);
 }
 
 class GenerateWarpConfigRequest extends $pb.GeneratedMessage {
@@ -2095,9 +2329,13 @@ class GenerateWarpConfigRequest extends $pb.GeneratedMessage {
 class SetSystemProxyEnabledRequest extends $pb.GeneratedMessage {
   factory SetSystemProxyEnabledRequest({
     $core.bool? isEnabled,
+    $core.String? address,
+    $core.bool? supportSocks,
   }) {
     final result = create();
     if (isEnabled != null) result.isEnabled = isEnabled;
+    if (address != null) result.address = address;
+    if (supportSocks != null) result.supportSocks = supportSocks;
     return result;
   }
 
@@ -2115,6 +2353,8 @@ class SetSystemProxyEnabledRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'isEnabled')
+    ..aOS(2, _omitFieldNames ? '' : 'address')
+    ..aOB(3, _omitFieldNames ? '' : 'supportSocks')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2149,6 +2389,26 @@ class SetSystemProxyEnabledRequest extends $pb.GeneratedMessage {
   $core.bool hasIsEnabled() => $_has(0);
   @$pb.TagNumber(1)
   void clearIsEnabled() => $_clearField(1);
+
+  /// Where the system proxy points (host:port), when enabling: the local proxy of a core that runs
+  /// as root and cannot set the user's system proxy itself.
+  @$pb.TagNumber(2)
+  $core.String get address => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set address($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasAddress() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearAddress() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get supportSocks => $_getBF(2);
+  @$pb.TagNumber(3)
+  set supportSocks($core.bool value) => $_setBool(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasSupportSocks() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearSupportSocks() => $_clearField(3);
 }
 
 class LogMessage extends $pb.GeneratedMessage {
@@ -2339,6 +2599,299 @@ class StopRequest extends $pb.GeneratedMessage {
   static StopRequest? _defaultInstance;
 }
 
+class CrashReport extends $pb.GeneratedMessage {
+  factory CrashReport({
+    $core.String? name,
+    $core.String? crashedAt,
+    $core.String? source,
+    $core.bool? isCrash,
+  }) {
+    final result = create();
+    if (name != null) result.name = name;
+    if (crashedAt != null) result.crashedAt = crashedAt;
+    if (source != null) result.source = source;
+    if (isCrash != null) result.isCrash = isCrash;
+    return result;
+  }
+
+  CrashReport._();
+
+  factory CrashReport.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory CrashReport.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CrashReport',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'name')
+    ..aOS(2, _omitFieldNames ? '' : 'crashedAt')
+    ..aOS(3, _omitFieldNames ? '' : 'source')
+    ..aOB(4, _omitFieldNames ? '' : 'isCrash')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CrashReport clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CrashReport copyWith(void Function(CrashReport) updates) =>
+      super.copyWith((message) => updates(message as CrashReport))
+          as CrashReport;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static CrashReport create() => CrashReport._();
+  @$core.override
+  CrashReport createEmptyInstance() => create();
+  static $pb.PbList<CrashReport> createRepeated() => $pb.PbList<CrashReport>();
+  @$core.pragma('dart2js:noInline')
+  static CrashReport getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<CrashReport>(create);
+  static CrashReport? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get name => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set name($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasName() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearName() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get crashedAt => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set crashedAt($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasCrashedAt() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCrashedAt() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get source => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set source($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasSource() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearSource() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.bool get isCrash => $_getBF(3);
+  @$pb.TagNumber(4)
+  set isCrash($core.bool value) => $_setBool(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasIsCrash() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearIsCrash() => $_clearField(4);
+}
+
+class CrashReportList extends $pb.GeneratedMessage {
+  factory CrashReportList({
+    $core.Iterable<CrashReport>? reports,
+  }) {
+    final result = create();
+    if (reports != null) result.reports.addAll(reports);
+    return result;
+  }
+
+  CrashReportList._();
+
+  factory CrashReportList.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory CrashReportList.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CrashReportList',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
+      createEmptyInstance: create)
+    ..pPM<CrashReport>(1, _omitFieldNames ? '' : 'reports',
+        subBuilder: CrashReport.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CrashReportList clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CrashReportList copyWith(void Function(CrashReportList) updates) =>
+      super.copyWith((message) => updates(message as CrashReportList))
+          as CrashReportList;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static CrashReportList create() => CrashReportList._();
+  @$core.override
+  CrashReportList createEmptyInstance() => create();
+  static $pb.PbList<CrashReportList> createRepeated() =>
+      $pb.PbList<CrashReportList>();
+  @$core.pragma('dart2js:noInline')
+  static CrashReportList getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<CrashReportList>(create);
+  static CrashReportList? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<CrashReport> get reports => $_getList(0);
+}
+
+class ExportDiagnosticsRequest extends $pb.GeneratedMessage {
+  factory ExportDiagnosticsRequest({
+    $core.String? destinationPath,
+    $core.Iterable<$core.MapEntry<$core.String, $core.List<$core.int>>>?
+        extraFiles,
+    $core.bool? inline,
+  }) {
+    final result = create();
+    if (destinationPath != null) result.destinationPath = destinationPath;
+    if (extraFiles != null) result.extraFiles.addEntries(extraFiles);
+    if (inline != null) result.inline = inline;
+    return result;
+  }
+
+  ExportDiagnosticsRequest._();
+
+  factory ExportDiagnosticsRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ExportDiagnosticsRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ExportDiagnosticsRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'destinationPath')
+    ..m<$core.String, $core.List<$core.int>>(
+        2, _omitFieldNames ? '' : 'extraFiles',
+        entryClassName: 'ExportDiagnosticsRequest.ExtraFilesEntry',
+        keyFieldType: $pb.PbFieldType.OS,
+        valueFieldType: $pb.PbFieldType.OY,
+        packageName: const $pb.PackageName('hcore'))
+    ..aOB(3, _omitFieldNames ? '' : 'inline')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ExportDiagnosticsRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ExportDiagnosticsRequest copyWith(
+          void Function(ExportDiagnosticsRequest) updates) =>
+      super.copyWith((message) => updates(message as ExportDiagnosticsRequest))
+          as ExportDiagnosticsRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ExportDiagnosticsRequest create() => ExportDiagnosticsRequest._();
+  @$core.override
+  ExportDiagnosticsRequest createEmptyInstance() => create();
+  static $pb.PbList<ExportDiagnosticsRequest> createRepeated() =>
+      $pb.PbList<ExportDiagnosticsRequest>();
+  @$core.pragma('dart2js:noInline')
+  static ExportDiagnosticsRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ExportDiagnosticsRequest>(create);
+  static ExportDiagnosticsRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get destinationPath => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set destinationPath($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasDestinationPath() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDestinationPath() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $pb.PbMap<$core.String, $core.List<$core.int>> get extraFiles => $_getMap(1);
+
+  @$pb.TagNumber(3)
+  $core.bool get inline => $_getBF(2);
+  @$pb.TagNumber(3)
+  set inline($core.bool value) => $_setBool(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasInline() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearInline() => $_clearField(3);
+}
+
+class ExportDiagnosticsResponse extends $pb.GeneratedMessage {
+  factory ExportDiagnosticsResponse({
+    $core.String? path,
+    $core.List<$core.int>? content,
+  }) {
+    final result = create();
+    if (path != null) result.path = path;
+    if (content != null) result.content = content;
+    return result;
+  }
+
+  ExportDiagnosticsResponse._();
+
+  factory ExportDiagnosticsResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ExportDiagnosticsResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ExportDiagnosticsResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'path')
+    ..a<$core.List<$core.int>>(
+        2, _omitFieldNames ? '' : 'content', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ExportDiagnosticsResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ExportDiagnosticsResponse copyWith(
+          void Function(ExportDiagnosticsResponse) updates) =>
+      super.copyWith((message) => updates(message as ExportDiagnosticsResponse))
+          as ExportDiagnosticsResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ExportDiagnosticsResponse create() => ExportDiagnosticsResponse._();
+  @$core.override
+  ExportDiagnosticsResponse createEmptyInstance() => create();
+  static $pb.PbList<ExportDiagnosticsResponse> createRepeated() =>
+      $pb.PbList<ExportDiagnosticsResponse>();
+  @$core.pragma('dart2js:noInline')
+  static ExportDiagnosticsResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ExportDiagnosticsResponse>(create);
+  static ExportDiagnosticsResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get path => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set path($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasPath() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPath() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<$core.int> get content => $_getN(1);
+  @$pb.TagNumber(2)
+  set content($core.List<$core.int> value) => $_setBytes(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasContent() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearContent() => $_clearField(2);
+}
+
 class LANIPResponse extends $pb.GeneratedMessage {
   factory LANIPResponse({
     $core.String? ip,
@@ -2393,6 +2946,549 @@ class LANIPResponse extends $pb.GeneratedMessage {
   $core.bool hasIp() => $_has(0);
   @$pb.TagNumber(1)
   void clearIp() => $_clearField(1);
+}
+
+class IsAdminResponse extends $pb.GeneratedMessage {
+  factory IsAdminResponse({
+    $core.bool? isAdmin,
+  }) {
+    final result = create();
+    if (isAdmin != null) result.isAdmin = isAdmin;
+    return result;
+  }
+
+  IsAdminResponse._();
+
+  factory IsAdminResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory IsAdminResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'IsAdminResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'isAdmin')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  IsAdminResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  IsAdminResponse copyWith(void Function(IsAdminResponse) updates) =>
+      super.copyWith((message) => updates(message as IsAdminResponse))
+          as IsAdminResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static IsAdminResponse create() => IsAdminResponse._();
+  @$core.override
+  IsAdminResponse createEmptyInstance() => create();
+  static $pb.PbList<IsAdminResponse> createRepeated() =>
+      $pb.PbList<IsAdminResponse>();
+  @$core.pragma('dart2js:noInline')
+  static IsAdminResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<IsAdminResponse>(create);
+  static IsAdminResponse? _defaultInstance;
+
+  /// True when the core process runs as Administrator (Windows) or root (Unix).
+  @$pb.TagNumber(1)
+  $core.bool get isAdmin => $_getBF(0);
+  @$pb.TagNumber(1)
+  set isAdmin($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasIsAdmin() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearIsAdmin() => $_clearField(1);
+}
+
+class AdminNeededProxy extends $pb.GeneratedMessage {
+  factory AdminNeededProxy({
+    $core.String? tag,
+    $core.String? summary,
+    $core.String? detail,
+  }) {
+    final result = create();
+    if (tag != null) result.tag = tag;
+    if (summary != null) result.summary = summary;
+    if (detail != null) result.detail = detail;
+    return result;
+  }
+
+  AdminNeededProxy._();
+
+  factory AdminNeededProxy.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory AdminNeededProxy.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'AdminNeededProxy',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'tag')
+    ..aOS(2, _omitFieldNames ? '' : 'summary')
+    ..aOS(3, _omitFieldNames ? '' : 'detail')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  AdminNeededProxy clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  AdminNeededProxy copyWith(void Function(AdminNeededProxy) updates) =>
+      super.copyWith((message) => updates(message as AdminNeededProxy))
+          as AdminNeededProxy;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static AdminNeededProxy create() => AdminNeededProxy._();
+  @$core.override
+  AdminNeededProxy createEmptyInstance() => create();
+  static $pb.PbList<AdminNeededProxy> createRepeated() =>
+      $pb.PbList<AdminNeededProxy>();
+  @$core.pragma('dart2js:noInline')
+  static AdminNeededProxy getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<AdminNeededProxy>(create);
+  static AdminNeededProxy? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get tag => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set tag($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasTag() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTag() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get summary => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set summary($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSummary() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSummary() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get detail => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set detail($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasDetail() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDetail() => $_clearField(3);
+}
+
+class NeedAdminBgServiceRequest extends $pb.GeneratedMessage {
+  factory NeedAdminBgServiceRequest({
+    $core.String? serviceMode,
+    $core.String? hiddifySettingsJson,
+    AdminPreference? adminPreference,
+    $core.bool? privilegeErrorRemembered,
+  }) {
+    final result = create();
+    if (serviceMode != null) result.serviceMode = serviceMode;
+    if (hiddifySettingsJson != null)
+      result.hiddifySettingsJson = hiddifySettingsJson;
+    if (adminPreference != null) result.adminPreference = adminPreference;
+    if (privilegeErrorRemembered != null)
+      result.privilegeErrorRemembered = privilegeErrorRemembered;
+    return result;
+  }
+
+  NeedAdminBgServiceRequest._();
+
+  factory NeedAdminBgServiceRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory NeedAdminBgServiceRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'NeedAdminBgServiceRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'serviceMode')
+    ..aOS(2, _omitFieldNames ? '' : 'hiddifySettingsJson')
+    ..aE<AdminPreference>(3, _omitFieldNames ? '' : 'adminPreference',
+        enumValues: AdminPreference.values)
+    ..aOB(4, _omitFieldNames ? '' : 'privilegeErrorRemembered')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  NeedAdminBgServiceRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  NeedAdminBgServiceRequest copyWith(
+          void Function(NeedAdminBgServiceRequest) updates) =>
+      super.copyWith((message) => updates(message as NeedAdminBgServiceRequest))
+          as NeedAdminBgServiceRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static NeedAdminBgServiceRequest create() => NeedAdminBgServiceRequest._();
+  @$core.override
+  NeedAdminBgServiceRequest createEmptyInstance() => create();
+  static $pb.PbList<NeedAdminBgServiceRequest> createRepeated() =>
+      $pb.PbList<NeedAdminBgServiceRequest>();
+  @$core.pragma('dart2js:noInline')
+  static NeedAdminBgServiceRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<NeedAdminBgServiceRequest>(create);
+  static NeedAdminBgServiceRequest? _defaultInstance;
+
+  /// proxy | system-proxy | vpn
+  @$pb.TagNumber(1)
+  $core.String get serviceMode => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set serviceMode($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasServiceMode() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearServiceMode() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get hiddifySettingsJson => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set hiddifySettingsJson($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasHiddifySettingsJson() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearHiddifySettingsJson() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  AdminPreference get adminPreference => $_getN(2);
+  @$pb.TagNumber(3)
+  set adminPreference(AdminPreference value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasAdminPreference() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearAdminPreference() => $_clearField(3);
+
+  /// True after an in-process start failed with a privilege error.
+  @$pb.TagNumber(4)
+  $core.bool get privilegeErrorRemembered => $_getBF(3);
+  @$pb.TagNumber(4)
+  set privilegeErrorRemembered($core.bool value) => $_setBool(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasPrivilegeErrorRemembered() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearPrivilegeErrorRemembered() => $_clearField(4);
+}
+
+class NeedAdminBgServiceResponse extends $pb.GeneratedMessage {
+  factory NeedAdminBgServiceResponse({
+    AdminBgServiceDecision? decision,
+    $core.Iterable<AdminNeededProxy>? adminNeededProxies,
+  }) {
+    final result = create();
+    if (decision != null) result.decision = decision;
+    if (adminNeededProxies != null)
+      result.adminNeededProxies.addAll(adminNeededProxies);
+    return result;
+  }
+
+  NeedAdminBgServiceResponse._();
+
+  factory NeedAdminBgServiceResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory NeedAdminBgServiceResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'NeedAdminBgServiceResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
+      createEmptyInstance: create)
+    ..aE<AdminBgServiceDecision>(1, _omitFieldNames ? '' : 'decision',
+        enumValues: AdminBgServiceDecision.values)
+    ..pPM<AdminNeededProxy>(2, _omitFieldNames ? '' : 'adminNeededProxies',
+        subBuilder: AdminNeededProxy.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  NeedAdminBgServiceResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  NeedAdminBgServiceResponse copyWith(
+          void Function(NeedAdminBgServiceResponse) updates) =>
+      super.copyWith(
+              (message) => updates(message as NeedAdminBgServiceResponse))
+          as NeedAdminBgServiceResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static NeedAdminBgServiceResponse create() => NeedAdminBgServiceResponse._();
+  @$core.override
+  NeedAdminBgServiceResponse createEmptyInstance() => create();
+  static $pb.PbList<NeedAdminBgServiceResponse> createRepeated() =>
+      $pb.PbList<NeedAdminBgServiceResponse>();
+  @$core.pragma('dart2js:noInline')
+  static NeedAdminBgServiceResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<NeedAdminBgServiceResponse>(create);
+  static NeedAdminBgServiceResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  AdminBgServiceDecision get decision => $_getN(0);
+  @$pb.TagNumber(1)
+  set decision(AdminBgServiceDecision value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasDecision() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDecision() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<AdminNeededProxy> get adminNeededProxies => $_getList(1);
+}
+
+class EnsureAdminBgServiceRequest extends $pb.GeneratedMessage {
+  factory EnsureAdminBgServiceRequest({
+    $core.String? configContent,
+    $core.String? configName,
+    $core.String? settingsJson,
+    $core.Iterable<$core.MapEntry<$core.String, $core.List<$core.int>>>?
+        resources,
+    $core.bool? disableMemoryLimit,
+    $core.int? ownerPid,
+    $core.String? cliPath,
+    $core.String? ownerUser,
+    $core.bool? proxyOnly,
+  }) {
+    final result = create();
+    if (configContent != null) result.configContent = configContent;
+    if (configName != null) result.configName = configName;
+    if (settingsJson != null) result.settingsJson = settingsJson;
+    if (resources != null) result.resources.addEntries(resources);
+    if (disableMemoryLimit != null)
+      result.disableMemoryLimit = disableMemoryLimit;
+    if (ownerPid != null) result.ownerPid = ownerPid;
+    if (cliPath != null) result.cliPath = cliPath;
+    if (ownerUser != null) result.ownerUser = ownerUser;
+    if (proxyOnly != null) result.proxyOnly = proxyOnly;
+    return result;
+  }
+
+  EnsureAdminBgServiceRequest._();
+
+  factory EnsureAdminBgServiceRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory EnsureAdminBgServiceRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'EnsureAdminBgServiceRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'configContent')
+    ..aOS(2, _omitFieldNames ? '' : 'configName')
+    ..aOS(3, _omitFieldNames ? '' : 'settingsJson')
+    ..m<$core.String, $core.List<$core.int>>(
+        4, _omitFieldNames ? '' : 'resources',
+        entryClassName: 'EnsureAdminBgServiceRequest.ResourcesEntry',
+        keyFieldType: $pb.PbFieldType.OS,
+        valueFieldType: $pb.PbFieldType.OY,
+        packageName: const $pb.PackageName('hcore'))
+    ..aOB(5, _omitFieldNames ? '' : 'disableMemoryLimit')
+    ..aI(6, _omitFieldNames ? '' : 'ownerPid')
+    ..aOS(7, _omitFieldNames ? '' : 'cliPath')
+    ..aOS(8, _omitFieldNames ? '' : 'ownerUser')
+    ..aOB(9, _omitFieldNames ? '' : 'proxyOnly')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  EnsureAdminBgServiceRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  EnsureAdminBgServiceRequest copyWith(
+          void Function(EnsureAdminBgServiceRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as EnsureAdminBgServiceRequest))
+          as EnsureAdminBgServiceRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static EnsureAdminBgServiceRequest create() =>
+      EnsureAdminBgServiceRequest._();
+  @$core.override
+  EnsureAdminBgServiceRequest createEmptyInstance() => create();
+  static $pb.PbList<EnsureAdminBgServiceRequest> createRepeated() =>
+      $pb.PbList<EnsureAdminBgServiceRequest>();
+  @$core.pragma('dart2js:noInline')
+  static EnsureAdminBgServiceRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<EnsureAdminBgServiceRequest>(create);
+  static EnsureAdminBgServiceRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get configContent => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set configContent($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasConfigContent() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearConfigContent() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get configName => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set configName($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasConfigName() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearConfigName() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get settingsJson => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set settingsJson($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasSettingsJson() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearSettingsJson() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $pb.PbMap<$core.String, $core.List<$core.int>> get resources => $_getMap(3);
+
+  @$pb.TagNumber(5)
+  $core.bool get disableMemoryLimit => $_getBF(4);
+  @$pb.TagNumber(5)
+  set disableMemoryLimit($core.bool value) => $_setBool(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasDisableMemoryLimit() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearDisableMemoryLimit() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.int get ownerPid => $_getIZ(5);
+  @$pb.TagNumber(6)
+  set ownerPid($core.int value) => $_setSignedInt32(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasOwnerPid() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearOwnerPid() => $_clearField(6);
+
+  /// Absolute path to this app's HiddifyCli / HiddifyCli.exe (used for elevate install).
+  @$pb.TagNumber(7)
+  $core.String get cliPath => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set cliPath($core.String value) => $_setString(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasCliPath() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearCliPath() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.String get ownerUser => $_getSZ(7);
+  @$pb.TagNumber(8)
+  set ownerUser($core.String value) => $_setString(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasOwnerUser() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearOwnerUser() => $_clearField(8);
+
+  /// Runs the engine without its TUN: a proxy mode whose profile needs administrator rights.
+  @$pb.TagNumber(9)
+  $core.bool get proxyOnly => $_getBF(8);
+  @$pb.TagNumber(9)
+  set proxyOnly($core.bool value) => $_setBool(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasProxyOnly() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearProxyOnly() => $_clearField(9);
+}
+
+class EnsureAdminBgServiceEvent extends $pb.GeneratedMessage {
+  factory EnsureAdminBgServiceEvent({
+    EnsureAdminBgServiceProgress? progress,
+    $core.String? message,
+    $core.int? servicePort,
+  }) {
+    final result = create();
+    if (progress != null) result.progress = progress;
+    if (message != null) result.message = message;
+    if (servicePort != null) result.servicePort = servicePort;
+    return result;
+  }
+
+  EnsureAdminBgServiceEvent._();
+
+  factory EnsureAdminBgServiceEvent.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory EnsureAdminBgServiceEvent.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'EnsureAdminBgServiceEvent',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'hcore'),
+      createEmptyInstance: create)
+    ..aE<EnsureAdminBgServiceProgress>(1, _omitFieldNames ? '' : 'progress',
+        enumValues: EnsureAdminBgServiceProgress.values)
+    ..aOS(2, _omitFieldNames ? '' : 'message')
+    ..aI(3, _omitFieldNames ? '' : 'servicePort',
+        fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  EnsureAdminBgServiceEvent clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  EnsureAdminBgServiceEvent copyWith(
+          void Function(EnsureAdminBgServiceEvent) updates) =>
+      super.copyWith((message) => updates(message as EnsureAdminBgServiceEvent))
+          as EnsureAdminBgServiceEvent;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static EnsureAdminBgServiceEvent create() => EnsureAdminBgServiceEvent._();
+  @$core.override
+  EnsureAdminBgServiceEvent createEmptyInstance() => create();
+  static $pb.PbList<EnsureAdminBgServiceEvent> createRepeated() =>
+      $pb.PbList<EnsureAdminBgServiceEvent>();
+  @$core.pragma('dart2js:noInline')
+  static EnsureAdminBgServiceEvent getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<EnsureAdminBgServiceEvent>(create);
+  static EnsureAdminBgServiceEvent? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  EnsureAdminBgServiceProgress get progress => $_getN(0);
+  @$pb.TagNumber(1)
+  set progress(EnsureAdminBgServiceProgress value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasProgress() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearProgress() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get servicePort => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set servicePort($core.int value) => $_setUnsignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasServicePort() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearServicePort() => $_clearField(3);
 }
 
 const $core.bool _omitFieldNames =

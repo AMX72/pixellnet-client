@@ -26,6 +26,13 @@ import com.hiddify.core.libbox.NetworkInterface as LibboxNetworkInterface
 
 import android.system.OsConstants
 import com.hiddify.core.libbox.ConnectionOwner
+import com.hiddify.core.libbox.AutoRedirectHandler
+import com.hiddify.core.libbox.AutoRedirectSession
+import com.hiddify.core.libbox.BridgeOptions
+import com.hiddify.core.libbox.BridgeSession
+import com.hiddify.core.libbox.NeighborUpdateListener
+import com.hiddify.core.libbox.PlatformUser
+import com.hiddify.core.libbox.ShellSession
 import com.hiddify.core.libbox.LocalDNSTransport
 import java.security.KeyStore
 import kotlin.io.encoding.Base64
@@ -41,7 +48,7 @@ interface PlatformInterfaceWrapper : PlatformInterface {
         error("invalid argument")
     }
 
-    override fun useProcFS(): Boolean =  Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+    // hiddify-core 5.x (libbox 3eb646a): useProcFS() убран из PlatformInterface.
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun findConnectionOwner(
@@ -65,7 +72,8 @@ interface PlatformInterfaceWrapper : PlatformInterface {
             if (uid!=Process.INVALID_UID) {
                 val packages = Application.packageManager.getPackagesForUid(uid)
                 owner.userName = packages?.firstOrNull() ?: ""
-                owner.androidPackageName = owner.userName
+                // core 5.x: androidPackageName -> androidPackageNames (итератор всех пакетов uid)
+                owner.setAndroidPackageNames(StringArray(packages.orEmpty().iterator()))
             }
             return owner
         } catch (e: Exception) {
@@ -147,37 +155,96 @@ interface PlatformInterfaceWrapper : PlatformInterface {
     override fun clearDNSCache() {
     }
 
-    override fun readWIFIState(): WIFIState? {
-        @Suppress("DEPRECATION")
-        val wifiInfo =
-            Application.wifiManager.connectionInfo ?: return null
-        var ssid = wifiInfo.ssid
-        if (ssid == "<unknown ssid>") {
-            return WIFIState("", "")
-        }
-        if (ssid.startsWith("\"") && ssid.endsWith("\"")) {
-            ssid = ssid.substring(1, ssid.length - 1)
-        }
-        return WIFIState(ssid, wifiInfo.bssid)
-    }
+    // WiFi state (SSID/BSSID для правил wifi_ssid) не читаем: нужен ACCESS_WIFI_STATE и на новых
+    // Android — разрешение геолокации; SecurityException здесь уронит процесс из Go-ядра.
+    // (так же в upstream hiddify-app под ядро 5.9.1; у нас wifi_ssid-правил нет)
+    override fun readWIFIState(): WIFIState? = null
 
     override fun localDNSTransport(): LocalDNSTransport? = LocalResolver
 
     @OptIn(ExperimentalEncodingApi::class)
     override fun systemCertificates(): StringIterator {
         val certificates = mutableListOf<String>()
-        val keyStore = KeyStore.getInstance("AndroidCAStore")
-        if (keyStore != null) {
-            keyStore.load(null, null)
-            val aliases = keyStore.aliases()
-            while (aliases.hasMoreElements()) {
-                val cert = keyStore.getCertificate(aliases.nextElement())
-                certificates.add(
-                    "-----BEGIN CERTIFICATE-----\n" + Base64.encode(cert.encoded) + "\n-----END CERTIFICATE-----",
-                )
+        // Вызывается из Go-ядра без возврата ошибки: исключение здесь недопустимо.
+        try {
+            val keyStore = KeyStore.getInstance("AndroidCAStore")
+            if (keyStore != null) {
+                keyStore.load(null, null)
+                val aliases = keyStore.aliases()
+                while (aliases.hasMoreElements()) {
+                    val cert = keyStore.getCertificate(aliases.nextElement()) ?: continue
+                    certificates.add(
+                        "-----BEGIN CERTIFICATE-----\n" + Base64.encode(cert.encoded) + "\n-----END CERTIFICATE-----",
+                    )
+                }
             }
+        } catch (e: Exception) {
+            Log.w("PlatformInterface", "systemCertificates", e)
         }
         return StringArray(certificates.iterator())
+    }
+
+    // core 5.x: снятие уведомления ядра. sendNotification в VPNService — no-op, снимать нечего;
+    // по typeID не снимаем, чтобы случайно не убрать уведомление foreground-сервиса.
+    override fun cancelNotification(identifier: String, typeID: Int) {
+    }
+
+    // core 5.x: neighbor monitor, platform shell, bridge и auto-redirect требуют root-хелперов
+    // (RootClient в sing-box-for-android), которых в приложении нет — держим выключенными.
+    override fun startNeighborMonitor(listener: NeighborUpdateListener?) {
+    }
+
+    override fun closeNeighborMonitor(listener: NeighborUpdateListener?) {
+    }
+
+    override fun registerMyInterface(name: String?) {
+    }
+
+    override fun usePlatformShell(): Boolean = false
+
+    override fun checkPlatformShell() {
+        error("platform shell not supported")
+    }
+
+    override fun openShellSession(
+        user: PlatformUser?,
+        command: String?,
+        environ: StringIterator?,
+        term: String?,
+        rows: Int,
+        cols: Int,
+    ): ShellSession {
+        error("platform shell not supported")
+    }
+
+    override fun lookupUser(username: String?): PlatformUser {
+        error("platform shell not supported")
+    }
+
+    override fun lookupSFTPServer(): String {
+        error("not supported")
+    }
+
+    override fun readSystemSSHHostKey(): String {
+        error("not supported")
+    }
+
+    override fun tailscaleHostname(): String = android.provider.Settings.Global.getString(
+        Application.application.contentResolver,
+        android.provider.Settings.Global.DEVICE_NAME,
+    )?.takeIf { it.isNotBlank() }
+        ?: "${Build.MANUFACTURER} ${Build.MODEL}"
+
+    override fun usePlatformBridge(): Boolean = false
+
+    override fun createBridge(options: BridgeOptions?): BridgeSession {
+        error("platform bridge not supported")
+    }
+
+    override fun usePlatformAutoRedirect(): Boolean = false
+
+    override fun createAutoRedirect(options: ByteArray?, handler: AutoRedirectHandler?): AutoRedirectSession {
+        error("platform auto redirect not supported")
     }
 
     private class InterfaceArray(private val iterator: Iterator<LibboxNetworkInterface>) : NetworkInterfaceIterator {

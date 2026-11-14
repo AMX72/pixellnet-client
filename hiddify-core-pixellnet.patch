@@ -1,49 +1,50 @@
 diff --git a/v2/config/builder.go b/v2/config/builder.go
-index f80ccb4..b1a47a6 100644
+index 0c76f1e..b9c4df1 100644
 --- a/v2/config/builder.go
 +++ b/v2/config/builder.go
-@@ -40,7 +40,7 @@ const (
+@@ -50,7 +50,7 @@ const (
  	OutboundBypassTag = "bypass §hide§"
  	// OutboundBlockTag          = "block §hide§"
  	OutboundSelectTag         = "select"
 -	OutboundURLTestTag        = "lowest"
 +	OutboundURLTestTag        = "⚡ Автовыбор"
  	OutboundRoundRobinTag     = "balance"
- 	OutboundDNSTag            = "dns-out §hide§"
  	OutboundDirectFragmentTag = "direct-fragment §hide§"
-@@ -875,6 +875,14 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
+ 
+@@ -984,6 +984,14 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
  		})
  	}
- 	if hopt.Region != "other" {
+ 	if !useAppRules && hopt.Region != "other" {
 +		// PIXELLNET RU-fix: у большинства РФ-юзеров нет IPv6 на Wi-Fi/LAN,
 +		// но DNS-direct возвращает AAAA для .ru доменов (yandex.ru → 2a02:6b8:a::a).
-+		// Приложения пытаются IPv6-connect → connectex unreachable network → сайт не открывается.
-+		// Форсим ipv4_only на все direct-DNS правила когда region=ru.
-+		regionDirectDnsStrategy := hopt.DirectDnsDomainStrategy
++		// Приложения пытаются IPv6-connect → unreachable network → сайт не открывается.
++		// Форсим ipv4_only на direct-DNS правила региона, когда region=ru.
++		regionDirectDnsStrategy := clientDNSStrategy(hopt.DirectDnsDomainStrategy, hopt.IPv6Mode)
 +		if hopt.Region == "ru" {
 +			regionDirectDnsStrategy = option.DomainStrategy(C.DomainStrategyIPv4Only)
 +		}
  		dnsRules = append(dnsRules, option.DefaultDNSRule{
  			RawDefaultDNSRule: option.RawDefaultDNSRule{
  				DomainSuffix: []string{"." + hopt.Region},
-@@ -883,7 +891,7 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
- 				Action: C.RuleActionTypeRoute,
+@@ -993,7 +1001,7 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
  				RouteOptions: option.DNSRouteActionOptions{
- 					Server:         DNSMultiDirectTag,
--					Strategy:       hopt.DirectDnsDomainStrategy,
-+					Strategy:       regionDirectDnsStrategy,
- 					RewriteTTL:     &DEFAULT_DNS_TTL,
- 					BypassIfFailed: false,
- 				},
-@@ -915,13 +923,81 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
- 				Action: C.RuleActionTypeRoute,
+ 					Server: DNSMultiDirectTag,
+ 					AbstractDNSRouteActionOptions: option.AbstractDNSRouteActionOptions{
+-						Strategy:       clientDNSStrategy(hopt.DirectDnsDomainStrategy, hopt.IPv6Mode),
++						Strategy:       regionDirectDnsStrategy,
+ 						IPv6ByOutbound: ipv6ByOutbound(hopt, OutboundDirectTag),
+ 						RewriteTTL:     &DEFAULT_DNS_TTL,
+ 						BypassIfFailed: false,
+@@ -1028,7 +1036,7 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
  				RouteOptions: option.DNSRouteActionOptions{
- 					Server:         DNSMultiDirectTag,
--					Strategy:       hopt.DirectDnsDomainStrategy,
-+					Strategy:       regionDirectDnsStrategy,
- 					RewriteTTL:     &DEFAULT_DNS_TTL,
- 					BypassIfFailed: false,
- 				},
+ 					Server: DNSMultiDirectTag,
+ 					AbstractDNSRouteActionOptions: option.AbstractDNSRouteActionOptions{
+-						Strategy:       clientDNSStrategy(hopt.DirectDnsDomainStrategy, hopt.IPv6Mode),
++						Strategy:       regionDirectDnsStrategy,
+ 						IPv6ByOutbound: ipv6ByOutbound(hopt, OutboundDirectTag),
+ 						RewriteTTL:     &DEFAULT_DNS_TTL,
+ 						BypassIfFailed: false,
+@@ -1037,6 +1045,75 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
  			},
  		})
  
@@ -68,9 +69,8 @@ index f80ccb4..b1a47a6 100644
 +				"93.158.128.0/17",
 +			}
 +			// IPv4Only обязателен: у РФ-юзеров обычно нет IPv6 на Wi-Fi/LAN,
-+			// а Yandex/VK возвращают AAAA → curl/browser пытается v6 → unreachable
++			// а Yandex/VK возвращают AAAA → браузер пытается v6 → unreachable
 +			// → connection reset. С strategy=ipv4_only DNS вернёт только A record.
-+			pixellnetRuStrategy := option.DomainStrategy(C.DomainStrategyIPv4Only)
 +			dnsRules = append(dnsRules, option.DefaultDNSRule{
 +				RawDefaultDNSRule: option.RawDefaultDNSRule{
 +					DomainSuffix: pixellnetRuBypassSuffixes,
@@ -78,10 +78,12 @@ index f80ccb4..b1a47a6 100644
 +				DNSRuleAction: option.DNSRuleAction{
 +					Action: C.RuleActionTypeRoute,
 +					RouteOptions: option.DNSRouteActionOptions{
-+						Server:         DNSMultiDirectTag,
-+						Strategy:       pixellnetRuStrategy,
-+						RewriteTTL:     &DEFAULT_DNS_TTL,
-+						BypassIfFailed: false,
++						Server: DNSMultiDirectTag,
++						AbstractDNSRouteActionOptions: option.AbstractDNSRouteActionOptions{
++							Strategy:       option.DomainStrategy(C.DomainStrategyIPv4Only),
++							RewriteTTL:     &DEFAULT_DNS_TTL,
++							BypassIfFailed: false,
++						},
 +					},
 +				},
 +			})
@@ -117,4 +119,4 @@ index f80ccb4..b1a47a6 100644
 +
  		rulesets = append(rulesets, option.RuleSet{
  			Type:   C.RuleSetTypeRemote,
- 			Tag:    "geoip-" + hopt.Region,
+ 			Tag:    badoption.Listable[string]{"geoip-" + hopt.Region},

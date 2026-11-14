@@ -10,6 +10,11 @@ on:
         description: 'Version (e.g. 0.1.0)'
         required: false
         default: 'dev'
+      side_by_side:
+        description: 'Тестовая копия рядом с рабочим приложением (com.pixellnet.vpn.core5, «PIXELLNET β»)'
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: build-android-${{ github.ref }}
@@ -78,15 +83,17 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.25.6'
+          # hiddify-core 5.x требует Go из своего go.mod (5.9.1: go 1.27.3)
+          go-version-file: hiddify-core/go.mod
           cache: true
           cache-dependency-path: hiddify-core/go.sum
 
-      - name: Setup Android NDK r25c
+      - name: Setup Android NDK r28
         id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r25c
+          # как в upstream CI hiddify-core 5.x (build.yml: ndk-version r28)
+          ndk-version: r28
           add-to-path: false
 
       - name: Export NDK env
@@ -142,10 +149,16 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
+          EXTRA=()
+          if [ "${{ inputs.side_by_side }}" = "true" ]; then
+            EXTRA=(--android-project-arg=pixellnetIdSuffix=.core5 "--android-project-arg=pixellnetLabel=PIXELLNET β")
+            echo "Side-by-side test build: com.pixellnet.vpn.core5"
+          fi
           flutter build apk --release \
             --split-per-abi \
             --build-number=${{ github.run_number }} \
-            --build-name=${{ steps.ver.outputs.version }}
+            --build-name=${{ steps.ver.outputs.version }} \
+            "${EXTRA[@]}"
           mkdir -p out
           for f in build/app/outputs/flutter-apk/*.apk; do
             base=$(basename "$f")

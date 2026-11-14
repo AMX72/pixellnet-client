@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from v2/hcore/tunnelservice/tunnel.proto.
+// Generated from v2/hcore/adminbgservice/admin_bg.proto.
 
 // @dart = 3.3
 

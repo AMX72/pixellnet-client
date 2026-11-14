@@ -126,6 +126,17 @@ class CoreClient extends $grpc.Client {
     return $createUnaryCall(_$restart, request, options: options);
   }
 
+  /// Apply the config to the running core without restarting it: outbounds, endpoints, inbounds
+  /// (not TUN), DNS servers/rules/final and route rules/rule sets/final may change. Anything else,
+  /// or a changed TUN inbound, returns HOT_RELOAD_FAILED and leaves the core running unchanged.
+  /// When the core is stopped, it is started like Start.
+  $grpc.ResponseFuture<$0.CoreInfoResponse> hotReload(
+    $0.StartRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$hotReload, request, options: options);
+  }
+
   $grpc.ResponseFuture<$1.Response> selectOutbound(
     $0.SelectOutboundRequest request, {
     $grpc.CallOptions? options,
@@ -145,6 +156,30 @@ class CoreClient extends $grpc.Client {
     $grpc.CallOptions? options,
   }) {
     return $createUnaryCall(_$urlTestActive, request, options: options);
+  }
+
+  /// Measure the upload or download speed through a proxy, or each proxy of a group, at
+  /// speed.cloudflare.com; the results come with the outbounds info (upload_speed, download_speed).
+  $grpc.ResponseFuture<$1.Response> uploadTest(
+    $0.SpeedTestRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$uploadTest, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.Response> downloadTest(
+    $0.SpeedTestRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$downloadTest, request, options: options);
+  }
+
+  /// Forgets every speed test result, of this run and the earlier ones kept.
+  $grpc.ResponseFuture<$1.Response> clearSpeedTests(
+    $1.Empty request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$clearSpeedTests, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.WarpGenerationResponse> generateWarpConfig(
@@ -189,6 +224,54 @@ class CoreClient extends $grpc.Client {
     $grpc.CallOptions? options,
   }) {
     return $createUnaryCall(_$getLANIP, request, options: options);
+  }
+
+  /// Whether this core process already has administrator/root rights (same token as the app).
+  $grpc.ResponseFuture<$0.IsAdminResponse> isAdmin(
+    $1.Empty request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$isAdmin, request, options: options);
+  }
+
+  /// Windows/Linux: whether elevated admin_bgservice is required for this connect.
+  $grpc.ResponseFuture<$0.NeedAdminBgServiceResponse> needAdminBgService(
+    $0.NeedAdminBgServiceRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$needAdminBgService, request, options: options);
+  }
+
+  /// Windows/Linux: install/start admin_bgservice if needed and start the bg core until STARTED.
+  $grpc.ResponseStream<$0.EnsureAdminBgServiceEvent> ensureAdminBgService(
+    $0.EnsureAdminBgServiceRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createStreamingCall(
+        _$ensureAdminBgService, $async.Stream.fromIterable([request]),
+        options: options);
+  }
+
+  /// The crash reports in this core's working directory: the archived ones (crash_reports,
+  /// oom_reports) and the live stderr files that hold a crash, newest last.
+  $grpc.ResponseFuture<$0.CrashReportList> listCrashReports(
+    $1.Empty request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$listCrashReports, request, options: options);
+  }
+
+  /// A zip of this core's diagnostics: the crash, OOM and power reports, the stderr and core log
+  /// files, the previous run's goroutines (a snapshot the core writes every minute while connected,
+  /// kept aside at the next start), the running config with servers and secrets removed, and the
+  /// files the request adds. Text is scrubbed of addresses, links and secrets. Returns the zip's
+  /// path, and its bytes when the request asks for them (a core in another process, whose files the
+  /// app cannot read).
+  $grpc.ResponseFuture<$0.ExportDiagnosticsResponse> exportDiagnostics(
+    $0.ExportDiagnosticsRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$exportDiagnostics, request, options: options);
   }
 
   // method descriptors
@@ -249,6 +332,11 @@ class CoreClient extends $grpc.Client {
           '/hcore.Core/Restart',
           ($0.StartRequest value) => value.writeToBuffer(),
           $0.CoreInfoResponse.fromBuffer);
+  static final _$hotReload =
+      $grpc.ClientMethod<$0.StartRequest, $0.CoreInfoResponse>(
+          '/hcore.Core/HotReload',
+          ($0.StartRequest value) => value.writeToBuffer(),
+          $0.CoreInfoResponse.fromBuffer);
   static final _$selectOutbound =
       $grpc.ClientMethod<$0.SelectOutboundRequest, $1.Response>(
           '/hcore.Core/SelectOutbound',
@@ -260,6 +348,20 @@ class CoreClient extends $grpc.Client {
       $1.Response.fromBuffer);
   static final _$urlTestActive = $grpc.ClientMethod<$1.Empty, $1.Response>(
       '/hcore.Core/UrlTestActive',
+      ($1.Empty value) => value.writeToBuffer(),
+      $1.Response.fromBuffer);
+  static final _$uploadTest =
+      $grpc.ClientMethod<$0.SpeedTestRequest, $1.Response>(
+          '/hcore.Core/UploadTest',
+          ($0.SpeedTestRequest value) => value.writeToBuffer(),
+          $1.Response.fromBuffer);
+  static final _$downloadTest =
+      $grpc.ClientMethod<$0.SpeedTestRequest, $1.Response>(
+          '/hcore.Core/DownloadTest',
+          ($0.SpeedTestRequest value) => value.writeToBuffer(),
+          $1.Response.fromBuffer);
+  static final _$clearSpeedTests = $grpc.ClientMethod<$1.Empty, $1.Response>(
+      '/hcore.Core/ClearSpeedTests',
       ($1.Empty value) => value.writeToBuffer(),
       $1.Response.fromBuffer);
   static final _$generateWarpConfig = $grpc.ClientMethod<
@@ -289,6 +391,30 @@ class CoreClient extends $grpc.Client {
       '/hcore.Core/GetLANIP',
       ($1.Empty value) => value.writeToBuffer(),
       $0.LANIPResponse.fromBuffer);
+  static final _$isAdmin = $grpc.ClientMethod<$1.Empty, $0.IsAdminResponse>(
+      '/hcore.Core/IsAdmin',
+      ($1.Empty value) => value.writeToBuffer(),
+      $0.IsAdminResponse.fromBuffer);
+  static final _$needAdminBgService = $grpc.ClientMethod<
+          $0.NeedAdminBgServiceRequest, $0.NeedAdminBgServiceResponse>(
+      '/hcore.Core/NeedAdminBgService',
+      ($0.NeedAdminBgServiceRequest value) => value.writeToBuffer(),
+      $0.NeedAdminBgServiceResponse.fromBuffer);
+  static final _$ensureAdminBgService = $grpc.ClientMethod<
+          $0.EnsureAdminBgServiceRequest, $0.EnsureAdminBgServiceEvent>(
+      '/hcore.Core/EnsureAdminBgService',
+      ($0.EnsureAdminBgServiceRequest value) => value.writeToBuffer(),
+      $0.EnsureAdminBgServiceEvent.fromBuffer);
+  static final _$listCrashReports =
+      $grpc.ClientMethod<$1.Empty, $0.CrashReportList>(
+          '/hcore.Core/ListCrashReports',
+          ($1.Empty value) => value.writeToBuffer(),
+          $0.CrashReportList.fromBuffer);
+  static final _$exportDiagnostics = $grpc.ClientMethod<
+          $0.ExportDiagnosticsRequest, $0.ExportDiagnosticsResponse>(
+      '/hcore.Core/ExportDiagnostics',
+      ($0.ExportDiagnosticsRequest value) => value.writeToBuffer(),
+      $0.ExportDiagnosticsResponse.fromBuffer);
 }
 
 @$pb.GrpcServiceName('hcore.Core')
@@ -382,6 +508,13 @@ abstract class CoreServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.StartRequest.fromBuffer(value),
         ($0.CoreInfoResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.StartRequest, $0.CoreInfoResponse>(
+        'HotReload',
+        hotReload_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.StartRequest.fromBuffer(value),
+        ($0.CoreInfoResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.SelectOutboundRequest, $1.Response>(
         'SelectOutbound',
         selectOutbound_Pre,
@@ -400,6 +533,27 @@ abstract class CoreServiceBase extends $grpc.Service {
     $addMethod($grpc.ServiceMethod<$1.Empty, $1.Response>(
         'UrlTestActive',
         urlTestActive_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $1.Empty.fromBuffer(value),
+        ($1.Response value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.SpeedTestRequest, $1.Response>(
+        'UploadTest',
+        uploadTest_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.SpeedTestRequest.fromBuffer(value),
+        ($1.Response value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.SpeedTestRequest, $1.Response>(
+        'DownloadTest',
+        downloadTest_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.SpeedTestRequest.fromBuffer(value),
+        ($1.Response value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.Empty, $1.Response>(
+        'ClearSpeedTests',
+        clearSpeedTests_Pre,
         false,
         false,
         ($core.List<$core.int> value) => $1.Empty.fromBuffer(value),
@@ -450,6 +604,47 @@ abstract class CoreServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $1.Empty.fromBuffer(value),
         ($0.LANIPResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.Empty, $0.IsAdminResponse>(
+        'IsAdmin',
+        isAdmin_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $1.Empty.fromBuffer(value),
+        ($0.IsAdminResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.NeedAdminBgServiceRequest,
+            $0.NeedAdminBgServiceResponse>(
+        'NeedAdminBgService',
+        needAdminBgService_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.NeedAdminBgServiceRequest.fromBuffer(value),
+        ($0.NeedAdminBgServiceResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.EnsureAdminBgServiceRequest,
+            $0.EnsureAdminBgServiceEvent>(
+        'EnsureAdminBgService',
+        ensureAdminBgService_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) =>
+            $0.EnsureAdminBgServiceRequest.fromBuffer(value),
+        ($0.EnsureAdminBgServiceEvent value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.Empty, $0.CrashReportList>(
+        'ListCrashReports',
+        listCrashReports_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $1.Empty.fromBuffer(value),
+        ($0.CrashReportList value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.ExportDiagnosticsRequest,
+            $0.ExportDiagnosticsResponse>(
+        'ExportDiagnostics',
+        exportDiagnostics_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.ExportDiagnosticsRequest.fromBuffer(value),
+        ($0.ExportDiagnosticsResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.CoreInfoResponse> start_Pre(
@@ -549,6 +744,14 @@ abstract class CoreServiceBase extends $grpc.Service {
   $async.Future<$0.CoreInfoResponse> restart(
       $grpc.ServiceCall call, $0.StartRequest request);
 
+  $async.Future<$0.CoreInfoResponse> hotReload_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.StartRequest> $request) async {
+    return hotReload($call, await $request);
+  }
+
+  $async.Future<$0.CoreInfoResponse> hotReload(
+      $grpc.ServiceCall call, $0.StartRequest request);
+
   $async.Future<$1.Response> selectOutbound_Pre($grpc.ServiceCall $call,
       $async.Future<$0.SelectOutboundRequest> $request) async {
     return selectOutbound($call, await $request);
@@ -571,6 +774,30 @@ abstract class CoreServiceBase extends $grpc.Service {
   }
 
   $async.Future<$1.Response> urlTestActive(
+      $grpc.ServiceCall call, $1.Empty request);
+
+  $async.Future<$1.Response> uploadTest_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.SpeedTestRequest> $request) async {
+    return uploadTest($call, await $request);
+  }
+
+  $async.Future<$1.Response> uploadTest(
+      $grpc.ServiceCall call, $0.SpeedTestRequest request);
+
+  $async.Future<$1.Response> downloadTest_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.SpeedTestRequest> $request) async {
+    return downloadTest($call, await $request);
+  }
+
+  $async.Future<$1.Response> downloadTest(
+      $grpc.ServiceCall call, $0.SpeedTestRequest request);
+
+  $async.Future<$1.Response> clearSpeedTests_Pre(
+      $grpc.ServiceCall $call, $async.Future<$1.Empty> $request) async {
+    return clearSpeedTests($call, await $request);
+  }
+
+  $async.Future<$1.Response> clearSpeedTests(
       $grpc.ServiceCall call, $1.Empty request);
 
   $async.Future<$0.WarpGenerationResponse> generateWarpConfig_Pre(
@@ -621,4 +848,47 @@ abstract class CoreServiceBase extends $grpc.Service {
 
   $async.Future<$0.LANIPResponse> getLANIP(
       $grpc.ServiceCall call, $1.Empty request);
+
+  $async.Future<$0.IsAdminResponse> isAdmin_Pre(
+      $grpc.ServiceCall $call, $async.Future<$1.Empty> $request) async {
+    return isAdmin($call, await $request);
+  }
+
+  $async.Future<$0.IsAdminResponse> isAdmin(
+      $grpc.ServiceCall call, $1.Empty request);
+
+  $async.Future<$0.NeedAdminBgServiceResponse> needAdminBgService_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.NeedAdminBgServiceRequest> $request) async {
+    return needAdminBgService($call, await $request);
+  }
+
+  $async.Future<$0.NeedAdminBgServiceResponse> needAdminBgService(
+      $grpc.ServiceCall call, $0.NeedAdminBgServiceRequest request);
+
+  $async.Stream<$0.EnsureAdminBgServiceEvent> ensureAdminBgService_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.EnsureAdminBgServiceRequest> $request) async* {
+    yield* ensureAdminBgService($call, await $request);
+  }
+
+  $async.Stream<$0.EnsureAdminBgServiceEvent> ensureAdminBgService(
+      $grpc.ServiceCall call, $0.EnsureAdminBgServiceRequest request);
+
+  $async.Future<$0.CrashReportList> listCrashReports_Pre(
+      $grpc.ServiceCall $call, $async.Future<$1.Empty> $request) async {
+    return listCrashReports($call, await $request);
+  }
+
+  $async.Future<$0.CrashReportList> listCrashReports(
+      $grpc.ServiceCall call, $1.Empty request);
+
+  $async.Future<$0.ExportDiagnosticsResponse> exportDiagnostics_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.ExportDiagnosticsRequest> $request) async {
+    return exportDiagnostics($call, await $request);
+  }
+
+  $async.Future<$0.ExportDiagnosticsResponse> exportDiagnostics(
+      $grpc.ServiceCall call, $0.ExportDiagnosticsRequest request);
 }
