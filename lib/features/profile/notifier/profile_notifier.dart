@@ -185,15 +185,10 @@ class UpdateProfileNotifier extends _$UpdateProfileNotifier with AppLogger {
             },
             (_) async {
               loggy.info('successfully updated profile');
-              // The channel list comes from the running core, so a refreshed
-              // subscription is invisible until the core reloads its config.
-              // The TUN fd race that made v0.1.36 drop this is fixed in
-              // VPNService (close fd + 200ms before establish()).
-              // reconnect() is a no-op unless the VPN is connected.
-              if (profile.active) {
-                final fresh = await ref.read(activeProfileProvider.future);
-                await ref.read(connectionNotifierProvider.notifier).reconnect(fresh);
-              }
+              // Do NOT reconnect here. An in-place core restart still hits
+              // "configure tun interface: permission denied" on Android and
+              // drops the VPN (seen v0.1.36, again v0.1.84-0.1.86). New
+              // channels apply on the next manual disconnect/connect.
               return unit;
             },
           )

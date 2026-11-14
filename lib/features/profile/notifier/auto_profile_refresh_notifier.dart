@@ -1,11 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:hiddify/core/notification/in_app_notification_controller.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
-import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/diagnostics/diagnostics_service.dart';
 import 'package:hiddify/features/profile/data/profile_data_providers.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
-import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -191,13 +189,6 @@ class AutoProfileRefreshNotifier extends Notifier<AutoProfileRefreshState> {
             refreshed++;
           },
         );
-      }
-
-      if (refreshed > 0) {
-        final active = await ref.read(activeProfileProvider.future);
-        if (active != null) {
-          await ref.read(connectionNotifierProvider.notifier).reconnect(active);
-        }
       }
 
       final now = DateTime.now().millisecondsSinceEpoch;
