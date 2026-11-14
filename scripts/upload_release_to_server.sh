@@ -10,6 +10,7 @@
 #   SERVER_HOST            default 159.195.27.39
 #   SERVER_USER            default root
 #   KEEP_LAST              default 3
+#   MIRROR_HOSTS           space-separated mirrors, default 178.236.254.45 (dl.pixellnet.com, Aeza MSK)
 #   CLOUDFLARE_MASTER_KEY, CLOUDFLARE_EMAIL   optional, for cache purge
 #
 # Usage: ./upload_release_to_server.sh v0.1.85
@@ -26,6 +27,7 @@ HOST=$(trim "${SERVER_HOST:-159.195.27.39}")
 USER=$(trim "${SERVER_USER:-root}")
 KEEP="${KEEP_LAST:-3}"
 REMOTE="/var/www/pixellnet-downloads"
+MIRROR_HOSTS="${MIRROR_HOSTS-178.236.254.45}"
 CF_KEY=$(trim "${CLOUDFLARE_MASTER_KEY:-}")
 CF_EMAIL=$(trim "${CLOUDFLARE_EMAIL:-}")
 
@@ -93,15 +95,7 @@ for need in "pixellnet-$VER-arm64.apk" "pxl-win-v$VER.zip" "pixellnet-setup-$VER
   fi
 done
 
-echo "==> uploading to $HOST"
-for f in "$TMP"/pixellnet-*.apk "$TMP"/pixellnet-setup-*.exe "$TMP"/pxl-win-*.zip; do
-  [ -f "$f" ] || continue
-  scp "${SSH_OPTS[@]}" -q "$f" "$USER@$HOST:$REMOTE/"
-  echo "  uploaded $(basename "$f")"
-done
-
-echo "==> symlinks, rotation, latest.json"
-ssh "${SSH_OPTS[@]}" "$USER@$HOST" "VER='$VER' KEEP='$KEEP' REMOTE='$REMOTE' bash -s" <<'REMOTE_SCRIPT'
+cat > "$TMP/remote.sh" <<'REMOTE_SCRIPT'
 set -e
 cd "$REMOTE"
 for f in "pixellnet-$VER-arm64.apk" "pixellnet-setup-$VER.exe" "pxl-win-v$VER.zip"; do
@@ -147,6 +141,27 @@ PY
 chown -R www-data:www-data "$REMOTE"
 ls -la | grep -vE '^(total|d)' | awk '{print "  " $NF " " $5}' | sort
 REMOTE_SCRIPT
+
+deploy_to() {
+  local host="$1"
+  echo "==> uploading to $host"
+  for f in "$TMP"/pixellnet-*.apk "$TMP"/pixellnet-setup-*.exe "$TMP"/pxl-win-*.zip; do
+    [ -f "$f" ] || continue
+    scp "${SSH_OPTS[@]}" -q "$f" "$USER@$host:$REMOTE/"
+    echo "  uploaded $(basename "$f")"
+  done
+  echo "==> symlinks, rotation, latest.json on $host"
+  ssh "${SSH_OPTS[@]}" "$USER@$host" "mkdir -p '$REMOTE' && VER='$VER' KEEP='$KEEP' REMOTE='$REMOTE' bash -s" < "$TMP/remote.sh"
+}
+
+deploy_to "$HOST"
+
+# Mirrors are best effort: the primary already serves the release, and clients
+# fall back to GitHub when a mirror lacks the file.
+for m in $MIRROR_HOSTS; do
+  m=$(trim "$m")
+  deploy_to "$m" || echo "WARNING: mirror $m failed, continuing" >&2
+done
 
 echo "==> purging Cloudflare cache"
 if [ -n "$CF_KEY" ] && [ -n "$CF_EMAIL" ]; then
