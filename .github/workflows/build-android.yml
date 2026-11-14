@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+    # Тестовые сборки веток feat/**: без релиза и без автозаливки (upload-to-server
+    # берёт только head_branch на 'v'); APK ставится рядом с рабочим (.core5, «PIXELLNET β»).
+    branches:
+      - 'feat/**'
   workflow_dispatch:
     inputs:
       version:
@@ -65,6 +69,9 @@ jobs:
             V="${V#refs/tags/v}"
           elif [ -n "${{ inputs.version }}" ]; then
             V="${{ inputs.version }}"
+          elif [[ "${{ github.ref }}" == refs/heads/feat/* ]]; then
+            BASE=$(grep -m1 '^version:' pubspec.yaml | sed -E 's/^version: *([0-9.]+).*/\1/')
+            V="${BASE}-${GITHUB_REF_NAME##*/}.${{ github.run_number }}"
           else
             V="dev-${{ github.run_number }}"
           fi
@@ -150,7 +157,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
           EXTRA=()
-          if [ "${{ inputs.side_by_side }}" = "true" ]; then
+          if [ "${{ inputs.side_by_side }}" = "true" ] || [[ "${{ github.ref }}" == refs/heads/feat/* ]]; then
             EXTRA=(--android-project-arg=pixellnetIdSuffix=.core5 "--android-project-arg=pixellnetLabel=PIXELLNET β")
             echo "Side-by-side test build: com.pixellnet.vpn.core5"
           fi

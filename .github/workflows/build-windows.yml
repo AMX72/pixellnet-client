@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+    # Тестовые сборки веток feat/**: без релиза и без автозаливки (upload-to-server
+    # берёт только head_branch на 'v').
+    branches:
+      - 'feat/**'
   workflow_dispatch:
     inputs:
       version:
@@ -98,6 +102,9 @@ jobs:
             $v = "${{ github.ref }}" -replace 'refs/tags/v',''
           } elseif ("${{ inputs.version }}" -ne "") {
             $v = "${{ inputs.version }}"
+          } elseif ("${{ github.ref }}" -like "refs/heads/feat/*") {
+            $base = (Select-String -Path pubspec.yaml -Pattern '^version:\s*([0-9.]+)').Matches[0].Groups[1].Value
+            $v = "$base-" + ("${{ github.ref_name }}" -split '/')[-1] + ".${{ github.run_number }}"
           } else {
             $v = "dev-${{ github.run_number }}"
           }
