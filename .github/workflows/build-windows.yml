@@ -54,6 +54,11 @@ jobs:
       - name: Build hiddify-core.dll + HiddifyCli.exe
         working-directory: hiddify-core
         run: |
+          # Версия ядра в бинаре (как CODE_VERSION в upstream CI), иначе «version unknown»
+          CORE_V=$(sed -n 's/^core.version=//p' ../dependencies.properties)
+          SB_V=$(git -C hiddify-sing-box rev-parse --short HEAD 2>/dev/null || echo unknown)
+          export CODE_VERSION="-X github.com/hiddify/hiddify-core/v2/hcommon/constants.Version=${CORE_V} -X github.com/sagernet/sing-box/constant.Version=hiddify-${SB_V}"
+          echo "CODE_VERSION=$CODE_VERSION"
           make windows-amd64
           ls -la bin/
 

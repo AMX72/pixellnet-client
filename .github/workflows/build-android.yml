@@ -127,6 +127,11 @@ jobs:
             fi
           fi
           echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME"
+          # Версия ядра в бинаре (как CODE_VERSION в upstream CI), иначе «version unknown»
+          CORE_V=$(sed -n 's/^core.version=//p' ../dependencies.properties)
+          SB_V=$(git -C hiddify-sing-box rev-parse --short HEAD 2>/dev/null || echo unknown)
+          export CODE_VERSION="-X github.com/hiddify/hiddify-core/v2/hcommon/constants.Version=${CORE_V} -X github.com/sagernet/sing-box/constant.Version=hiddify-${SB_V}"
+          echo "CODE_VERSION=$CODE_VERSION"
           # Override TAGS: strip with_naive_outbound to avoid cronet-go relocation 315
           # (pre-compiled libcronet.a incompatible with Go 1.25 linker on Android).
           # Naive outbound не используется в наших каналах — безопасно выключить.
