@@ -159,6 +159,8 @@ const _kPrefAutoUpdate = 'pixellnet.updater.auto_update_enabled';
 const _kPrefLastCheck = 'pixellnet.updater.last_check';
 const _kCheckIntervalMs = 4 * 60 * 60 * 1000; // 4 часа
 const _kSiteDownloads = 'https://pixellnet.com/download';
+// Aeza MSK, DNS-only (no Cloudflare). Port 443 there belongs to the VPN.
+const _kMirrorDownloads = 'https://dl.pixellnet.com:2096/download';
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
@@ -338,13 +340,21 @@ class UpdaterService {
     }
   }
 
-  /// Reads https://pixellnet.com/download/latest.json (written by
-  /// scripts/upload_release_to_server.sh on every release).
+  /// Reads latest.json (written by scripts/upload_release_to_server.sh on
+  /// every release) from the site, then the mirror if the site is down.
   /// `reachable == false` means the caller should fall back to GitHub.
   Future<({bool reachable, UpdateInfo? info})> _checkLatestJson() async {
+    for (final base in [_kSiteDownloads, _kMirrorDownloads]) {
+      final result = await _checkLatestJsonAt(base);
+      if (result.reachable) return result;
+    }
+    return (reachable: false, info: null);
+  }
+
+  Future<({bool reachable, UpdateInfo? info})> _checkLatestJsonAt(String base) async {
     try {
       final response = await http
-          .get(Uri.parse('$_kSiteDownloads/latest.json'))
+          .get(Uri.parse('$base/latest.json'))
           .timeout(const Duration(seconds: 8));
       if (response.statusCode != 200) return (reachable: false, info: null);
       final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -368,15 +378,17 @@ class UpdaterService {
 
       return (
         reachable: true,
-        // GitHub first for the big file: in RU, Cloudflare (pixellnet.com)
-        // freezes downloads after ~26 KB, while GitHub serves at full speed
-        // (measured 2026-11-14 on a Tyumen ISP without VPN). Same bytes:
-        // the site copy is uploaded from this GitHub release.
+        // Measured 2026-11-14 on a Tyumen ISP without VPN: Aeza MSK mirror
+        // ~30 MB/s, GitHub ~3 MB/s, pixellnet.com (Cloudflare) freezes after
+        // ~26 KB. All three hold the same bytes (copies of the GitHub release).
         info: UpdateInfo(
           version: version,
-          downloadUrl: 'https://github.com/$_kGithubRepo/releases/download/v$version/$ghAsset',
+          downloadUrl: '$_kMirrorDownloads/${entry['file']}',
           changelog: '',
-          mirrors: ['$_kSiteDownloads/${entry['file']}'],
+          mirrors: [
+            'https://github.com/$_kGithubRepo/releases/download/v$version/$ghAsset',
+            '$_kSiteDownloads/${entry['file']}',
+          ],
           sha256: (entry['sha256'] as String?)?.toLowerCase(),
         ),
       );
