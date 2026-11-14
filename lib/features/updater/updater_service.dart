@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
+import 'package:crypto/crypto.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -155,6 +158,7 @@ const _kGithubRepo = 'AMX72/pixellnet-client';
 const _kPrefAutoUpdate = 'pixellnet.updater.auto_update_enabled';
 const _kPrefLastCheck = 'pixellnet.updater.last_check';
 const _kCheckIntervalMs = 4 * 60 * 60 * 1000; // 4 часа
+const _kSiteDownloads = 'https://pixellnet.com/download';
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
@@ -191,11 +195,15 @@ class UpdateInfo {
   /// РФ-юзеры на CF/GH ловят ТСПУ throttle 16 KB — mirror в РФ-DC даёт full speed.
   final List<String> mirrors;
 
+  /// Expected SHA-256 of the file (lowercase hex), from latest.json.
+  final String? sha256;
+
   const UpdateInfo({
     required this.version,
     required this.downloadUrl,
     required this.changelog,
     this.mirrors = const [],
+    this.sha256,
   });
 
   /// Все URL: primary + mirrors без дубликатов, порядок сохраняется.
@@ -220,6 +228,12 @@ class UpdaterService {
     // v0.1.16: поддержка Windows (кроме Android) — качаем portable zip
     if (!Platform.isAndroid && !Platform.isWindows) return null;
 
+    // Primary source: our own server. Reachable without a working VPN and
+    // cheap (a ~1 KB JSON), so it is not throttled.
+    final site = await _checkLatestJson();
+    if (site.reachable) return site.info;
+
+    // Fallback: GitHub API, throttled (60 req/h per IP without a token).
     final prefs = await SharedPreferences.getInstance();
     final lastCheck = prefs.getInt(_kPrefLastCheck) ?? 0;
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -322,6 +336,82 @@ class UpdaterService {
       if (kDebugMode) debugPrint('[UpdaterService] checkForUpdate error: $e');
       return null;
     }
+  }
+
+  /// Reads https://pixellnet.com/download/latest.json (written by
+  /// scripts/upload_release_to_server.sh on every release).
+  /// `reachable == false` means the caller should fall back to GitHub.
+  Future<({bool reachable, UpdateInfo? info})> _checkLatestJson() async {
+    try {
+      final response = await http
+          .get(Uri.parse('$_kSiteDownloads/latest.json'))
+          .timeout(const Duration(seconds: 8));
+      if (response.statusCode != 200) return (reachable: false, info: null);
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final version = (data['version'] as String).replaceFirst('v', '');
+
+      final Map<String, dynamic>? entry;
+      final String ghAsset;
+      if (Platform.isWindows) {
+        entry = (data['windows'] as Map<String, dynamic>?)?['zip'] as Map<String, dynamic>?;
+        ghAsset = 'pixellnet-windows-x64-$version.zip';
+      } else {
+        final abi = await _androidAbi();
+        entry = (data['android'] as Map<String, dynamic>?)?[abi.key] as Map<String, dynamic>?;
+        ghAsset = 'pixellnet-$version-app-${abi.ghName}-release.apk';
+      }
+      if (entry == null) return (reachable: false, info: null);
+
+      final packageInfo = await PackageInfo.fromPlatform();
+      final current = Version.parse(packageInfo.version.split('+').first);
+      if (Version.parse(version) <= current) return (reachable: true, info: null);
+
+      return (
+        reachable: true,
+        info: UpdateInfo(
+          version: version,
+          downloadUrl: '$_kSiteDownloads/${entry['file']}',
+          changelog: '',
+          mirrors: ['https://github.com/$_kGithubRepo/releases/download/v$version/$ghAsset'],
+          sha256: (entry['sha256'] as String?)?.toLowerCase(),
+        ),
+      );
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Updater] latest.json check failed: $e');
+      return (reachable: false, info: null);
+    }
+  }
+
+  /// Deletes [file] and throws if its SHA-256 differs from [expected].
+  /// No-op when the source gave no checksum (GitHub API fallback).
+  Future<void> _verifySha256(File file, String? expected) async {
+    if (expected == null || expected.isEmpty) return;
+    final path = file.path;
+    final actual = await Isolate.run(
+      () async => (await sha256.bind(File(path).openRead()).first).toString(),
+    );
+    if (actual != expected) {
+      await file.delete();
+      throw Exception('Файл обновления повреждён (контрольная сумма не совпала). Попробуй снова.');
+    }
+  }
+
+  /// Maps the device's preferred ABI to latest.json keys / GitHub asset names.
+  Future<({String key, String ghName})> _androidAbi() async {
+    try {
+      final abis = (await DeviceInfoPlugin().androidInfo).supportedAbis;
+      for (final abi in abis) {
+        switch (abi) {
+          case 'arm64-v8a':
+            return (key: 'arm64', ghName: 'arm64-v8a');
+          case 'armeabi-v7a':
+            return (key: 'armv7', ghName: 'armeabi-v7a');
+          case 'x86_64':
+            return (key: 'x86_64', ghName: 'x86_64');
+        }
+      }
+    } catch (_) {}
+    return (key: 'arm64', ghName: 'arm64-v8a');
   }
 
   /// v0.0.37: rollout manifest check — superadmin promotes version via
@@ -472,6 +562,7 @@ class UpdaterService {
       await file.delete();
       throw Exception('Скачанный файл слишком мал ($actualSize байт). Проверь интернет.');
     }
+    await _verifySha256(file, info.sha256);
 
     // v0.1.26: метка установки для post-update banner на Home.
     // Android install через PackageInstaller — юзер подтверждает вручную,
@@ -641,6 +732,7 @@ class UpdaterService {
     if (actualSize < 5 * 1024 * 1024) {
       throw Exception('Скачанный файл слишком мал ($actualSize байт). Проверь интернет.');
     }
+    await _verifySha256(zipFile, info.sha256);
 
     // Распаковка через PowerShell (нативная на Windows 10+, без зависимостей)
     final expand = await Process.run(
