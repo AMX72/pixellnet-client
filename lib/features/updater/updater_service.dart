@@ -368,11 +368,15 @@ class UpdaterService {
 
       return (
         reachable: true,
+        // GitHub first for the big file: in RU, Cloudflare (pixellnet.com)
+        // freezes downloads after ~26 KB, while GitHub serves at full speed
+        // (measured 2026-11-14 on a Tyumen ISP without VPN). Same bytes:
+        // the site copy is uploaded from this GitHub release.
         info: UpdateInfo(
           version: version,
-          downloadUrl: '$_kSiteDownloads/${entry['file']}',
+          downloadUrl: 'https://github.com/$_kGithubRepo/releases/download/v$version/$ghAsset',
           changelog: '',
-          mirrors: ['https://github.com/$_kGithubRepo/releases/download/v$version/$ghAsset'],
+          mirrors: ['$_kSiteDownloads/${entry['file']}'],
           sha256: (entry['sha256'] as String?)?.toLowerCase(),
         ),
       );
@@ -594,6 +598,7 @@ class UpdaterService {
 
     for (int attempt = 0; attempt < 3; attempt++) {
       final client = http.Client();
+      final startReceived = received;
       try {
         final headers = <String, String>{};
         if (received > 0) {
@@ -638,7 +643,9 @@ class UpdaterService {
         final sink =
             file.openWrite(mode: received > 0 ? FileMode.append : FileMode.write);
         try {
-          await response.stream.map((chunk) {
+          // Idle timeout: a stalled connection (RU DPI throttling on CF/GH)
+          // otherwise hangs forever and never resumes or switches mirror.
+          await response.stream.timeout(const Duration(seconds: 20)).map((chunk) {
             received += chunk.length;
             if (totalSize > 0) onProgress?.call(received / totalSize);
             return chunk;
@@ -669,7 +676,9 @@ class UpdaterService {
       } on Exception {
         // Обрыв стрима — сохраняем позицию, retry с Range.
         received = await file.exists() ? await file.length() : 0;
-        if (attempt == 2) {
+        // Almost nothing arrived: the source is being throttled, retrying it
+        // is pointless — let the caller switch to the next mirror right away.
+        if (attempt == 2 || received - startReceived < 256 * 1024) {
           rethrow;
         }
         await Future.delayed(const Duration(seconds: 2));
