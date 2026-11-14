@@ -185,12 +185,15 @@ class UpdateProfileNotifier extends _$UpdateProfileNotifier with AppLogger {
             },
             (_) async {
               loggy.info('successfully updated profile');
-              // v0.1.36: НЕ auto-reconnect после refresh активного профиля.
-              // Причина: gRPC restart sing-box иногда фейлит с
-              // "configure tun interface: permission denied" — старый TUN fd
-              // не успевает освободиться до нового establish() (race в ядре).
-              // Новые каналы применятся при следующем manual reconnect
-              // (юзер выключил/включил VPN, или сменил канал в selector).
+              // The channel list comes from the running core, so a refreshed
+              // subscription is invisible until the core reloads its config.
+              // The TUN fd race that made v0.1.36 drop this is fixed in
+              // VPNService (close fd + 200ms before establish()).
+              // reconnect() is a no-op unless the VPN is connected.
+              if (profile.active) {
+                final fresh = await ref.read(activeProfileProvider.future);
+                await ref.read(connectionNotifierProvider.notifier).reconnect(fresh);
+              }
               return unit;
             },
           )
