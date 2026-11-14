@@ -519,6 +519,17 @@ class _Row extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback? onTap;
 
+  Widget _label(ThemeData theme) => Text(
+        label,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: theme.colorScheme.onSurface,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -529,21 +540,12 @@ class _Row extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: _kRowPadH, vertical: 7),
         child: Row(
           children: [
-            // Fixed-width label column so every row's value column begins at
-            // the same x — right side no longer jumps per row length.
-            SizedBox(
-              width: 140,
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: theme.colorScheme.onSurface,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
+            // Rows with a text value use a fixed-width label so all values start
+            // at the same x; switch/chevron-only rows give the label full width.
+            if (value != null)
+              SizedBox(width: 140, child: _label(theme))
+            else
+              Expanded(child: _label(theme)),
             const Gap(12),
             if (valueWidget != null)
               valueWidget!
