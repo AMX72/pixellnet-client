@@ -1793,6 +1793,9 @@ Future<void> _confirmAndDelete(BuildContext context, WidgetRef ref, ProfileEntit
       SnackBar(
         content: const Text('Подписка удалена'),
         duration: const Duration(seconds: 4),
+        // Flutter 3.38: SnackBar с action по умолчанию persist = true и не исчезает
+        // по duration — плашка висела и закрывала «Добавить подписку». Явно гасим через 4 с.
+        persist: false,
         action: SnackBarAction(
           label: 'Отменить',
           onPressed: () async {
