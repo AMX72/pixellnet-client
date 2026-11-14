@@ -5,12 +5,13 @@ name: Upload release to pixellnet.com
 # updates latest-* symlinks, rotates to keep last 3 per platform, purges Cloudflare cache.
 
 on:
-  # Triggered after Build Windows completes successfully.
+  # Triggered after either build; the script uploads only once the release
+  # holds both the Android APK and the Windows zip.
   # (release:published trigger does not fire because the release
   # is created by softprops/action-gh-release via GITHUB_TOKEN,
   # which cannot start other workflows — recursion safety.)
   workflow_run:
-    workflows: ["Build Windows"]
+    workflows: ["Build Android", "Build Windows"]
     types: [completed]
   workflow_dispatch:
     inputs:
@@ -55,7 +56,6 @@ jobs:
           SERVER_USER: ${{ secrets.NETCUP_USER }}
           CLOUDFLARE_MASTER_KEY: ${{ secrets.CLOUDFLARE_MASTER_KEY }}
           CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
-          PIXELLNET_ADMIN_TOKEN: ${{ secrets.PIXELLNET_ADMIN_TOKEN }}
         run: |
           chmod +x scripts/upload_release_to_server.sh
           scripts/upload_release_to_server.sh ${{ steps.tag.outputs.tag }}
