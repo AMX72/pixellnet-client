@@ -53,8 +53,10 @@ sealed class CoreStatus with _$CoreStatus {
           MessageType.ERROR_PARSING_CONFIG => CoreAlert.emptyConfiguration,
           MessageType.ERROR_BUILDING_CONFIG => CoreAlert.emptyConfiguration,
           MessageType.EMPTY_CONFIGURATION => CoreAlert.emptyConfiguration,
-          MessageType.ALREADY_STOPPED => CoreAlert.createService,
-          MessageType.ALREADY_STARTED => CoreAlert.startService,
+          // v0.1.95: ядро 5.x шлёт STOPPED+ALREADY_STOPPED при каждой остановке/перезапуске
+          // (смена ключа) — это не сбой; раньше превращалось в ложное «createService».
+          MessageType.ALREADY_STOPPED => null,
+          MessageType.ALREADY_STARTED => null,
 
           // MessageType.REQUEST_VPN_PERMISSION => SingboxAlert.requestVPNPermission,
           // MessageType.REQUEST_NOTIFICATION_PERMISSION => SingboxAlert.requestNotificationPermission,
