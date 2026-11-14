@@ -161,24 +161,34 @@ class BoxService(
 
             DefaultNetworkMonitor.start()
             Libbox.setMemoryLimit(!Settings.disableMemoryLimit)
-            val newService = try {
-                Mobile.setup(
-                    SetupOptions().also {
-                        it.basePath = Settings.baseDir
-                        it.workingDir = Settings.workingDir
-                        it.tempDir = Settings.tempDir
-                        it.fixAndroidStack = com.hiddify.hiddify.bg.Bugs.fixAndroidStack
-                        it.mode=4L//mode.toLong()
-                        it.listen= "127.0.0.1:${Settings.grpcServiceModePort}"
-                        it.secret=""
-                        it.debug = Settings.debugMode
-                    },platformInterface)
-
-
-//                Libbox.newService(content,platformInterface)
-
-            } catch (e: Exception) {
-                stopAndAlert(Alert.CreateService, e.message)
+            // v0.1.93: при быстром перезапуске (смена ключа) предыдущее ядро может ещё
+            // закрываться и держать gRPC-порт → Mobile.setup падал, юзер видел
+            // «Непредвиденный сбой: createService». Повторяем до 5 раз, добивая остатки.
+            var setupError: Exception? = null
+            for (attempt in 1..5) {
+                try {
+                    Mobile.setup(
+                        SetupOptions().also {
+                            it.basePath = Settings.baseDir
+                            it.workingDir = Settings.workingDir
+                            it.tempDir = Settings.tempDir
+                            it.fixAndroidStack = com.hiddify.hiddify.bg.Bugs.fixAndroidStack
+                            it.mode=4L//mode.toLong()
+                            it.listen= "127.0.0.1:${Settings.grpcServiceModePort}"
+                            it.secret=""
+                            it.debug = Settings.debugMode
+                        },platformInterface)
+                    setupError = null
+                    break
+                } catch (e: Exception) {
+                    setupError = e
+                    Log.w(TAG, "Mobile.setup attempt $attempt failed: ${e.message}")
+                    runCatching { Mobile.close(4L) }
+                    delay(500L)
+                }
+            }
+            if (setupError != null) {
+                stopAndAlert(Alert.CreateService, setupError.message)
                 return
             }
             status.postValue(Status.Started)

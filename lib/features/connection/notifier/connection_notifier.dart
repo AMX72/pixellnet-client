@@ -117,7 +117,9 @@ class ConnectionNotifier extends _$ConnectionNotifier with AppLogger {
     await ref.read(Preferences.startedByUser.notifier).update(true);
     await _disconnect();
     await _waitForDisconnected(const Duration(seconds: 10));
-    await Future<void>.delayed(const Duration(milliseconds: 500));
+    // v0.1.93: Dart видит Disconnected раньше, чем Android-сервис закроет старое ядро
+    // (Mobile.close) — 500 мс не хватало (createService). Плюс повторы setup в BoxService.
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
     await _connect();
   }
 
