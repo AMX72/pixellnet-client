@@ -1,5 +1,5 @@
 diff --git a/v2/config/builder.go b/v2/config/builder.go
-index 0c76f1e..b9c4df1 100644
+index 0c76f1e..e2f8ec3 100644
 --- a/v2/config/builder.go
 +++ b/v2/config/builder.go
 @@ -50,7 +50,7 @@ const (
@@ -44,7 +44,7 @@ index 0c76f1e..b9c4df1 100644
  						IPv6ByOutbound: ipv6ByOutbound(hopt, OutboundDirectTag),
  						RewriteTTL:     &DEFAULT_DNS_TTL,
  						BypassIfFailed: false,
-@@ -1037,6 +1045,75 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
+@@ -1037,6 +1045,76 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
  			},
  		})
  
@@ -105,7 +105,8 @@ index 0c76f1e..b9c4df1 100644
 +				Type: C.RuleTypeDefault,
 +				DefaultOptions: option.DefaultRule{
 +					RawDefaultRule: option.RawDefaultRule{
-+						IPCIDR: pixellnetRuBypassCIDR,
++						// core 5.x: IPCIDR = badoption.Listable[*badoption.Prefixable]
++						IPCIDR: prefixables(pixellnetRuBypassCIDR),
 +					},
 +					RuleAction: option.RuleAction{
 +						Action: C.RuleActionTypeRoute,
