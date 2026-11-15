@@ -37,6 +37,9 @@ Compression=lzma
 SolidCompression=yes
 SetupIconFile=..\windows\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\{#AppExecutable}
+; v0.1.96: после установки шлём SHChangeNotify(SHCNE_ASSOCCHANGED) — Проводник сбрасывает
+; кэш иконок, иначе ярлык при обновлении поверх старой версии показывает старый логотип.
+ChangesAssociations=yes
 WizardStyle=modern
 PrivilegesRequired=admin
 ArchitecturesAllowed=x64compatible
