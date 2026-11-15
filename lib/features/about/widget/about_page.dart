@@ -23,7 +23,7 @@ import 'package:share_plus/share_plus.dart';
 const String kPixellnetShareText =
     'PIXELLNET VPN — быстрый и приватный доступ к Интернету\n\n'
     'Скачать для Android и Windows:\n'
-    'https://pixellnet.com/download';
+    'https://download.pixellnet.com';
 
 class AboutPage extends HookConsumerWidget {
   const AboutPage({super.key});

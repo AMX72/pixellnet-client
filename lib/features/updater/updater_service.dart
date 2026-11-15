@@ -159,8 +159,9 @@ const _kPrefAutoUpdate = 'pixellnet.updater.auto_update_enabled';
 const _kPrefLastCheck = 'pixellnet.updater.last_check';
 const _kCheckIntervalMs = 4 * 60 * 60 * 1000; // 4 часа
 const _kSiteDownloads = 'https://pixellnet.com/download';
-// Aeza MSK, DNS-only (no Cloudflare). Port 443 there belongs to the VPN.
-const _kMirrorDownloads = 'https://dl.pixellnet.com:2096/download';
+// Aeza MSK, DNS-only (no Cloudflare). v0.1.97: download.pixellnet.com on :443
+// (nginx SNI router in front of the VPN); dl.pixellnet.com:2096 serves the same files.
+const _kMirrorDownloads = 'https://download.pixellnet.com/download';
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
@@ -341,10 +342,12 @@ class UpdaterService {
   }
 
   /// Reads latest.json (written by scripts/upload_release_to_server.sh on
-  /// every release) from the site, then the mirror if the site is down.
+  /// every release) from the Aeza MSK mirror first, then the site.
+  /// v0.1.97: mirror first — pixellnet.com sits behind Cloudflare, which RU mobile
+  /// carriers throttle without VPN (request hangs until the 8 s timeout).
   /// `reachable == false` means the caller should fall back to GitHub.
   Future<({bool reachable, UpdateInfo? info})> _checkLatestJson() async {
-    for (final base in [_kSiteDownloads, _kMirrorDownloads]) {
+    for (final base in [_kMirrorDownloads, _kSiteDownloads]) {
       final result = await _checkLatestJsonAt(base);
       if (result.reachable) return result;
     }

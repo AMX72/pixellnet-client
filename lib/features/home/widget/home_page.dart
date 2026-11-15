@@ -207,7 +207,7 @@ class HomePage extends HookConsumerWidget {
                   await Share.share(
                     'PIXELLNET VPN — быстрый и приватный доступ к Интернету\n\n'
                     'Скачать для Android и Windows:\n'
-                    'https://pixellnet.com/download',
+                    'https://download.pixellnet.com',
                     subject: 'PIXELLNET VPN',
                   );
                 },
@@ -220,7 +220,7 @@ class HomePage extends HookConsumerWidget {
                 onTap: () async {
                   Navigator.of(ctx).pop();
                   await launchUrl(
-                    Uri.parse('https://pixellnet.com/download'),
+                    Uri.parse('https://download.pixellnet.com'),
                     mode: LaunchMode.externalApplication,
                   );
                 },
