@@ -27,7 +27,22 @@ import 'package:meta/meta.dart';
 /// - remote:  fallback to `Remote Profile`
 /// - local: fallback to protocol, extracted from content by protocol()
 
-class ProfileParser {
+class ProfileParser with InfraLogger {
+  // v0.1.99: subscription mirror on the Aeza MSK entry (download.pixellnet.com, DNS-only, no
+  // Cloudflare on the way). On RU mobile networks connections to Cloudflare freeze, so
+  // https://pixellnet.com/sub/... timed out there and mobile users never got subscription updates
+  // (the app excludes itself from its own VPN on Android). The mirror proxies to pixellnet.com
+  // byte-for-byte; the stored profile URL stays pixellnet.com, the origin is the fallback.
+  static const _kSubMirrorHost = 'download.pixellnet.com';
+  static const _kSubOriginHosts = {'pixellnet.com', 'www.pixellnet.com'};
+
+  static String? subscriptionMirrorUrl(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null || uri.scheme != 'https' || !_kSubOriginHosts.contains(uri.host)) return null;
+    if (!uri.path.startsWith('/sub/')) return null;
+    return uri.replace(host: _kSubMirrorHost).toString();
+  }
+
   // Synthetic sentinel assigned to `total` for "unlimited" traffic (subscription-userinfo total=0 or
   // missing). It MUST stay above the 10 TB "unlimited" threshold the UI uses to decide whether to show
   // "∞" (isInfinitSize() in lib/utils/number_formatters.dart, and profile_tile.dart). The previous
@@ -155,21 +170,33 @@ class ProfileParser {
     // if (url.startsWith("http://"))
     //   throw const ProfileFailure.invalidUrl('HTTP is not supported. Please use HTTPS for secure connection.');
 
-    final rs = await _httpClient
-        .download(
-          url.trim(),
-          tempFilePath,
-          cancelToken: cancelToken,
-          userAgent: _ref.read(ConfigOptions.useXrayCoreWhenPossible)
-              ? _httpClient.userAgent.replaceAll("HiddifyNext", "HiddifyNextX")
-              : null,
-        )
-        .catchError((err) {
-          if (CancelToken.isCancel(err as DioException)) {
+    final userAgent = _ref.read(ConfigOptions.useXrayCoreWhenPossible)
+        ? _httpClient.userAgent.replaceAll("HiddifyNext", "HiddifyNextX")
+        : null;
+    Future<Response<dynamic>> fetch(String target) => _httpClient
+        .download(target, tempFilePath, cancelToken: cancelToken, userAgent: userAgent)
+        .catchError((Object err) {
+          if (err is DioException && CancelToken.isCancel(err)) {
             throw const ProfileFailure.cancelByUser('HTTP request for getting profile content canceled by user.');
           }
           throw err;
         });
+
+    final origin = url.trim();
+    final mirror = subscriptionMirrorUrl(origin);
+    Response<dynamic> rs;
+    if (mirror == null) {
+      rs = await fetch(origin);
+    } else {
+      try {
+        rs = await fetch(mirror);
+      } on ProfileFailure {
+        rethrow;
+      } catch (e) {
+        loggy.warning("subscription mirror failed, falling back to the origin: $e");
+        rs = await fetch(origin);
+      }
+    }
     await expandRemoteLinesInParallel(
       tempFilePath: tempFilePath,
       httpClient: _httpClient,
