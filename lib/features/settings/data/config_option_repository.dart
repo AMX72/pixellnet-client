@@ -33,7 +33,8 @@ abstract class ConfigOptions {
 
   static final region = PreferencesNotifier.create<Region, String>(
     "region",
-    Region.other,
+    // v0.1.98: PIXELLNET is for Russia — Russian sites go direct unless the user picks another region.
+    Region.ru,
     mapFrom: Region.values.byName,
     mapTo: (value) => value.name,
   );

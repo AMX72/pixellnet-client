@@ -114,17 +114,32 @@ class HiddifyCoreService with InfraLogger {
     });
   }
 
+  /// v0.1.98: an empty app rule list is not sent. hiddify-core treats any "route-rule"
+  /// (even `{}`) as "the app has its own rules" and then skips the region rules
+  /// (.ru, geosite-ru/geoip-ru, Yandex/VK from our core patch). With region=ru every
+  /// Russian site went through the VPN exit in Germany, and Ozon/Wildberries/RBC drop
+  /// the TLS handshake for foreign datacenter IPs.
+  static String _settingsJson(SingboxConfigOption options) {
+    final json = options.toJson();
+    final routeRule = json['route-rule'];
+    if (routeRule is Map && ((routeRule['rules'] as List?)?.isEmpty ?? true)) {
+      json.remove('route-rule');
+    }
+    return jsonEncode(json);
+  }
+
   TaskEither<String, Unit> changeOptions(SingboxConfigOption options) {
     return TaskEither(() async {
       loggy.debug("changing options");
       // latestOptions = options;
       try {
+        final settingsJson = _settingsJson(options);
         final res = await core.fgClient.changeHiddifySettings(
-          ChangeHiddifySettingsRequest(hiddifySettingsJson: jsonEncode(options.toJson())),
+          ChangeHiddifySettingsRequest(hiddifySettingsJson: settingsJson),
         );
         if (res.messageType != MessageType.EMPTY) return left("${res.messageType} ${res.message}");
         await core.bgClient.changeHiddifySettings(
-          ChangeHiddifySettingsRequest(hiddifySettingsJson: jsonEncode(options.toJson())),
+          ChangeHiddifySettingsRequest(hiddifySettingsJson: settingsJson),
         );
       } on GrpcError catch (e) {
         if (e.code == StatusCode.unavailable) {
