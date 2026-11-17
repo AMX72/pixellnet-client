@@ -80,12 +80,16 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env, {List
     } else {
       Logger.bootstrap.debug("silent start, remain hidden accessible via tray");
     }
-    // v0.1.100: необязательный сервис не должен ронять запуск (v0.1.99 падал на свежем
-    // профиле Windows без StartupApproved\Run — CHANGELOG 2026-11-17 part 34).
-    await _safeInit("auto start service", () => container.read(autoStartNotifierProvider.future));
   }
   await _init("logs repository", () => container.read(logRepositoryProvider.future));
   await _init("logger controller", () => LoggerController.postInit(debug));
+
+  if (PlatformUtils.isDesktop) {
+    // v0.1.100: необязательный сервис не должен ронять запуск (v0.1.99 падал на свежем
+    // профиле Windows без StartupApproved\Run — CHANGELOG 2026-11-17 part 34).
+    // После logs repository: тот обнуляет app.log, и строки миграции автозапуска терялись.
+    await _safeInit("auto start service", () => container.read(autoStartNotifierProvider.future));
+  }
 
   Logger.bootstrap.info(appInfo.format());
 
