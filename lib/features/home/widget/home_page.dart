@@ -18,6 +18,7 @@ import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/gen/translations.g.dart' show AppLocale;
 import 'package:hiddify/features/connection/model/connection_status.dart';
+import 'package:hiddify/utils/alerts.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/singbox/model/singbox_config_enum.dart';
@@ -2113,10 +2114,16 @@ class _SettingsSection extends ConsumerWidget {
           valueWidget: Switch(
             value: autoStart,
             onChanged: (v) async {
-              if (v) {
-                await ref.read(autoStartNotifierProvider.notifier).enable();
-              } else {
-                await ref.read(autoStartNotifierProvider.notifier).disable();
+              try {
+                if (v) {
+                  await ref.read(autoStartNotifierProvider.notifier).enable();
+                } else {
+                  await ref.read(autoStartNotifierProvider.notifier).disable();
+                }
+              } catch (_) {
+                if (context.mounted) {
+                  CustomToast.error(v ? 'Не удалось включить автозапуск' : 'Не удалось выключить автозапуск').show(context);
+                }
               }
             },
           ),

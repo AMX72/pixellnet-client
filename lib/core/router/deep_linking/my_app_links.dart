@@ -13,5 +13,8 @@ Stream<String> myAppLinks(Ref ref) async* {
       registerProtocolHandler(protocol);
     }
   }
-  yield* AppLinks().uriLinkStream.map((event) => event.toString());
+  // v0.1.100: на Windows app_links берёт argv[1] как ссылку (и при старте, и при
+  // пересылке в уже открытое окно). Флаги вроде `--autostart` (задача автозапуска)
+  // ссылками не являются — иначе роутер уходил на несуществующую страницу.
+  yield* AppLinks().uriLinkStream.map((event) => event.toString()).where((link) => !link.startsWith('-'));
 }

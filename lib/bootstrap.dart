@@ -16,6 +16,8 @@ import 'package:hiddify/core/preferences/preferences_migration.dart';
 import 'package:hiddify/core/preferences/preferences_provider.dart';
 import 'package:hiddify/features/app/widget/app.dart';
 import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
+import 'package:hiddify/features/auto_start/windows_autostart.dart';
+import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/chain/model/chain_enum.dart';
 import 'package:hiddify/features/chain/notifier/chain_profile_notifier.dart';
@@ -32,7 +34,7 @@ import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
-Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async {
+Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env, {List<String> args = const []}) async {
   if (!kIsWeb) {
     FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   }
@@ -141,6 +143,13 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async
     }
   }
 
+  // v0.1.100 Windows: запуск задачей Планировщика при входе (--autostart) →
+  // подключаемся сами («Автоподключение при запуске»). Ручной запуск не трогаем.
+  if (PlatformUtils.isWindows && args.contains(WindowsAutostart.launchArg)) {
+    Logger.bootstrap.info("desktop autostart launch: auto-connect scheduled");
+    unawaited(_autostartConnect(container));
+  }
+
   Logger.bootstrap.info("bootstrap took [${stopWatch.elapsedMilliseconds}ms]");
   stopWatch.stop();
 
@@ -156,6 +165,37 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env) async
     FlutterNativeSplash.remove();
   }
   // SentryFlutter.s(DateTime.now().toUtc());
+}
+
+/// Подключение после автозапуска при входе в Windows. Сеть (Wi-Fi) в этот момент
+/// может ещё подниматься — до 4 попыток с паузой 15 с, пока не Connected.
+Future<void> _autostartConnect(ProviderContainer container) async {
+  await Future<void>.delayed(const Duration(seconds: 2));
+  for (var attempt = 1; attempt <= 4; attempt++) {
+    try {
+      final activeProfile = await container.read(activeProfileProvider.future);
+      if (activeProfile == null) {
+        Logger.bootstrap.info("autostart auto-connect: no active profile, skip");
+        return;
+      }
+      final status = container.read(connectionNotifierProvider);
+      if (status case AsyncData(value: Connected() || Connecting())) return;
+      Logger.bootstrap.info("autostart auto-connect: attempt $attempt");
+      if (status is AsyncError) {
+        await container.read(connectionNotifierProvider.notifier).toggleConnection();
+      } else {
+        await container.read(connectionNotifierProvider.notifier).mayConnect();
+      }
+    } catch (e, st) {
+      Logger.bootstrap.warning("autostart auto-connect attempt $attempt failed", e, st);
+    }
+    await Future<void>.delayed(const Duration(seconds: 15));
+    if (container.read(connectionNotifierProvider) case AsyncData(value: Connected())) {
+      Logger.bootstrap.info("autostart auto-connect: connected");
+      return;
+    }
+  }
+  Logger.bootstrap.warning("autostart auto-connect: gave up after 4 attempts");
 }
 
 Future<T> _init<T>(String name, Future<T> Function() initializer, {int? timeout}) async {

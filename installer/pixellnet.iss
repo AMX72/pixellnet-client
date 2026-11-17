@@ -77,6 +77,11 @@ Root: HKCR; Subkey: "pixellnet\shell\open\command"; ValueType: string; ValueName
 ; При полной чистке юзер удалит вручную.
 Type: filesandordirs; Name: "{app}"
 
+[UninstallRun]
+; v0.1.100: автозапуск теперь — задача Планировщика (её создаёт приложение,
+; ярлык из «Автозагрузки» оно переносит в задачу). При удалении — снять задачу.
+Filename: "{sys}\schtasks.exe"; Parameters: "/Delete /TN ""PIXELLNET Autostart"" /F"; Flags: runhidden; RunOnceId: "DelPixellnetAutostartTask"
+
 [Code]
 function InitializeSetup(): Boolean;
 var

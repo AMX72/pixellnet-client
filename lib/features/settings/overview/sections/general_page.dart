@@ -54,10 +54,19 @@ class GeneralPage extends HookConsumerWidget {
             SwitchListTile.adaptive(
               title: Text(t.pages.settings.general.autoStart),
               secondary: const Icon(Icons.auto_mode_outlined),
-              value: ref.watch(autoStartNotifierProvider).asData!.value,
-              onChanged: (value) async => value
-                  ? await ref.read(autoStartNotifierProvider.notifier).enable()
-                  : await ref.read(autoStartNotifierProvider.notifier).disable(),
+              value: ref.watch(autoStartNotifierProvider).valueOrNull ?? false,
+              onChanged: (value) async {
+                try {
+                  value
+                      ? await ref.read(autoStartNotifierProvider.notifier).enable()
+                      : await ref.read(autoStartNotifierProvider.notifier).disable();
+                } catch (_) {
+                  if (context.mounted) {
+                    CustomToast.error(value ? 'Не удалось включить автозапуск' : 'Не удалось выключить автозапуск')
+                        .show(context);
+                  }
+                }
+              },
             ),
             SwitchListTile.adaptive(
               title: Text(t.pages.settings.general.silentStart),
