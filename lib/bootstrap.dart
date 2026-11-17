@@ -80,7 +80,9 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env, {List
     } else {
       Logger.bootstrap.debug("silent start, remain hidden accessible via tray");
     }
-    await _init("auto start service", () => container.read(autoStartNotifierProvider.future));
+    // v0.1.100: необязательный сервис не должен ронять запуск (v0.1.99 падал на свежем
+    // профиле Windows без StartupApproved\Run — CHANGELOG 2026-11-17 part 34).
+    await _safeInit("auto start service", () => container.read(autoStartNotifierProvider.future));
   }
   await _init("logs repository", () => container.read(logRepositoryProvider.future));
   await _init("logger controller", () => LoggerController.postInit(debug));
