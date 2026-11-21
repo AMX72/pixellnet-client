@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.hiddify.hiddify.bg.ServiceConnection
@@ -20,6 +21,7 @@ import com.hiddify.hiddify.constant.Status
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.LinkedList
@@ -49,6 +51,11 @@ class MainActivity : FlutterFragmentActivity(), ServiceConnection.Callback {
         flutterEngine.plugins.add(PlatformSettingsHandler())
         flutterEngine.plugins.add(EventHandler())
         flutterEngine.plugins.add(LogHandler())
+        // v0.1.102: спросить уведомления один раз при запуске, а не посреди первого подключения
+        lifecycleScope.launch {
+            delay(1500)
+            askNotificationsEarly()
+        }
 //        flutterEngine.plugins.add(GroupsChannel(lifecycleScope))
 //        flutterEngine.plugins.add(ActiveGroupsChannel(lifecycleScope))
 //        flutterEngine.plugins.add(StatsChannel(lifecycleScope))
@@ -58,9 +65,35 @@ class MainActivity : FlutterFragmentActivity(), ServiceConnection.Callback {
         connection.reconnect()
     }
 
+    // v0.1.102: системный вопрос «Разрешить уведомления?» посреди первого подключения съедал
+    // время ожидания старта ядра → «Непредвиденный сбой: startService - starting background core...»
+    // (CHANGELOG 2026-11-14 part 15, 2026-11-21 part 43). Теперь спрашиваем один раз при запуске
+    // приложения, а подключение уведомлениями не блокируем: служба работает и без них.
+    private val nativePrefs by lazy { getSharedPreferences("pixellnet_native", MODE_PRIVATE) }
+
+    private fun notificationsAskedBefore() = nativePrefs.getBoolean("notifications_asked", false)
+
+    private fun markNotificationsAsked() = nativePrefs.edit().putBoolean("notifications_asked", true).apply()
+
+    private val earlyNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            Log.d(TAG, "notification permission asked at start: granted=$granted")
+        }
+
+    private fun askNotificationsEarly() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        if (ServiceNotification.checkPermission() || notificationsAskedBefore()) return
+        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) return
+        markNotificationsAsked()
+        runCatching { earlyNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) }
+    }
+
     @SuppressLint("NewApi")
     fun startService() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !ServiceNotification.checkPermission()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !ServiceNotification.checkPermission() &&
+            !notificationsAskedBefore()
+        ) {
+            markNotificationsAsked()
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             return
         }
@@ -103,11 +136,9 @@ class MainActivity : FlutterFragmentActivity(), ServiceConnection.Callback {
         registerForActivityResult(
             ActivityResultContracts.RequestPermission(),
         ) { isGranted ->
-            if (Settings.dynamicNotification && !isGranted) {
-                onServiceAlert(Alert.RequestNotificationPermission, null)
-            } else {
-                startService0()
-            }
+            // v0.1.102: отказ от уведомлений больше не блокирует подключение
+            Log.d(TAG, "notification permission at connect: granted=$isGranted")
+            startService0()
         }
 
     private val prepareLauncher =
