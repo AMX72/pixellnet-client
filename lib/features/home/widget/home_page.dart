@@ -23,6 +23,8 @@ import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
+import 'package:hiddify/features/background_guard/background_guard.dart';
+import 'package:hiddify/features/background_guard/channel_recheck.dart';
 import 'package:hiddify/features/profile/model/profile_entity.dart';
 import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
@@ -65,6 +67,8 @@ class HomePage extends HookConsumerWidget {
       }
     });
     final vpnPermState = ref.watch(vpnPermissionRecoveryProvider);
+    // v0.1.101: пока главный экран жив — быстрая перепроверка каналов после сбоев сети.
+    ref.watch(channelRecheckProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -94,6 +98,7 @@ class HomePage extends HookConsumerWidget {
                 slivers: [
                   const SliverToBoxAdapter(child: _UpdateAvailableBanner()),
                   const SliverToBoxAdapter(child: _PostUpdateBanner()),
+                  const SliverToBoxAdapter(child: BackgroundGuardBanner()),
                   const SliverToBoxAdapter(child: _StatusHero()),
                   const SliverToBoxAdapter(child: _SubscriptionSection()),
                   const SliverToBoxAdapter(child: _ExpirySection()),
@@ -198,6 +203,17 @@ class HomePage extends HookConsumerWidget {
                   context.pushNamed('logs');
                 },
               ),
+              if (Platform.isAndroid)
+                ListTile(
+                  leading: const Icon(Icons.battery_charging_full_outlined, size: 20),
+                  title: const Text('Работа в фоне'),
+                  subtitle: const Text('Чтобы телефон не закрывал PIXELLNET',
+                      style: TextStyle(fontSize: 12)),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    showBackgroundGuardSheet(context);
+                  },
+                ),
               ListTile(
                 leading: const Icon(Icons.ios_share_outlined, size: 20),
                 title: const Text('Поделиться приложением'),

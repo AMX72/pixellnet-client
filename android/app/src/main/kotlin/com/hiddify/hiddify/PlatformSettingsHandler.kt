@@ -3,8 +3,10 @@ package com.hiddify.hiddify
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AppOpsManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -72,7 +74,14 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
             // v0.1.34: запросить VPN разрешение заново и перезапустить сервис.
             // Flutter вызывает это при автодетекте "permission denied" и по кнопке.
             VpnRequestPermission("vpn_request_permission"),
+            // v0.1.101: «чтобы VPN не выключался» — состояние работы в фоне и
+            // переход на экраны производителя (MIUI, EMUI, ColorOS, Funtouch).
+            BackgroundStatus("background_status"),
+            OpenBackgroundSettings("open_background_settings"),
         }
+
+        // MIUI: скрытая операция AppOps «Автозапуск» (видна как MIUIOP(10008)).
+        const val MIUI_OP_AUTO_START = 10008
     }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -283,8 +292,121 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
                 }
             }
 
+            Trigger.BackgroundStatus.method -> {
+                result.runCatching { success(gson.toJson(collectBackgroundStatus())) }
+            }
+
+            Trigger.OpenBackgroundSettings.method -> {
+                val kind = call.argument<String>("kind") ?: "autostart"
+                result.runCatching { success(openBackgroundSettings(kind)) }
+            }
+
             else -> result.notImplemented()
         }
+    }
+
+    // v0.1.101: производитель → какой экран «работы в фоне» у него есть.
+    // MIUI/HyperOS ночью убивает VPN (ScreenOffCPUCheckKill, CHANGELOG 2026-11-21 part 42),
+    // а без «Автозапуска» он уже не поднимается. Разрешить это может только юзер —
+    // приложение лишь открывает нужный экран.
+    private fun oemFamily(): String {
+        val m = (Build.MANUFACTURER ?: "").lowercase()
+        val b = (Build.BRAND ?: "").lowercase()
+        return when {
+            m.contains("xiaomi") || b in setOf("xiaomi", "redmi", "poco") -> "xiaomi"
+            m.contains("huawei") || b == "huawei" -> "huawei"
+            m.contains("honor") || b == "honor" -> "honor"
+            m.contains("samsung") -> "samsung"
+            m.contains("oppo") || m.contains("realme") || m.contains("oneplus") ||
+                b in setOf("oppo", "realme", "oneplus") -> "oppo"
+            m.contains("vivo") || b in setOf("vivo", "iqoo") -> "vivo"
+            else -> "other"
+        }
+    }
+
+    private fun collectBackgroundStatus(): Map<String, Any> {
+        val ctx = Application.application
+        val batteryOk = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            runCatching { Application.powerManager.isIgnoringBatteryOptimizations(ctx.packageName) }
+                .getOrDefault(false)
+        } else true
+        val family = oemFamily()
+        return mapOf(
+            "oem" to family,
+            "battery_ok" to batteryOk,
+            "autostart" to if (family == "xiaomi") miuiAutostartState(ctx) else "unknown",
+            "sdk" to Build.VERSION.SDK_INT,
+        )
+    }
+
+    // "allowed" / "denied" / "unknown" (если MIUI не даёт прочитать операцию).
+    private fun miuiAutostartState(ctx: Context): String = try {
+        val ops = ctx.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        val m = AppOpsManager::class.java.getMethod(
+            "checkOpNoThrow", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType, String::class.java
+        )
+        val mode = m.invoke(ops, MIUI_OP_AUTO_START, android.os.Process.myUid(), ctx.packageName) as Int
+        if (mode == AppOpsManager.MODE_ALLOWED) "allowed" else "denied"
+    } catch (e: Throwable) {
+        "unknown"
+    }
+
+    // kind: "autostart" (автозапуск / запуск приложений) или "battery" (экономия батареи).
+    // true — открыт экран производителя; false — открыта страница «О приложении» (запасной путь).
+    private fun openBackgroundSettings(kind: String): Boolean {
+        val pkg = Application.application.packageName
+        fun comp(p: String, c: String) = Intent().setComponent(ComponentName(p, c))
+        val candidates: List<Intent> = when (oemFamily() to kind) {
+            "xiaomi" to "autostart" -> listOf(
+                comp("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"),
+            )
+            "xiaomi" to "battery" -> listOf(
+                comp("com.miui.powerkeeper", "com.miui.powerkeeper.ui.HiddenAppsConfigActivity")
+                    .putExtra("package_name", pkg).putExtra("package_label", "PIXELLNET"),
+            )
+            "huawei" to "autostart", "huawei" to "battery" -> listOf(
+                comp("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"),
+                comp("com.huawei.systemmanager", "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity"),
+                comp("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity"),
+            )
+            "honor" to "autostart", "honor" to "battery" -> listOf(
+                comp("com.hihonor.systemmanager", "com.hihonor.systemmanager.startupmgr.ui.StartupNormalAppListActivity"),
+                comp("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"),
+            )
+            "oppo" to "autostart", "oppo" to "battery" -> listOf(
+                comp("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity"),
+                comp("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity"),
+                comp("com.oplus.safecenter", "com.oplus.safecenter.permission.startup.StartupAppListActivity"),
+                comp("com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity"),
+            )
+            "vivo" to "autostart", "vivo" to "battery" -> listOf(
+                comp("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"),
+                comp("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager"),
+                comp("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"),
+            )
+            else -> emptyList()
+        }
+        for (intent in candidates) {
+            if (startSettingsActivity(intent)) return true
+        }
+        val fallback = if (kind == "battery" && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+        } else {
+            Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$pkg"))
+        }
+        if (!startSettingsActivity(fallback)) {
+            startSettingsActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$pkg")))
+        }
+        return false
+    }
+
+    private fun startSettingsActivity(intent: Intent): Boolean = try {
+        val a = activity
+        if (a != null) a.startActivity(intent)
+        else Application.application.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        true
+    } catch (e: Throwable) {
+        false
     }
 
     // v0.1.33: диагностика "нет вышки" vs "VPN сломан". Возвращает enum:
