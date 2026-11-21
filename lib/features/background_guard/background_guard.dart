@@ -33,6 +33,11 @@ const _autoEvery = Duration(days: 3);
 /// Человек открывал экран производителя (если прочитать его состояние нельзя).
 final bgGuardOpenedAutostart = PreferencesNotifier.create<bool, bool>('bg_guard_opened_autostart', false);
 
+/// Xiaomi: человек открывал «Контроль активности» и вернулся. «Нет ограничений» в MIUI не всегда
+/// попадает в системный список исключений батареи (тест 2026-11-21: в одном прогоне попал,
+/// в другом — нет), поэтому одного isIgnoringBatteryOptimizations для Xiaomi мало.
+final bgGuardOpenedBattery = PreferencesNotifier.create<bool, bool>('bg_guard_opened_battery', false);
+
 class BackgroundStatus {
   const BackgroundStatus({required this.oem, required this.batteryOk, required this.autostart});
 
@@ -74,16 +79,16 @@ class _Step {
   final _Action action;
 }
 
-List<_Step> _stepsFor(BackgroundStatus s, {required bool openedAutostart}) {
+List<_Step> _stepsFor(BackgroundStatus s, {required bool openedAutostart, required bool openedBattery}) {
   // Xiaomi (MIUI/HyperOS): системный запрос «работа в фоне» открывает экран MIUI
-  // «Контроль фоновой активности», а «Нет ограничений» = исключение из оптимизации батареи
-  // (проверено на POCO M3 Pro, MIUI 14, 2026-11-21). Автозапуск читается через AppOps 10008.
+  // «Контроль фоновой активности» (проверено на POCO M3 Pro, MIUI 14, 2026-11-21).
+  // Автозапуск читается через AppOps 10008.
   final xiaomi = s.oem == 'xiaomi';
   return [
     _Step(
       title: xiaomi ? 'Контроль активности' : 'Работа в фоне',
       hint: xiaomi ? 'Выберите «Нет ограничений»' : 'В окне телефона нажмите «Разрешить»',
-      done: s.batteryOk,
+      done: s.batteryOk || (xiaomi && openedBattery),
       button: xiaomi ? 'Открыть' : 'Разрешить',
       action: _Action.requestBattery,
     ),
@@ -126,7 +131,11 @@ List<_Step> _stepsFor(BackgroundStatus s, {required bool openedAutostart}) {
 final backgroundGuardNeedsSetupProvider = Provider.autoDispose<bool>((ref) {
   final s = ref.watch(backgroundStatusProvider).valueOrNull;
   if (s == null) return false;
-  final steps = _stepsFor(s, openedAutostart: ref.watch(bgGuardOpenedAutostart));
+  final steps = _stepsFor(
+    s,
+    openedAutostart: ref.watch(bgGuardOpenedAutostart),
+    openedBattery: ref.watch(bgGuardOpenedBattery),
+  );
   return steps.any((e) => !e.done);
 });
 
@@ -288,6 +297,8 @@ class _BackgroundGuardSheetState extends ConsumerState<_BackgroundGuardSheet> wi
       switch (a) {
         case _Action.requestBattery:
           await _channel.invokeMethod<bool>('request_ignore_battery_optimizations');
+          if (!mounted) return;
+          await ref.read(bgGuardOpenedBattery.notifier).update(true);
           if (mounted) _refreshStatus(ref);
         case _Action.openAutostart:
           _pending = a;
@@ -304,7 +315,11 @@ class _BackgroundGuardSheetState extends ConsumerState<_BackgroundGuardSheet> wi
     final status = ref.watch(backgroundStatusProvider).valueOrNull;
     final steps = status == null
         ? const <_Step>[]
-        : _stepsFor(status, openedAutostart: ref.watch(bgGuardOpenedAutostart));
+        : _stepsFor(
+            status,
+            openedAutostart: ref.watch(bgGuardOpenedAutostart),
+            openedBattery: ref.watch(bgGuardOpenedBattery),
+          );
     final allDone = steps.isNotEmpty && steps.every((s) => s.done);
 
     return SafeArea(
