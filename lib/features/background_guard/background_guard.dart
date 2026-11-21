@@ -14,6 +14,7 @@ import 'package:gap/gap.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/core/utils/preferences_utils.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
+import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 const _channel = MethodChannel('com.hiddify.app/platform');
@@ -21,12 +22,16 @@ const _channel = MethodChannel('com.hiddify.app/platform');
 /// «Напомнить завтра»: до этого момента (мс) баннер не показываем.
 final bgGuardSnoozeUntil = PreferencesNotifier.create<int, int>('bg_guard_snooze_until', 0);
 
-/// Окно с шагами уже открывалось само (после первого подключения) — второй раз само не открываем.
-final bgGuardAutoShown = PreferencesNotifier.create<bool, bool>('bg_guard_auto_shown', false);
+/// Сколько раз окно с шагами открывалось само и когда последний раз (мс).
+/// Открывается само у новых и у обновившихся (настроек ещё нет), пока шаги не сделаны:
+/// не чаще раза в 3 дня, не больше 3 раз — дальше только баннер.
+final bgGuardAutoCount = PreferencesNotifier.create<int, int>('bg_guard_auto_count', 0);
+final bgGuardAutoAt = PreferencesNotifier.create<int, int>('bg_guard_auto_at', 0);
+const _autoMaxTimes = 3;
+const _autoEvery = Duration(days: 3);
 
-/// Человек открывал экран производителя (проверить его состояние приложение не может).
+/// Человек открывал экран производителя (если прочитать его состояние нельзя).
 final bgGuardOpenedAutostart = PreferencesNotifier.create<bool, bool>('bg_guard_opened_autostart', false);
-final bgGuardOpenedBattery = PreferencesNotifier.create<bool, bool>('bg_guard_opened_battery', false);
 
 class BackgroundStatus {
   const BackgroundStatus({required this.oem, required this.batteryOk, required this.autostart});
@@ -58,7 +63,7 @@ final backgroundStatusProvider = FutureProvider.autoDispose<BackgroundStatus?>((
   }
 });
 
-enum _Action { requestBattery, openAutostart, openBattery }
+enum _Action { requestBattery, openAutostart }
 
 class _Step {
   const _Step({required this.title, required this.hint, required this.done, required this.button, required this.action});
@@ -69,31 +74,27 @@ class _Step {
   final _Action action;
 }
 
-List<_Step> _stepsFor(BackgroundStatus s, {required bool openedAutostart, required bool openedBattery}) {
+List<_Step> _stepsFor(BackgroundStatus s, {required bool openedAutostart}) {
+  // Xiaomi (MIUI/HyperOS): системный запрос «работа в фоне» открывает экран MIUI
+  // «Контроль фоновой активности», а «Нет ограничений» = исключение из оптимизации батареи
+  // (проверено на POCO M3 Pro, MIUI 14, 2026-11-21). Автозапуск читается через AppOps 10008.
+  final xiaomi = s.oem == 'xiaomi';
   return [
     _Step(
-      title: 'Работа в фоне',
-      hint: 'В окне телефона нажмите «Разрешить»',
+      title: xiaomi ? 'Контроль активности' : 'Работа в фоне',
+      hint: xiaomi ? 'Выберите «Нет ограничений»' : 'В окне телефона нажмите «Разрешить»',
       done: s.batteryOk,
-      button: 'Разрешить',
+      button: xiaomi ? 'Открыть' : 'Разрешить',
       action: _Action.requestBattery,
     ),
-    if (s.oem == 'xiaomi') ...[
+    if (xiaomi)
       _Step(
         title: 'Автозапуск',
-        hint: 'Найдите PIXELLNET в списке и включите переключатель',
+        hint: 'Найдите PIXELLNET (можно через поиск) и включите переключатель',
         done: s.autostart == 'allowed' || (s.autostart == 'unknown' && openedAutostart),
         button: 'Открыть',
         action: _Action.openAutostart,
       ),
-      _Step(
-        title: 'Контроль активности',
-        hint: 'Выберите «Нет ограничений»',
-        done: openedBattery,
-        button: 'Открыть',
-        action: _Action.openBattery,
-      ),
-    ],
     if (s.oem == 'huawei' || s.oem == 'honor')
       _Step(
         title: 'Запуск приложений',
@@ -125,13 +126,22 @@ List<_Step> _stepsFor(BackgroundStatus s, {required bool openedAutostart, requir
 final backgroundGuardNeedsSetupProvider = Provider.autoDispose<bool>((ref) {
   final s = ref.watch(backgroundStatusProvider).valueOrNull;
   if (s == null) return false;
-  final steps = _stepsFor(
-    s,
-    openedAutostart: ref.watch(bgGuardOpenedAutostart),
-    openedBattery: ref.watch(bgGuardOpenedBattery),
-  );
+  final steps = _stepsFor(s, openedAutostart: ref.watch(bgGuardOpenedAutostart));
   return steps.any((e) => !e.done);
 });
+
+/// После возврата с экрана телефона MIUI записывает настройку с небольшой задержкой —
+/// перечитываем статус сразу и ещё раз через 1,5 с.
+void _refreshStatus(WidgetRef ref) {
+  ref.invalidate(backgroundStatusProvider);
+  Future<void>.delayed(const Duration(milliseconds: 1500), () {
+    try {
+      ref.invalidate(backgroundStatusProvider);
+    } catch (_) {
+      // виджет уже закрыт
+    }
+  });
+}
 
 Future<void> showBackgroundGuardSheet(BuildContext context) {
   return showModalBottomSheet<void>(
@@ -168,11 +178,10 @@ class _BackgroundGuardBannerState extends ConsumerState<BackgroundGuardBanner> w
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) ref.invalidate(backgroundStatusProvider);
+    if (state == AppLifecycleState.resumed) _refreshStatus(ref);
   }
 
   Future<void> _autoOpen() async {
-    _autoOpening = true;
     await Future<void>.delayed(const Duration(seconds: 4));
     if (!mounted) return;
     final route = ModalRoute.of(context);
@@ -180,7 +189,8 @@ class _BackgroundGuardBannerState extends ConsumerState<BackgroundGuardBanner> w
       _autoOpening = false; // поверх открыто другое окно — попробуем при следующей перерисовке
       return;
     }
-    await ref.read(bgGuardAutoShown.notifier).update(true);
+    await ref.read(bgGuardAutoCount.notifier).update(ref.read(bgGuardAutoCount) + 1);
+    await ref.read(bgGuardAutoAt.notifier).update(DateTime.now().millisecondsSinceEpoch);
     if (!mounted) return;
     await showBackgroundGuardSheet(context);
   }
@@ -189,12 +199,18 @@ class _BackgroundGuardBannerState extends ConsumerState<BackgroundGuardBanner> w
   Widget build(BuildContext context) {
     if (!Platform.isAndroid) return const SizedBox.shrink();
     if (!ref.watch(backgroundGuardNeedsSetupProvider)) return const SizedBox.shrink();
-    final snoozeUntil = ref.watch(bgGuardSnoozeUntil);
-    if (DateTime.now().millisecondsSinceEpoch < snoozeUntil) return const SizedBox.shrink();
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (now < ref.watch(bgGuardSnoozeUntil)) return const SizedBox.shrink();
 
-    if (!_autoOpening && !ref.watch(bgGuardAutoShown) && ref.watch(serviceRunningProvider)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _autoOpen());
+    // Само открываем, только когда защита реально работает (канал ответил на проверку):
+    // сразу после запуска ядро сообщает «подключено» ещё без ключа (β 2026-11-21).
+    final delay = ref.watch(activeProxyNotifierProvider).valueOrNull?.urlTestDelay ?? 0;
+    final working = ref.watch(serviceRunningProvider) && delay > 0 && delay < 65000;
+    final count = ref.watch(bgGuardAutoCount);
+    final due = count == 0 || now - ref.watch(bgGuardAutoAt) > _autoEvery.inMilliseconds;
+    if (!_autoOpening && working && count < _autoMaxTimes && due) {
       _autoOpening = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _autoOpen());
     }
 
     final theme = Theme.of(context);
@@ -264,8 +280,7 @@ class _BackgroundGuardSheetState extends ConsumerState<_BackgroundGuardSheet> wi
     final p = _pending;
     _pending = null;
     if (p == _Action.openAutostart) ref.read(bgGuardOpenedAutostart.notifier).update(true);
-    if (p == _Action.openBattery) ref.read(bgGuardOpenedBattery.notifier).update(true);
-    ref.invalidate(backgroundStatusProvider);
+    _refreshStatus(ref);
   }
 
   Future<void> _run(_Action a) async {
@@ -273,13 +288,10 @@ class _BackgroundGuardSheetState extends ConsumerState<_BackgroundGuardSheet> wi
       switch (a) {
         case _Action.requestBattery:
           await _channel.invokeMethod<bool>('request_ignore_battery_optimizations');
-          ref.invalidate(backgroundStatusProvider);
+          if (mounted) _refreshStatus(ref);
         case _Action.openAutostart:
           _pending = a;
           await _channel.invokeMethod<bool>('open_background_settings', {'kind': 'autostart'});
-        case _Action.openBattery:
-          _pending = a;
-          await _channel.invokeMethod<bool>('open_background_settings', {'kind': 'battery'});
       }
     } catch (_) {
       // экран не открылся — шаг останется невыполненным, человек увидит его снова
@@ -292,11 +304,7 @@ class _BackgroundGuardSheetState extends ConsumerState<_BackgroundGuardSheet> wi
     final status = ref.watch(backgroundStatusProvider).valueOrNull;
     final steps = status == null
         ? const <_Step>[]
-        : _stepsFor(
-            status,
-            openedAutostart: ref.watch(bgGuardOpenedAutostart),
-            openedBattery: ref.watch(bgGuardOpenedBattery),
-          );
+        : _stepsFor(status, openedAutostart: ref.watch(bgGuardOpenedAutostart));
     final allDone = steps.isNotEmpty && steps.every((s) => s.done);
 
     return SafeArea(
