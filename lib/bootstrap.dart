@@ -19,6 +19,7 @@ import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
 import 'package:hiddify/features/auto_start/windows_autostart.dart';
 import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
+import 'package:hiddify/features/connection/windows_dns_guard.dart';
 import 'package:hiddify/features/chain/model/chain_enum.dart';
 import 'package:hiddify/features/chain/notifier/chain_profile_notifier.dart';
 
@@ -111,6 +112,12 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env, {List
   // Eagerly listen to activeProxyNotifierProvider to force synchronous evaluation in microtasks,
   // avoiding lazy build-phase flushes and sibling dependency collisions on the Home page.
   container.listen(activeProxyNotifierProvider, (previous, next) {});
+
+  // v0.1.102 Windows: DNS только через VPN, пока VPN включён (NRPT) — иначе при IPv6 от роутера
+  // каждый новый сайт ждёт ~11 с. Заодно снимает правило, оставшееся от прошлого запуска.
+  if (PlatformUtils.isWindows) {
+    container.listen(windowsDnsGuardProvider, (previous, next) {});
+  }
 
   if (!kIsWeb) {
     // await _safeInit(

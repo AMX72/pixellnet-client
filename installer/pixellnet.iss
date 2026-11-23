@@ -81,6 +81,9 @@ Type: filesandordirs; Name: "{app}"
 ; v0.1.100: автозапуск теперь — задача Планировщика (её создаёт приложение,
 ; ярлык из «Автозагрузки» оно переносит в задачу). При удалении — снять задачу.
 Filename: "{sys}\schtasks.exe"; Parameters: "/Delete /TN ""PIXELLNET Autostart"" /F"; Flags: runhidden; RunOnceId: "DelPixellnetAutostartTask"
+; v0.1.102: правило DNS «через VPN» (NRPT, Comment PIXELLNET) — снять, если осталось после
+; аварийного выхода приложения (lib/features/connection/windows_dns_guard.dart).
+Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -NonInteractive -ExecutionPolicy Bypass -Command ""Get-DnsClientNrptRule | Where-Object {{ $_.Comment -like 'PIXELLNET*' } | Remove-DnsClientNrptRule -Force; Clear-DnsClientCache"""; Flags: runhidden; RunOnceId: "DelPixellnetNrpt"
 
 [Code]
 function InitializeSetup(): Boolean;

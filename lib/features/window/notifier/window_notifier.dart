@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
+import 'package:hiddify/features/connection/windows_dns_guard.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -127,6 +128,14 @@ class WindowNotifier extends _$WindowNotifier with AppLogger {
         .timeout(const Duration(seconds: 2))
         .catchError((e) {
           loggy.warning("error aborting connection on quit", e);
+        });
+    // v0.1.102: снять правило DNS «через VPN» (NRPT) до выхода — windows_dns_guard.dart.
+    await ref
+        .read(windowsDnsGuardProvider)
+        ?.shutdown()
+        .timeout(const Duration(seconds: 6))
+        .catchError((Object e) {
+          loggy.warning("error removing dns policy on quit", e);
         });
     await trayManager.destroy();
     await windowManager.destroy();
