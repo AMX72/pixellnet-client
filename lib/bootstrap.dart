@@ -181,18 +181,38 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env, {List
 }
 
 /// Подключение после автозапуска при входе в Windows. Сеть (Wi-Fi) в этот момент
-/// может ещё подниматься — до 4 попыток с паузой 15 с, пока не Connected.
+/// может ещё подниматься — до 6 попыток с паузой 15 с, пока не Connected.
+/// v0.1.102: если идёт подключение — ждём, чем оно кончится (до 30 с), а не выходим из цикла.
+/// Раньше цикл сдавался на статусе Connecting: после убийства подключённого приложения
+/// (установщик, сбой) ядро не может сразу создать TUN («Cannot create a file when that file
+/// already exists»), ошибка приходила ровно к следующей попытке — и VPN оставался выключенным
+/// (ноутбук пенсионеров 2026-11-18, бета на ПК 2026-11-24). Адаптер освобождается за 1–2 мин.
 Future<void> _autostartConnect(ProviderContainer container) async {
   await Future<void>.delayed(const Duration(seconds: 2));
-  for (var attempt = 1; attempt <= 4; attempt++) {
+  for (var attempt = 1; attempt <= 6; attempt++) {
     try {
       final activeProfile = await container.read(activeProfileProvider.future);
       if (activeProfile == null) {
         Logger.bootstrap.info("autostart auto-connect: no active profile, skip");
         return;
       }
+      for (var i = 0; i < 30; i++) {
+        if (container.read(connectionNotifierProvider) case AsyncData(value: Connecting())) {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        } else {
+          break;
+        }
+      }
       final status = container.read(connectionNotifierProvider);
-      if (status case AsyncData(value: Connected() || Connecting())) return;
+      if (status case AsyncData(value: Connected())) {
+        Logger.bootstrap.info("autostart auto-connect: connected");
+        return;
+      }
+      if (status case AsyncData(value: Connecting())) {
+        Logger.bootstrap.info("autostart auto-connect: still connecting after 30 s, waiting");
+        await Future<void>.delayed(const Duration(seconds: 15));
+        continue;
+      }
       Logger.bootstrap.info("autostart auto-connect: attempt $attempt");
       if (status is AsyncError) {
         await container.read(connectionNotifierProvider.notifier).toggleConnection();
@@ -208,7 +228,7 @@ Future<void> _autostartConnect(ProviderContainer container) async {
       return;
     }
   }
-  Logger.bootstrap.warning("autostart auto-connect: gave up after 4 attempts");
+  Logger.bootstrap.warning("autostart auto-connect: gave up after 6 attempts");
 }
 
 Future<T> _init<T>(String name, Future<T> Function() initializer, {int? timeout}) async {
