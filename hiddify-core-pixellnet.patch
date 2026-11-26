@@ -1,5 +1,5 @@
 diff --git a/v2/config/builder.go b/v2/config/builder.go
-index 0c76f1e..e2f8ec3 100644
+index 0c76f1e..c80de01 100644
 --- a/v2/config/builder.go
 +++ b/v2/config/builder.go
 @@ -50,7 +50,7 @@ const (
@@ -11,7 +11,33 @@ index 0c76f1e..e2f8ec3 100644
  	OutboundRoundRobinTag     = "balance"
  	OutboundDirectFragmentTag = "direct-fragment §hide§"
  
-@@ -984,6 +984,14 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
+@@ -277,23 +277,8 @@ func setOutbounds(options *option.Options, input *option.Options, opt *HiddifyOp
+ 	// 		InterruptExistConnections: true,
+ 	// 	},
+ 	// }
+-	urlTest := option.Outbound{
+-		Type: C.TypeBalancer,
+-		Tag:  OutboundURLTestTag,
+-		Options: &option.BalancerOutboundOptions{
+-			Outbounds:            tags,
+-			Strategy:             "lowest-delay",
+-			DelayAcceptableRatio: 2,
+-			// URL:       opt.ConnectionTestUrl,
+-			// URLs:      opt.ConnectionTestUrls,
+-			// Interval:  badoption.Duration(opt.URLTestInterval.Duration()),
+-			// IdleTimeout: badoption.Duration(opt.URLTestIdleTimeout.Duration()),
+-			Tolerance:      BalancerTolerance,
+-			ToleranceRatio: BalancerToleranceRatio,
+-			// IdleTimeout:               badoption.Duration(opt.URLTestInterval.Duration().Nanoseconds() * 3),
+-			InterruptExistConnections: true,
+-		},
+-	}
++	// PIXELLNET v0.1.103: «⚡ Автовыбор» prefers channels that hold one flow to the entry (pixellnet.go)
++	urlTest := pixellnetAutoSelect(tags, outbounds, endpoints)
+ 
+ 	balancer := option.Outbound{
+ 		Type: C.TypeBalancer,
+@@ -984,6 +969,14 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
  		})
  	}
  	if !useAppRules && hopt.Region != "other" {
@@ -26,7 +52,7 @@ index 0c76f1e..e2f8ec3 100644
  		dnsRules = append(dnsRules, option.DefaultDNSRule{
  			RawDefaultDNSRule: option.RawDefaultDNSRule{
  				DomainSuffix: []string{"." + hopt.Region},
-@@ -993,7 +1001,7 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
+@@ -993,7 +986,7 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
  				RouteOptions: option.DNSRouteActionOptions{
  					Server: DNSMultiDirectTag,
  					AbstractDNSRouteActionOptions: option.AbstractDNSRouteActionOptions{
@@ -35,7 +61,7 @@ index 0c76f1e..e2f8ec3 100644
  						IPv6ByOutbound: ipv6ByOutbound(hopt, OutboundDirectTag),
  						RewriteTTL:     &DEFAULT_DNS_TTL,
  						BypassIfFailed: false,
-@@ -1028,7 +1036,7 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
+@@ -1028,7 +1021,7 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
  				RouteOptions: option.DNSRouteActionOptions{
  					Server: DNSMultiDirectTag,
  					AbstractDNSRouteActionOptions: option.AbstractDNSRouteActionOptions{
@@ -44,7 +70,7 @@ index 0c76f1e..e2f8ec3 100644
  						IPv6ByOutbound: ipv6ByOutbound(hopt, OutboundDirectTag),
  						RewriteTTL:     &DEFAULT_DNS_TTL,
  						BypassIfFailed: false,
-@@ -1037,6 +1045,76 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
+@@ -1037,6 +1030,76 @@ func setRoutingOptions(options *option.Options, hopt *HiddifyOptions) error {
  			},
  		})
  
@@ -121,3 +147,189 @@ index 0c76f1e..e2f8ec3 100644
  		rulesets = append(rulesets, option.RuleSet{
  			Type:   C.RuleSetTypeRemote,
  			Tag:    badoption.Listable[string]{"geoip-" + hopt.Region},
+diff --git a/v2/config/dns.go b/v2/config/dns.go
+index a9d199c..03724bc 100644
+--- a/v2/config/dns.go
++++ b/v2/config/dns.go
+@@ -44,7 +44,8 @@ func getDnsAddress(d string) string {
+ }
+ 
+ func setDns(options *option.Options, opt *HiddifyOptions, staticIps *map[string][]string) error {
+-	remoteAddr := getDnsAddress(opt.RemoteDnsAddress)
++	// PIXELLNET v0.1.103: plain remote DNS becomes DoH, one connection for all queries (pixellnet.go)
++	remoteAddr := pixellnetRemoteDNSAddress(getDnsAddress(opt.RemoteDnsAddress))
+ 	fallbackAddr := "https://8.8.8.8/dns-query"
+ 	if remoteAddr == fallbackAddr {
+ 		fallbackAddr = "https://1.0.0.1/dns-query"
+@@ -90,11 +91,18 @@ func setDns(options *option.Options, opt *HiddifyOptions, staticIps *map[string]
+ 	}
+ 	// through a blocked proxy a UDP query only times out, while TCP fails at once, so every TCP
+ 	// server goes first, then UDP, then TLS
+-	remoteGroup, remoteMembers, err := getDNSGroupOptions(DNSMultiRemoteTag, *remote_dns, remoteAddr, DNSDirectTag, true, func(string) string {
+-		return OutboundMainDetour
+-	})
+-	if err != nil {
+-		return err
++	var remoteGroup *option.DNSServerOptions
++	var remoteMembers []option.DNSServerOptions
++	if strings.HasPrefix(remoteAddr, "https://") {
++		// PIXELLNET v0.1.103: DoH and the DoH fallback only, both already among the servers
++		remoteGroup = pixellnetRemoteGroup(*remote_dns, *remote_dns_fallback)
++	} else {
++		remoteGroup, remoteMembers, err = getDNSGroupOptions(DNSMultiRemoteTag, *remote_dns, remoteAddr, DNSDirectTag, true, func(string) string {
++			return OutboundMainDetour
++		})
++		if err != nil {
++			return err
++		}
+ 	}
+ 	// Behind extra security every remote server answers through the hop. When the hop is down or
+ 	// still coming up, names must still resolve (for the hop itself, among others), so the group
+diff --git a/v2/config/pixellnet.go b/v2/config/pixellnet.go
+new file mode 100644
+index 0000000..4138490
+--- /dev/null
++++ b/v2/config/pixellnet.go
+@@ -0,0 +1,108 @@
++package config
++
++// PIXELLNET (v0.1.103): fewer new connections from one user to the entry server.
++//
++// The anti-DDoS of the entry (Aeza MSK) shuts a source IP off for 5-30 min after bursts of new
++// connections (2026-11-25: TCP to every port opens, then no data; ICMP lost; UDP 443/2053 dead;
++// only AWG on UDP 8211 lives). The client made those bursts itself:
++//   - the select group started on the round-robin balancer: every app connection went to the next
++//     channel, VLESS ones (WS, XHTTP, Reality, CDN) opening a new TCP connection to the entry each
++//     time, on a different port;
++//   - the remote DNS was a group of 6 plain servers (TCP/UDP/TLS): every query a new connection
++//     through the proxy, and an empty or NXDOMAIN answer tried all six.
++// Now «⚡ Автовыбор» keeps the first working channel of those that hold one flow to the entry
++// (QUIC: Hysteria2, TUIC; then AnyTLS, which reuses its TLS sessions), the remote DNS is DoH (one
++// HTTP/2 connection for all queries) with a second DoH server as its only fallback, and the app
++// starts on «⚡ Автовыбор» (default-proxy=lowest, sent by the app).
++
++import (
++	"slices"
++	"sort"
++	"strings"
++
++	C "github.com/sagernet/sing-box/constant"
++	"github.com/sagernet/sing-box/option"
++)
++
++const (
++	// «⚡ Автовыбор» changes its channel while that one answers only for one faster by more than
++	// the larger of these (80 ms, or half the current delay); a dead one is left at once.
++	pixellnetAutoTolerance      uint16 = 80
++	pixellnetAutoToleranceRatio        = 0.5
++	// remote DNS in place of a plain udp/tcp/tls address
++	pixellnetRemoteDoH = "https://8.8.8.8/dns-query"
++)
++
++// pixellnetOneFlowFirst orders the members of «⚡ Автовыбор»: one QUIC flow per channel first
++// (Hysteria2, TUIC), then AnyTLS (its TLS sessions are reused), then the rest in the profile's
++// order (VLESS & co: a new TCP connection to the entry per app connection), WireGuard/AWG last
++// (one key per subscription: a second device on it breaks the first).
++func pixellnetOneFlowFirst(tags []string, outbounds []option.Outbound, endpoints []option.Endpoint) []string {
++	kind := make(map[string]string, len(outbounds)+len(endpoints))
++	for _, out := range outbounds {
++		kind[out.Tag] = out.Type
++	}
++	for _, end := range endpoints {
++		kind[end.Tag] = end.Type
++	}
++	rank := func(tag string) int {
++		switch kind[tag] {
++		case C.TypeHysteria2, C.TypeHysteria, C.TypeTUIC:
++			return 0
++		case C.TypeAnyTLS:
++			return 1
++		case C.TypeWireGuard, C.TypeAwg:
++			return 3
++		}
++		return 2
++	}
++	ordered := slices.Clone(tags)
++	sort.SliceStable(ordered, func(i, j int) bool { return rank(ordered[i]) < rank(ordered[j]) })
++	return ordered
++}
++
++// pixellnetAutoSelect is «⚡ Автовыбор»: a one-slot pool, which keeps the first working member in
++// the order above, takes the next working one when it dies, and moves to a faster one only past
++// the tolerance (protocol/group/balancer/h_pool.go). It replaces hiddify's lowest-delay pick,
++// which moved to whichever channel was a few ms faster, VLESS ones included.
++func pixellnetAutoSelect(tags []string, outbounds []option.Outbound, endpoints []option.Endpoint) option.Outbound {
++	return option.Outbound{
++		Type: C.TypeBalancer,
++		Tag:  OutboundURLTestTag,
++		Options: &option.BalancerOutboundOptions{
++			Outbounds:                 pixellnetOneFlowFirst(tags, outbounds, endpoints),
++			Strategy:                  "pool",
++			Pool:                      1,
++			Tolerance:                 pixellnetAutoTolerance,
++			ToleranceRatio:            pixellnetAutoToleranceRatio,
++			InterruptExistConnections: true,
++		},
++	}
++}
++
++// pixellnetRemoteDNSAddress turns a plain udp/tcp/tls remote DNS into DoH: one HTTP/2 connection
++// through the proxy carries every query, where a TCP or TLS server opened one per query.
++func pixellnetRemoteDNSAddress(address string) string {
++	for _, prefix := range []string{"udp://", "tcp://", "tls://"} {
++		if strings.HasPrefix(address, prefix) {
++			return pixellnetRemoteDoH
++		}
++	}
++	return address
++}
++
++// pixellnetRemoteGroup is the remote DNS group for a DoH address: the selected server, then the
++// DoH fallback (another provider). An empty or NXDOMAIN answer tries the next member (see
++// hiddify-sing-box dns/transport/group.go), so two members cost at most two queries, both on
++// kept-alive connections, where the six plain members cost six new connections.
++func pixellnetRemoteGroup(primary, fallback option.DNSServerOptions) *option.DNSServerOptions {
++	return &option.DNSServerOptions{
++		Tag:  DNSMultiRemoteTag,
++		Type: C.DNSTypeGroup,
++		Options: &option.GroupDNSServerOptions{
++			Servers:      []string{primary.Tag, fallback.Tag},
++			Mode:         C.DNSGroupModeSequential,
++			IgnoreRanges: dnsGroupIgnoreRanges,
++		},
++	}
++}
+diff --git a/v2/hcore/proxy_info.go b/v2/hcore/proxy_info.go
+index debdb89..a2f65d0 100644
+--- a/v2/hcore/proxy_info.go
++++ b/v2/hcore/proxy_info.go
+@@ -32,12 +32,19 @@ func groupNow(group adapter.OutboundGroup) string {
+ // connectedVia is the outbound a group sends every connection through, or "" when it picks one
+ // per connection (a balancer other than lowest-delay), so which one is in use is not known.
+ func connectedVia(group adapter.OutboundGroup) string {
+-	if b, ok := group.(*balancer.Balancer); ok && b.Strategy() != balancer.StrategyLowestDelay {
++	if b, ok := group.(*balancer.Balancer); ok && !singleRoute(b) {
+ 		return ""
+ 	}
+ 	return groupNow(group)
+ }
+ 
++// singleRoute reports whether a balancer sends every connection through one member, the one the
++// UI shows: lowest-delay, and PIXELLNET's «⚡ Автовыбор», a one-slot pool (v0.1.103, config/pixellnet.go).
++func singleRoute(b *balancer.Balancer) bool {
++	return b.Strategy() == balancer.StrategyLowestDelay ||
++		(b.Strategy() == balancer.StrategyPool && b.Tag() == config.OutboundURLTestTag)
++}
++
+ // unreachableDelay is the delay a failed URL test records.
+ const unreachableDelay = monitoring.TimeoutDelay
+ 
+@@ -193,7 +200,7 @@ func (h *HiddifyInstance) GetProxyInfo(url_test_history *adapter.URLTestHistory,
+ 		dtag := TrimTagName(tag)
+ 		out.GroupSelectedTagDisplay = &dtag
+ 		if balancer, ok := detour.(*balancer.Balancer); ok {
+-			if stg := balancer.Strategy(); stg != "lowest-delay" {
++			if stg := balancer.Strategy(); !singleRoute(balancer) {
+ 				out.GroupSelectedTagDisplay = &stg
+ 			}
+ 		}

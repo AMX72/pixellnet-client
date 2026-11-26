@@ -125,6 +125,11 @@ class HiddifyCoreService with InfraLogger {
     if (routeRule is Map && ((routeRule['rules'] as List?)?.isEmpty ?? true)) {
       json.remove('route-rule');
     }
+    // v0.1.103: начинать на «⚡ Автовыбор», а не на балансировщике round-robin: тот слал каждое
+    // соединение на следующий канал, и VLESS-каналы открывали ко входу новое TCP на каждое —
+    // пачки, на которые срабатывает анти-DDoS Aeza (CHANGELOG 2026-11-25 part 49). Ручной выбор
+    // канала (он хранится в ядре) это не трогает.
+    json.putIfAbsent('default-proxy', () => 'lowest');
     return jsonEncode(json);
   }
 
