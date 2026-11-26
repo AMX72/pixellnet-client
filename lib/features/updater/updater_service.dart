@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -162,6 +163,11 @@ const _kSiteDownloads = 'https://pixellnet.com/download';
 // Aeza MSK, DNS-only (no Cloudflare). v0.1.97: download.pixellnet.com on :443
 // (nginx SNI router in front of the VPN); dl.pixellnet.com:2096 serves the same files.
 const _kMirrorDownloads = 'https://download.pixellnet.com/download';
+// v0.1.104: загрузка обновления — меньше 32 КБ за 15 с = встала → новое соединение с того же места;
+// попыток на один источник 6 (было 3): Wi-Fi-обрывы лечатся переподключением, а не сменой источника.
+const _kStallWindow = Duration(seconds: 15);
+const _kStallMinBytes = 32 * 1024;
+const _kAttemptsPerSource = 6;
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
@@ -542,6 +548,9 @@ class UpdaterService {
     }
 
     await _notifStart(info.version);
+    // v0.1.104: при смене источника скачанное не стирается — докачка с того же места, если у нового
+    // источника тот же размер (иначе _downloadWithResume начнёт с нуля); в конце сверка SHA-256.
+    var knownTotal = 0;
     try {
       for (int mirrorIdx = 0; mirrorIdx < urls.length; mirrorIdx++) {
         final url = urls[mirrorIdx];
@@ -551,17 +560,14 @@ class UpdaterService {
             url: url,
             file: file,
             onProgress: wrappedProgress,
+            expectedTotal: knownTotal,
+            onTotal: (t) => knownTotal = t,
           );
           lastError = null;
           break; // success
         } on Exception catch (e) {
           lastError = e;
           if (kDebugMode) debugPrint('[Updater] mirror #$mirrorIdx failed: $e');
-          // Перед переключением на след. mirror стираем частичный файл —
-          // разные origin могут отдавать байты с разным ETag, склейка = битый APK.
-          if (mirrorIdx < urls.length - 1) {
-            if (await file.exists()) await file.delete();
-          }
         }
       }
     } finally {
@@ -607,13 +613,20 @@ class UpdaterService {
     required String url,
     required File file,
     void Function(double progress)? onProgress,
+    int expectedTotal = 0,
+    void Function(int total)? onTotal,
   }) async {
-    int totalSize = 0;
+    // v0.1.104: [expectedTotal] — размер, который назвал прошлый источник: при смене источника
+    // частичный файл больше не стирается, а докачивается, если размер у нового тот же (файлы
+    // одинаковые, в конце всё равно сверка SHA-256).
+    int totalSize = expectedTotal;
     int received = await file.exists() ? await file.length() : 0;
 
-    for (int attempt = 0; attempt < 3; attempt++) {
+    for (int attempt = 0; attempt < _kAttemptsPerSource; attempt++) {
       final client = http.Client();
       final startReceived = received;
+      Timer? watchdog;
+      var stalled = false;
       try {
         final headers = <String, String>{};
         if (received > 0) {
@@ -633,39 +646,65 @@ class UpdaterService {
           if (response.statusCode != 200) {
             throw Exception('HTTP ${response.statusCode}');
           }
-          totalSize = response.contentLength ?? 0;
+          final length = response.contentLength ?? 0;
+          if (expectedTotal > 0 && length > 0 && length != expectedTotal) {
+            throw Exception('Источник отдаёт другой файл ($length байт вместо $expectedTotal)');
+          }
+          if (length > 0) totalSize = length;
         } else {
           if (response.statusCode != 206) {
-            // Server не поддерживает Range → перекачиваем с нуля
-            received = 0;
-            if (await file.exists()) await file.delete();
-            continue;
+            final length = response.contentLength ?? 0;
+            if (response.statusCode == 200 && (totalSize == 0 || length == totalSize)) {
+              // Server не поддерживает Range, но файл тот же → перекачиваем с нуля
+              received = 0;
+              if (await file.exists()) await file.delete();
+              continue;
+            }
+            // ошибка или чужая страница вместо файла: скачанное не трогаем, следующий источник
+            throw Exception('HTTP ${response.statusCode}');
           }
-          // 206 Partial — обновить totalSize из Content-Range. v0.1.32:
-          // ВСЕГДА пересчитываем — mirror #2 может отдать другой файл
-          // с другим размером; если оставим старый totalSize от mirror #1,
-          // financial check в конце ошибочно скажет «файл повреждён».
+          // 206 Partial — totalSize из Content-Range. v0.1.32: другой источник может отдать
+          // другой файл; v0.1.104: тогда начинаем с нуля, склейка двух файлов не годится.
           final cr = response.headers['content-range'];
           if (cr != null) {
             final m = RegExp(r'/(\d+)$').firstMatch(cr);
             if (m != null) {
               final crTotal = int.tryParse(m.group(1) ?? '') ?? 0;
+              if (crTotal > 0 && totalSize > 0 && crTotal != totalSize) {
+                received = 0;
+                if (await file.exists()) await file.delete();
+                totalSize = crTotal;
+                continue;
+              }
               if (crTotal > 0) totalSize = crTotal;
             }
           }
         }
+        if (totalSize > 0) onTotal?.call(totalSize);
 
         final sink =
             file.openWrite(mode: received > 0 ? FileMode.append : FileMode.write);
+        // v0.1.104: сторож скорости вместо 20-секундного таймаута тишины. На домашнем Wi-Fi
+        // загрузка вставала на 3 % (телефон получил 5,2 МБ, 2026-11-26): «струйка» данных не даёт
+        // сработать таймауту тишины, и загрузка висит. Меньше 32 КБ за 15 с — рвём соединение
+        // и докачиваем с того же места новым.
+        var windowBytes = 0;
+        watchdog = Timer.periodic(_kStallWindow, (_) {
+          if (windowBytes < _kStallMinBytes) {
+            stalled = true;
+            client.close();
+          }
+          windowBytes = 0;
+        });
         try {
-          // Idle timeout: a stalled connection (RU DPI throttling on CF/GH)
-          // otherwise hangs forever and never resumes or switches mirror.
-          await response.stream.timeout(const Duration(seconds: 20)).map((chunk) {
+          await response.stream.map((chunk) {
             received += chunk.length;
+            windowBytes += chunk.length;
             if (totalSize > 0) onProgress?.call(received / totalSize);
             return chunk;
           }).pipe(sink);
         } finally {
+          watchdog.cancel();
           await sink.close();
         }
 
@@ -693,13 +732,20 @@ class UpdaterService {
         received = await file.exists() ? await file.length() : 0;
         // Almost nothing arrived: the source is being throttled, retrying it
         // is pointless — let the caller switch to the next mirror right away.
-        if (attempt == 2 || received - startReceived < 256 * 1024) {
+        if (attempt == _kAttemptsPerSource - 1 || received - startReceived < 256 * 1024) {
           rethrow;
         }
         await Future.delayed(const Duration(seconds: 2));
       } finally {
+        watchdog?.cancel();
         client.close();
+        if (stalled && kDebugMode) debugPrint('[Updater] stalled at $received bytes, reconnecting');
       }
+    }
+    // все попытки ушли на докачку и файл всё ещё неполный → пусть caller берёт следующий источник
+    final actual = await file.exists() ? await file.length() : 0;
+    if (totalSize > 0 && actual < totalSize) {
+      throw Exception('Скачано $actual байт из $totalSize');
     }
     return totalSize;
   }
@@ -731,6 +777,7 @@ class UpdaterService {
     // v0.1.30: multi-mirror + resume через общий _downloadWithResume.
     final urls = info.allSources;
     Exception? lastError;
+    var knownTotal = 0; // v0.1.104: докачка через смену источника, как на Android
     for (int mirrorIdx = 0; mirrorIdx < urls.length; mirrorIdx++) {
       final url = urls[mirrorIdx];
       if (kDebugMode) debugPrint('[Updater/Win] trying mirror #$mirrorIdx: $url');
@@ -739,15 +786,14 @@ class UpdaterService {
           url: url,
           file: zipFile,
           onProgress: onProgress,
+          expectedTotal: knownTotal,
+          onTotal: (t) => knownTotal = t,
         );
         lastError = null;
         break;
       } on Exception catch (e) {
         lastError = e;
         if (kDebugMode) debugPrint('[Updater/Win] mirror #$mirrorIdx failed: $e');
-        if (mirrorIdx < urls.length - 1) {
-          if (await zipFile.exists()) await zipFile.delete();
-        }
       }
     }
     if (lastError != null) throw lastError;

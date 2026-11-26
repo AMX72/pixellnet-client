@@ -129,6 +129,15 @@ android {
         buildConfig true
     }
 
+    // v0.1.104: нативные библиотеки в APK сжаты. По умолчанию AGP кладёт .so без сжатия
+    // (libhiddify-core.so 101 МБ как есть) → APK arm64 144 МБ; сжатыми ~55 МБ — обновление
+    // качается в 2,5 раза быстрее. Цена: при установке библиотеки распаковываются на диск.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
 }
 
 android.applicationVariants.all { variant ->
