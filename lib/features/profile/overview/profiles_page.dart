@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
+import 'package:hiddify/core/localization/locale_extensions.dart';
+import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/failures.dart';
 import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
@@ -144,7 +146,9 @@ class _ChannelsSection extends ConsumerWidget {
       error: (_, __) => Padding(
         padding: const EdgeInsets.all(16),
         child: Text(
-          'Включи VPN — сможешь увидеть все каналы',
+          ref.watch(localePreferencesProvider).isRussian
+              ? 'Подключитесь, чтобы увидеть все каналы'
+              : 'Connect to see all channels',
           textAlign: TextAlign.center,
           style: theme.textTheme.bodySmall?.copyWith(color: PixellnetBrand.textSecondary),
         ),

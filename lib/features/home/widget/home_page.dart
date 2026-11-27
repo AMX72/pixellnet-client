@@ -14,14 +14,13 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
+import 'package:hiddify/core/localization/locale_extensions.dart';
 import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/gen/translations.g.dart' show AppLocale;
 import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/utils/alerts.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
-import 'package:hiddify/features/settings/data/config_option_repository.dart';
-import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
 import 'package:hiddify/features/background_guard/background_guard.dart';
 import 'package:hiddify/features/background_guard/channel_recheck.dart';
@@ -102,7 +101,6 @@ class HomePage extends HookConsumerWidget {
                   const SliverToBoxAdapter(child: _StatusHero()),
                   const SliverToBoxAdapter(child: _SubscriptionSection()),
                   const SliverToBoxAdapter(child: _ExpirySection()),
-                  const SliverToBoxAdapter(child: _ConnectionSection()),
                   const SliverToBoxAdapter(child: _TrafficSection()),
                   const SliverToBoxAdapter(child: _SettingsSection()),
                   const SliverToBoxAdapter(child: _FooterRow()),
@@ -222,10 +220,8 @@ class HomePage extends HookConsumerWidget {
                 onTap: () async {
                   Navigator.of(ctx).pop();
                   await Share.share(
-                    'PIXELLNET VPN — быстрый и приватный доступ к Интернету\n\n'
-                    'Скачать для Android и Windows:\n'
-                    'https://download.pixellnet.com',
-                    subject: 'PIXELLNET VPN',
+                    PixellnetBrand.shareText(ru: ref.read(localePreferencesProvider).isRussian),
+                    subject: PixellnetBrand.appName,
                   );
                 },
               ),
@@ -346,14 +342,9 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
     final name = active.tagDisplay.isNotEmpty
         ? active.tagDisplay
         : (active.tag.isNotEmpty ? active.tag : '—');
-    final protocol = active.type.isNotEmpty ? active.type : '';
+    // 0.1.105 (Р0.2): тип канала из ядра на экране не показываем.
     final speedPart = '↑${_formatSpeed(upSpeed)} ↓${_formatSpeed(downSpeed)}';
-    final parts = [
-      name,
-      delayText,
-      if (protocol.isNotEmpty) protocol,
-      speedPart,
-    ];
+    final parts = [name, delayText, speedPart];
     final line = parts.join(' · ');
 
     return GestureDetector(
@@ -400,7 +391,6 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
               active.ipinfo.ip.isNotEmpty ? active.ipinfo.ip : '—'),
           ('Провайдер (ASN)',
               active.ipinfo.org.isNotEmpty ? active.ipinfo.org : '—'),
-          ('Протокол', active.type.isNotEmpty ? active.type : '—'),
           ('Задержка',
               active.urlTestDelay > 0 && active.urlTestDelay < 65000
                   ? '${active.urlTestDelay} мс'
@@ -410,6 +400,9 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
           ('Всего за сессию',
               '↑${_bytes(active.upload.toInt())}  ↓${_bytes(active.download.toInt())}'),
         ];
+        // 0.1.105 (Р0.2): тип канала из ядра на экране не показываем,
+        // но в «Скопировать для поддержки» он остаётся.
+        final supportOnlyRows = <(String, String)>[('Протокол', active.type.isNotEmpty ? active.type : '—')];
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
@@ -487,7 +480,7 @@ class _InfoStripState extends ConsumerState<_InfoStrip> {
                   icon: const Icon(Icons.copy_outlined, size: 18),
                   label: const Text('Скопировать для поддержки'),
                   onPressed: () async {
-                    final text = rows.map((r) => '${r.$1}: ${r.$2}').join('\n');
+                    final text = [...rows, ...supportOnlyRows].map((r) => '${r.$1}: ${r.$2}').join('\n');
                     await Clipboard.setData(ClipboardData(text: text));
                     if (!ctx.mounted) return;
                     Navigator.of(ctx).pop();
@@ -763,118 +756,8 @@ class _StatusDotState extends State<_StatusDot> with SingleTickerProviderStateMi
   }
 }
 
-class _ConnectionSection extends ConsumerWidget {
-  const _ConnectionSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = ref.watch(translationsProvider).requireValue;
-    final active = ref.watch(activeProxyNotifierProvider).valueOrNull;
-    final protocol = active?.type.isNotEmpty == true ? active!.type : 'Auto';
-    final mode = ref.watch(ConfigOptions.serviceMode);
-    final modeLabel = _serviceModeLabel(mode);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: 10),
-        _Row(
-          label: t.pages.home.protocol,
-          value: protocol,
-          onTap: () => _showPlaceholderSheet(context, t.pages.home.protocol,
-              'Протокол определяется автоматически для каждого сервера. Для смены — выберите другой сервер выше.'),
-        ),
-        _Row(
-          label: t.pages.home.mode,
-          value: modeLabel,
-          onTap: () => _showModeSheet(context, ref),
-        ),
-      ],
-    );
-  }
-}
-
-String _serviceModeLabel(ServiceMode m) {
-  switch (m) {
-    case ServiceMode.tun: return 'VPN (TUN)';
-    case ServiceMode.systemProxy: return 'Системный прокси';
-    case ServiceMode.proxy: return 'Прокси-порт';
-  }
-}
-
-void _showModeSheet(BuildContext context, WidgetRef ref) {
-  final current = ref.read(ConfigOptions.serviceMode);
-  final choices = ServiceMode.choices;
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
-    builder: (ctx) {
-      final theme = Theme.of(ctx);
-      return SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-              child: Text(
-                'Режим работы',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-            ),
-            for (final m in choices)
-              InkWell(
-                onTap: () async {
-                  Navigator.of(ctx).pop();
-                  if (m != current) {
-                    await ref.read(ConfigOptions.serviceMode.notifier).update(m);
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _serviceModeLabel(m),
-                              style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
-                            ),
-                            if (m == ServiceMode.tun)
-                              Text('Рекомендуется — работает со всеми приложениями',
-                                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
-                            if (m == ServiceMode.systemProxy)
-                              Text('Только HTTP/HTTPS, ломает Node.js и Docker',
-                                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
-                            if (m == ServiceMode.proxy)
-                              Text('Для продвинутых — SOCKS5 порт',
-                                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
-                          ],
-                        ),
-                      ),
-                      if (m == current)
-                        Icon(Icons.check_outlined, size: 18, color: theme.colorScheme.primary),
-                    ],
-                  ),
-                ),
-              ),
-            const Gap(8),
-          ],
-        ),
-      );
-    },
-  );
-}
+// 0.1.105 (Р0.2): строки «Режим» и «Протокол» с главного экрана убраны вместе с выбором режима.
+// Сохранённый у людей режим работы по-прежнему действует, меняется только видимость.
 
 void _showServerSheet(BuildContext context, WidgetRef ref) {
   showModalBottomSheet<void>(
@@ -993,6 +876,15 @@ class _ServerEmpty extends StatelessWidget {
   }
 }
 
+/// Оценка канала по задержке (те же пороги, что на экране «Ключи»).
+/// Пустая строка — задержка неизвестна или канал не ответил.
+String _channelQuality(int delayMs, bool isRu) {
+  if (delayMs <= 0 || delayMs >= 65000) return '';
+  if (delayMs < 200) return isRu ? 'Быстрый' : 'Fast';
+  if (delayMs < 500) return isRu ? 'Обычный' : 'Normal';
+  return isRu ? 'Медленный' : 'Slow';
+}
+
 class _ServerList extends ConsumerWidget {
   const _ServerList({required this.group});
   final OutboundGroup group;
@@ -1001,6 +893,7 @@ class _ServerList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final items = group.items;
+    final isRu = ref.watch(localePreferencesProvider).isRussian;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1027,12 +920,12 @@ class _ServerList extends ConsumerWidget {
                             item.tagDisplay.isNotEmpty ? item.tagDisplay : item.tag,
                             style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
                           ),
-                          if (item.type.isNotEmpty)
-                            Text(item.type,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                )),
+                          // 0.1.105 (Р0.2): вместо типа канала из ядра — «Быстрый / Обычный / Медленный».
+                          if (_channelQuality(item.urlTestDelay, isRu).isNotEmpty)
+                            Text(
+                              _channelQuality(item.urlTestDelay, isRu),
+                              style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                            ),
                         ],
                       ),
                     ),
@@ -1067,39 +960,6 @@ class _ServerList extends ConsumerWidget {
     if (delayMs < 250) return theme.colorScheme.onSurface;
     return PixellnetBrand.warning;
   }
-}
-
-void _showPlaceholderSheet(BuildContext context, String title, String msg) {
-  showModalBottomSheet<void>(
-    context: context,
-    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
-    builder: (ctx) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(ctx).colorScheme.onSurface,
-                )),
-            const Gap(8),
-            Text(msg,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                )),
-          ],
-        ),
-      ),
-    ),
-  );
 }
 
 class _TrafficSection extends ConsumerWidget {
@@ -1219,7 +1079,7 @@ class _ExpirySection extends ConsumerWidget {
     final (color, valueText) = _expiryStyle(sub.expire, daysLeft, theme);
 
     return InkWell(
-      onTap: () => _showRenewSheet(context, activeProfile, sub),
+      onTap: () => _showRenewSheet(context, activeProfile, sub, isRu: ref.read(localePreferencesProvider).isRussian),
       child: Container(
         constraints: const BoxConstraints(minHeight: 36),
         padding: const EdgeInsets.symmetric(horizontal: _kRowPadH, vertical: 7),
@@ -1267,7 +1127,7 @@ class _ExpirySection extends ConsumerWidget {
   }
 }
 
-void _showRenewSheet(BuildContext context, RemoteProfileEntity profile, SubscriptionInfo sub) {
+void _showRenewSheet(BuildContext context, RemoteProfileEntity profile, SubscriptionInfo sub, {required bool isRu}) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -1304,8 +1164,8 @@ void _showRenewSheet(BuildContext context, RemoteProfileEntity profile, Subscrip
               SizedBox(
                 height: 48,
                 child: FilledButton.icon(
-                  icon: const Icon(Icons.send_outlined, size: 18),
-                  label: const Text('Продлить в Telegram'),
+                  icon: const Icon(Icons.autorenew_outlined, size: 18),
+                  label: Text(isRu ? 'Продлить' : 'Renew'),
                   onPressed: () async {
                     Navigator.of(ctx).pop();
                     final uri = Uri.parse('https://t.me/pixellnet_bot?start=renew');
@@ -1315,7 +1175,7 @@ void _showRenewSheet(BuildContext context, RemoteProfileEntity profile, Subscrip
               ),
               const Gap(10),
               Text(
-                'Другие тарифы и способы оплаты — в @pixellnet_bot',
+                isRu ? 'Откроется чат поддержки @pixellnet_bot' : 'Opens the support chat @pixellnet_bot',
                 style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
@@ -1881,9 +1741,18 @@ void _showAddSubscriptionSheet(BuildContext context, WidgetRef ref) {
             ),
             ListTile(
               leading: const Icon(Icons.data_object_outlined, size: 20),
-              title: const Text('Вставить JSON-конфиг', style: TextStyle(fontSize: 14)),
-              subtitle: const Text('sing-box · v2ray · raw-config',
-                  style: TextStyle(fontSize: 12)),
+              title: Text(
+                ref.read(localePreferencesProvider).isRussian
+                    ? 'Вставить настройки от поддержки'
+                    : 'Paste settings from support',
+                style: const TextStyle(fontSize: 14),
+              ),
+              subtitle: Text(
+                ref.read(localePreferencesProvider).isRussian
+                    ? 'Если поддержка прислала настройки текстом'
+                    : 'If support sent you settings as text',
+                style: const TextStyle(fontSize: 12),
+              ),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _showJsonEntryDialog(context, ref);
@@ -2057,16 +1926,18 @@ Future<void> _showJsonEntryDialog(BuildContext context, WidgetRef ref) async {
   final result = await showDialog<String>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('JSON-конфиг'),
+      title: Text(ref.read(localePreferencesProvider).isRussian ? 'Настройки от поддержки' : 'Settings from support'),
       content: SizedBox(
         width: 400,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Вставьте целиком JSON от поддержки (sing-box или v2ray).',
-              style: TextStyle(fontSize: 12),
+            Text(
+              ref.read(localePreferencesProvider).isRussian
+                  ? 'Вставьте целиком текст настроек, который прислала поддержка.'
+                  : 'Paste the full settings text that support sent you.',
+              style: const TextStyle(fontSize: 12),
             ),
             const SizedBox(height: 10),
             TextField(
@@ -2150,7 +2021,7 @@ class _SettingsSection extends ConsumerWidget {
           onTap: () => _showLanguageSheet(context, ref),
         ),
         _Row(
-          label: 'Отключить для приложений',
+          label: t.pages.settings.routing.generalOptions.perAppProxy.title,
           onTap: () => context.pushNamed('perAppProxy'),
         ),
         _Row(

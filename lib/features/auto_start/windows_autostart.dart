@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -17,6 +18,10 @@ class WindowsAutostart {
   WindowsAutostart._();
 
   static const taskName = 'PIXELLNET Autostart';
+
+  /// Описание задачи — его видно только в «Планировщике заданий».
+  /// До 0.1.105 содержало слово «VPN» (см. [refreshStaleTask]).
+  static const taskDescription = 'Запуск PIXELLNET при входе в Windows';
 
   /// Аргумент, с которым задача запускает приложение — по нему bootstrap
   /// понимает, что это автозапуск при входе, и подключает VPN сам.
@@ -46,6 +51,48 @@ class WindowsAutostart {
         await dir.delete(recursive: true);
       } catch (_) {}
     }
+  }
+
+  static final _descriptionRe = RegExp('<Description>([^<]*)</Description>', caseSensitive: false);
+  static final _commandRe = RegExp(r'<Command>\s*"?([^<"]+)"?\s*</Command>', caseSensitive: false);
+  static final _disabledRe = RegExp(r'<Enabled>\s*false\s*</Enabled>', caseSensitive: false);
+
+  /// 0.1.105: из описания задачи убрано слово «VPN» (решение Р-12). Задачу, созданную
+  /// версиями 0.1.100–0.1.104, пересоздаём один раз при запуске новой версии:
+  /// то же имя и `/F` — второго автозапуска не появляется. Состояние сохраняется:
+  ///  - задачи нет (автозапуск выключен) — ничего не создаём;
+  ///  - задача выключена в Планировщике — после пересоздания выключаем снова;
+  ///  - путь к программе берём из старой задачи (если файл на месте), а не у запущенной
+  ///    копии: иначе запуск копии из другой папки перенаправил бы автозапуск на неё.
+  /// В новом описании «VPN» нет — при следующих запусках задача не трогается.
+  /// Возвращает true, если задача пересоздана. Если пересоздать не вышло — бросает
+  /// исключение, старая задача остаётся как была.
+  static Future<bool> refreshStaleTask(String currentExePath, {String name = taskName}) async {
+    // latin1: байты не падают на кодировке консоли; ищем только ASCII («VPN», теги, путь).
+    final q = await Process.run(
+      'schtasks',
+      ['/Query', '/TN', name, '/XML'],
+      stdoutEncoding: latin1,
+      stderrEncoding: latin1,
+    );
+    if (q.exitCode != 0) return false;
+    final xml = q.stdout as String;
+    final description = _descriptionRe.firstMatch(xml)?.group(1);
+    if (description == null || !description.toUpperCase().contains('VPN')) return false;
+
+    final wasDisabled = _disabledRe.hasMatch(xml);
+    var exePath = currentExePath;
+    final oldCommand = _commandRe.firstMatch(xml)?.group(1);
+    if (oldCommand != null) {
+      final oldPath = _unesc(oldCommand.trim());
+      if (File(oldPath).existsSync()) exePath = oldPath;
+    }
+
+    await enable(exePath, name: name);
+    if (wasDisabled) {
+      await Process.run('schtasks', ['/Change', '/TN', name, '/DISABLE']);
+    }
+    return true;
   }
 
   static Future<void> disable({String name = taskName}) async {
@@ -93,7 +140,7 @@ class WindowsAutostart {
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
     <Author>PIXELLNET</Author>
-    <Description>Запуск PIXELLNET VPN при входе в Windows</Description>
+    <Description>${_esc(taskDescription)}</Description>
   </RegistrationInfo>
   <Triggers>
     <LogonTrigger>
@@ -140,6 +187,13 @@ class WindowsAutostart {
   }
 
   static String _esc(String s) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+
+  static String _unesc(String s) => s
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&quot;', '"')
+      .replaceAll('&apos;', "'")
+      .replaceAll('&amp;', '&');
 
   static Uint8List _utf16le(String s) {
     final units = s.codeUnits;

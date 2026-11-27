@@ -291,7 +291,7 @@ class HiddifyCoreService with InfraLogger {
     return TaskEither(() async {
       // only available on iOS (and macOS later)
       if (!PlatformUtils.isIOS) {
-        throw UnimplementedError("reset tunnel function unavailable on platform");
+        throw UnimplementedError("reset connection function unavailable on platform");
       }
 
       // loggy.debug("resetting tunnel");
@@ -299,7 +299,7 @@ class HiddifyCoreService with InfraLogger {
       if (res) {
         return right(unit);
       }
-      return left("failed to reset tunnel");
+      return left("failed to reset connection");
     });
   }
 

@@ -209,8 +209,7 @@ class AutoProfileRefreshNotifier extends Notifier<AutoProfileRefreshState> {
       if (!silent || refreshed > 0) {
         final notif = ref.read(inAppNotificationControllerProvider);
         if (errors == 0) {
-          notif.showSuccessToast(
-              'Обновились прокси-каналы: $refreshed');
+          notif.showSuccessToast('Список каналов обновлён');
         } else {
           notif.showErrorToast(
               'Обновлено $refreshed из ${remoteProfiles.length}, ошибок: $errors');

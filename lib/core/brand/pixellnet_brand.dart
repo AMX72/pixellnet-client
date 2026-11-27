@@ -10,6 +10,21 @@ abstract class PixellnetBrand {
   static const String appTagline = 'Стабильное соединение в один клик';
   static const String homepage = 'https://pixellnet.com';
   static const String supportEmail = 'support@pixellnet.com';
+  static const String downloadUrl = 'https://download.pixellnet.com';
+
+  /// Текст «Поделиться приложением» (0.1.105, Р0.1). Единый для главного экрана и «О программе».
+  /// Пока есть только связь, поэтому про ИИ-помощника и расширения — «скоро».
+  static String shareText({required bool ru}) => ru
+      ? 'PIXELLNET — стабильная связь одной кнопкой. Скоро — ИИ-помощник и расширения.\n\n'
+            'Скачать для Android и Windows:\n$downloadUrl'
+      : 'PIXELLNET — stable connectivity in one tap. Coming soon: an AI assistant and extensions.\n\n'
+            'Download for Android and Windows:\n$downloadUrl';
+
+  /// Текст приглашения друга по реферальной ссылке (0.1.105, Р0.1).
+  /// Основной текст приходит с сервера (`invite_text`); это запасной вариант без сети.
+  static String inviteText(String link, {required bool ru}) => ru
+      ? 'Пользуюсь PIXELLNET — стабильная связь одной кнопкой. По моей ссылке — 7 дней бесплатно: $link'
+      : 'I use PIXELLNET — stable connectivity in one tap. Get 7 days free with my link: $link';
 
   // ─── Dark palette (primary) ───
   static const Color bgScaffold = Color(0xFF131314);

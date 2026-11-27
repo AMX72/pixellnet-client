@@ -98,7 +98,7 @@ class _DeveloperPageState extends ConsumerState<DeveloperPage> {
           _Section('Диагностика'),
           _ActionRow(
             icon: Icons.article_outlined,
-            label: 'Логи sing-box',
+            label: 'Журнал соединения',
             onTap: () => context.pushNamed('logs'),
           ),
           _ActionRow(

@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:hiddify/core/brand/pixellnet_brand.dart';
+import 'package:hiddify/core/localization/locale_preferences.dart';
+import 'package:hiddify/gen/translations.g.dart' show AppLocale;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,6 +43,12 @@ class ReferralApiService {
   static const _kPrefTrialUrl = 'pixellnet.trial.subscription_url';
   static const _kPrefRefCode = 'pixellnet.referral.ref_code';
   static const _kPrefRefCachedAt = 'pixellnet.referral.cached_at';
+
+  /// Язык интерфейса русский? Для текстов, которые собираются без `ref` (приглашение).
+  static Future<bool> isRussianUi() async {
+    final prefs = await SharedPreferences.getInstance();
+    return resolveAppLocale(prefs.getString('locale')) == AppLocale.ru;
+  }
 
   /// Fetch referral profile — по sub_url из prefs.
   /// Returns null если trial ещё не создан или API недоступен.
@@ -87,8 +96,7 @@ class ReferralApiService {
     return ReferralProfile(
       refCode: code,
       refLink: link,
-      inviteText: 'Пользуюсь PIXELLNET — быстрый VPN без танцев с бубном. '
-          'Держи 7 дней бесплатно: $link',
+      inviteText: PixellnetBrand.inviteText(link, ru: resolveAppLocale(prefs.getString('locale')) == AppLocale.ru),
       referralsConfirmed: prefs.getInt('pixellnet.referral.confirmed') ?? 0,
       referralsPending: prefs.getInt('pixellnet.referral.pending') ?? 0,
       bonusDaysEarned: prefs.getInt('pixellnet.referral.bonus_days') ?? 0,

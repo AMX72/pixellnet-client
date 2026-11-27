@@ -85,7 +85,7 @@ class TrialExpiredPage extends ConsumerWidget {
               mode: LaunchMode.externalApplication,
             ),
             child: const Text(
-              'Купить подписку',
+              'Продлить доступ',
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
           ),

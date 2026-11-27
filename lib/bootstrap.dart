@@ -104,7 +104,7 @@ Future<void> lazyBootstrap(WidgetsBinding widgetsBinding, Environment env, {List
     () => container.read(chainProfileNotifierProvider(ChainType.extraSecurity).future),
   );
   await _init(
-    "chain profile unblocker",
+    "chain profile backup route",
     () => container.read(chainProfileNotifierProvider(ChainType.unblocker).future),
   );
   await _safeInit("hiddify-core", () => container.read(hiddifyCoreServiceProvider).init());

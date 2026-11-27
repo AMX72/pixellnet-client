@@ -151,7 +151,7 @@ class PerAppProxy extends _$PerAppProxy with AppLogger {
       final json = await _exportJson();
       final bytes = utf8.encode(jsonEncode(json));
       final outputFile = await FilePicker.platform.saveFile(
-        fileName: 'per-app proxy.json',
+        fileName: 'pixellnet-apps.json',
         type: FileType.custom,
         allowedExtensions: ['json'],
         bytes: bytes,

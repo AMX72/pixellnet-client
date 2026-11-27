@@ -158,7 +158,7 @@ class GeneralPage extends HookConsumerWidget {
           // v0.1.38: раздел обновления прокси-каналов (Marzban subscription)
           ListTile(
             leading: const Icon(Icons.swap_horiz_outlined),
-            title: const Text('Как обновлять прокси-каналы'),
+            title: const Text('Как обновлять каналы'),
             subtitle: Text(_profileRefreshModeLabel(ref.watch(Preferences.profileRefreshMode))),
             trailing: DropdownButton<int>(
               value: ref.watch(Preferences.profileRefreshMode),
@@ -205,7 +205,7 @@ class GeneralPage extends HookConsumerWidget {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.cloud_download_outlined),
-            title: const Text('Обновить прокси сейчас'),
+            title: const Text('Обновить каналы сейчас'),
             subtitle: const Text('Скачать свежий список серверов'),
             trailing: const Icon(Icons.chevron_right_outlined),
             enabled: !ref.watch(autoProfileRefreshProvider).isRefreshing,
@@ -219,7 +219,7 @@ class GeneralPage extends HookConsumerWidget {
                     st.lastError != null
                         ? st.lastError!
                         : st.newChannelsCount > 0
-                            ? 'Обновились прокси-каналы: +${st.newChannelsCount}'
+                            ? 'Список каналов обновлён'
                             : 'Список актуален — изменений нет',
                   ),
                 ),

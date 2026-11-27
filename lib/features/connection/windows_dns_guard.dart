@@ -40,13 +40,15 @@ class WindowsDnsGuard with AppLogger {
 
   final Ref ref;
 
-  // Comment правила — «PIXELLNET»; снимаем всё, что начинается с него (и ручное «PIXELLNET-test»).
+  // Comment правила — «PIXELLNET», DisplayName — «PIXELLNET DNS» (до 0.1.105 название было длиннее).
+  // Снимаем всё, у чего Comment ИЛИ DisplayName начинается с «PIXELLNET» (и ручное «PIXELLNET-test»):
+  // правило, оставшееся от прежней версии, снимается так же, как новое.
   // Результат — код выхода: 10 = поставлено, 10 + N = снято N правил, 1 = ошибка.
   static const _applyScript = r'''
 $ProgressPreference = 'SilentlyContinue'
 try {
-  Get-DnsClientNrptRule | Where-Object { $_.Comment -like 'PIXELLNET*' } | Remove-DnsClientNrptRule -Force -ErrorAction Stop
-  Add-DnsClientNrptRule -Namespace '.' -NameServers '77.88.8.8','8.8.8.8' -Comment 'PIXELLNET' -DisplayName 'PIXELLNET DNS via VPN' -ErrorAction Stop
+  Get-DnsClientNrptRule | Where-Object { $_.Comment -like 'PIXELLNET*' -or $_.DisplayName -like 'PIXELLNET*' } | Remove-DnsClientNrptRule -Force -ErrorAction Stop
+  Add-DnsClientNrptRule -Namespace '.' -NameServers '77.88.8.8','8.8.8.8' -Comment 'PIXELLNET' -DisplayName 'PIXELLNET DNS' -ErrorAction Stop
   Clear-DnsClientCache
   exit 10
 } catch { exit 1 }
@@ -55,7 +57,7 @@ try {
   static const _removeScript = r'''
 $ProgressPreference = 'SilentlyContinue'
 try {
-  $r = @(Get-DnsClientNrptRule | Where-Object { $_.Comment -like 'PIXELLNET*' })
+  $r = @(Get-DnsClientNrptRule | Where-Object { $_.Comment -like 'PIXELLNET*' -or $_.DisplayName -like 'PIXELLNET*' })
   if ($r.Count -gt 0) { $r | Remove-DnsClientNrptRule -Force -ErrorAction Stop; Clear-DnsClientCache }
   exit (10 + $r.Count)
 } catch { exit 1 }

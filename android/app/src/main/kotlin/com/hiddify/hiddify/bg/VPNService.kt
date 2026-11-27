@@ -83,7 +83,7 @@ class VPNService : VpnService(), PlatformInterfaceWrapper {
         if (prepare(this) != null) {
             Log.w(TAG, "openTun: VPN permission missing or revoked, sending alert")
             service.notifyVpnPermissionRevoked()
-            error("android: missing vpn permission")
+            error("android: missing connection permission")
         }
         // v0.1.36: закрыть старый TUN fd перед establish() нового.
         // Без этого при gRPC restart (subscription refresh активного профиля
@@ -95,7 +95,7 @@ class VPNService : VpnService(), PlatformInterfaceWrapper {
         Thread.sleep(200)
 
         val builder = Builder()
-            .setSession("hiddify")
+            .setSession("PIXELLNET")
             .setMtu(options.mtu)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

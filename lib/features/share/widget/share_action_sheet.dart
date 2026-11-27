@@ -109,7 +109,7 @@ class ShareActionSheet extends StatelessWidget {
                 Navigator.of(context).pop();
                 await Share.share(
                   '$messengerPreamble\n\n$primaryLink',
-                  subject: profileName.isNotEmpty ? profileName : 'PIXELLNET VPN',
+                  subject: profileName.isNotEmpty ? profileName : PixellnetBrand.appName,
                 );
               },
               style: FilledButton.styleFrom(

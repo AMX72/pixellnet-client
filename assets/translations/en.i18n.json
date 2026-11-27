@@ -23,7 +23,7 @@
     "addToClipboard": "Add to clipboard",
     "scanQr": "Scan QR",
     "free": "Free",
-    "warp": "WARP",
+    "warp": "Extra service 1",
     "fragment": "Fragment",
     "help": "Help",
     "save": "Save",
@@ -51,7 +51,7 @@
     "sort": "Sort",
     "dashboard": "Dashboard",
     "disable": "Disable",
-    "psiphon": "Psiphon",
+    "psiphon": "Extra service 2",
     "profile": "Profile",
     "configuration": "Configuration",
     "file": "File",
@@ -93,18 +93,13 @@
     }
   },
   "intro": {
-    "banner": "All you need for an unrestricted internet",
+    "banner": "Stable connectivity in one tap",
     "termsAndPolicyCaution(rich)": "By continuing you agree to ${tap(@:pages.about.termsAndConditions)}",
     "info(rich)": "Powered by PIXELLNET - ${tap_source(Open Source)} (${tap_license(License)})"
   },
   "pages": {
     "home": {
       "title": "Home",
-      "quickSettings": "Quick setting options",
-      "server": "Server",
-      "protocol": "Protocol",
-      "mode": "Mode",
-      "vpnTun": "VPN (TUN)",
       "key": "Key",
       "autoConnect": "Auto-connect on startup",
       "language": "Language",
@@ -114,18 +109,14 @@
       "cancel": "Cancel",
       "support": "Support",
       "languageTitle": "Interface language",
-      "copied": "Copied",
-      "serverSoon": "Server list — coming soon",
-      "protocolSoon": "Protocol selection — coming soon",
-      "modeSoon": "VPN (TUN) · System proxy — coming soon",
-      "developerSoon": "Logs, DNS, MTU, export — coming soon"
+      "copied": "Copied"
     },
     "proxies": {
-      "title": "Proxies",
-      "sort": "Sort proxies",
+      "title": "Channels",
+      "sort": "Sort channels",
       "testDelay": "Test delay",
-      "empty": "No proxies available",
-      "activeProxy": "Active proxy",
+      "empty": "No channels yet",
+      "activeProxy": "Current channel",
       "unknownIp": "Unknown IP",
       "sortOptions": {
         "unsorted": "Default",
@@ -199,6 +190,7 @@
     },
     "about": {
       "title": "About",
+      "tagline": "Stable connectivity in one tap. Coming soon: an AI assistant and extensions.",
       "notAvailableMsg": "Already using the latest version",
       "checkForUpdate": "Check for update",
       "openWorkingDir": "Open working directory",
@@ -209,15 +201,15 @@
     },
     "settings": {
       "title": "Settings",
-      "resetTunnel": "Reset VPN profile",
+      "resetTunnel": "Reset connection",
       "options": {
         "import": {
           "clipboard": "Import options from clipboard",
           "file": "Import options from file"
         },
         "export": {
-          "anonymousToClipboard": "Copy anonymous options to clipboard",
-          "anonymousToFile": "Export anonymous options to file",
+          "anonymousToClipboard": "Copy settings without personal data",
+          "anonymousToFile": "Save to file without personal data",
           "allToClipboard": "Copy all options to clipboard",
           "allToFile": "Export all options to file"
         },
@@ -242,7 +234,7 @@
         "autoStart": "Start at login",
         "silentStart": "Start minimized",
         "ignoreBatteryOptimizations": "Disable battery optimization",
-        "ignoreBatteryOptimizationsMsg": "Remove restrictions for optimal VPN performance",
+        "ignoreBatteryOptimizationsMsg": "So your phone doesn't close PIXELLNET",
         "memoryLimit": "Memory limit",
         "memoryLimitMsg": "Enable if you're experiencing out of memory errors or frequent app crashes",
         "debugMode": "Debug mode",
@@ -251,8 +243,8 @@
         "connectionTestUrl": "Connection test URL",
         "urlTestInterval": "URL test interval",
         "clashApiPort": "Clash API port",
-        "useXrayCoreWhenPossible": "Use xray-core when possible",
-        "useXrayCoreWhenPossibleMsg": "Use xray-core during parsing sub links. You need to reimport the sub link to enable this option."
+        "useXrayCoreWhenPossible": "Alternative key format",
+        "useXrayCoreWhenPossibleMsg": "Re-add your key to turn this on."
       },
       "routing": {
         "title": "Routing",
@@ -273,7 +265,7 @@
           },
           "rule": {
             "title": "Rule",
-            "onlyTunMode": "Available only in tun mode",
+            "onlyTunMode": "Works only in \"All apps\" mode",
             "notAvailabeInThisPlatform": "Not available in this platform",
             "canNotBeEmpty": "Can not be empty",
             "validUrlEx": "https://example.com",
@@ -309,7 +301,7 @@
               "domain_regex": "Domain regex"
             },
             "outbound(map)": {
-              "proxy": "Proxy",
+              "proxy": "Through PIXELLNET",
               "direct": "Direct",
               "direct_with_fragment": "Direct with fragment",
               "block": "Block"
@@ -364,7 +356,7 @@
             "only": "Exclusive"
           },
           "perAppProxy": {
-            "title": "Per-app proxy",
+            "title": "Exclude apps",
             "hideSysApps": "Hide system apps",
             "options": {
               "import": {
@@ -381,11 +373,11 @@
             },
             "modes": {
               "all": "All",
-              "proxy": "Proxy",
-              "bypass": "Bypass",
-              "allMsg": "Proxy all apps",
-              "proxyMsg": "Proxy only selected apps",
-              "bypassMsg": "Do not proxy selected apps"
+              "proxy": "Only checked",
+              "bypass": "All except checked",
+              "allMsg": "All apps through PIXELLNET",
+              "proxyMsg": "Only checked apps through PIXELLNET",
+              "bypassMsg": "Checked apps connect directly"
             },
             "autoSelection": {
               "title": "Auto selection",
@@ -400,7 +392,7 @@
               },
               "dialog": {
                 "title": "Auto apps selection",
-                "msg": "The auto selection feature for per-app proxy was disabled due to the region change to \"${region}\""
+                "msg": "Auto apps selection was turned off because the region changed to \"${region}\""
               }
             }
           }
@@ -412,7 +404,7 @@
             "description": ""
           },
           "bypassLan": {
-            "name": "Bypass LAN",
+            "name": "Home network directly",
             "description": ""
           }
         }
@@ -434,16 +426,16 @@
       },
       "inbound": {
         "title": "Inbound",
-        "serviceMode": "Service mode",
+        "serviceMode": "Mode",
         "serviceModes": {
-          "proxy": "Proxy service only",
-          "systemProxy": "Set system proxy",
-          "tun": "VPN"
+          "proxy": "Local port only",
+          "systemProxy": "System settings",
+          "tun": "All apps"
         },
         "shortServiceModes": {
-          "proxy": "Proxy",
-          "systemProxy": "System proxy",
-          "tun": "VPN"
+          "proxy": "Local port",
+          "systemProxy": "System",
+          "tun": "All apps"
         },
         "strictRoute": "Strict route",
         "tunImplementation": "Tun implementation",
@@ -453,12 +445,12 @@
           "gvisor": "gVisor"
         },
         "mixedPort": "Mixed port",
-        "tproxyPort": "Transparent proxy port",
+        "tproxyPort": "Transparent mode port",
         "directPort": "Direct port",
         "redirectPort": "Redirect port",
-        "lanSharing": "VPN sharing",
+        "lanSharing": "Access for other devices on your network",
         "lanSharingPasswordNotSet": "Password not set",
-        "lanSharingPassword": "VPN sharing password",
+        "lanSharingPassword": "Password for other devices",
         "copyLink": "Copy link",
         "qrCode": "QR Code",
         "lanIPError": "Failed to get local IP address"
@@ -485,12 +477,12 @@
       },
       "chain": {
         "title": "Chain",
-        "subtitle": "Extra security & Unblocker",
+        "subtitle": "Extra protection and a backup route",
         "finalIp": "Final IP",
         "levels": {
           "app": {
             "title": "App",
-            "msg": "Start point: Your app traffic enters the chain here and passes through the next layers to prepare for the final bypass"
+            "msg": "Start point: your apps' traffic enters the chain here"
           },
           "extraSecurity": {
             "title": "Extra security",
@@ -500,16 +492,16 @@
             "title": "Main profile"
           },
           "unblocker": {
-            "title": "Unblocker",
-            "msg": "Helps bypass network restrictions. If the helper connects, your main profile can still work even if it's currently blocked"
+            "title": "Backup route",
+            "msg": "If the main channel doesn't respond, traffic goes through the backup route"
           },
           "filtering": {
             "title": "Filtering",
-            "msg": "Final exit: After passing through the active layers (Extra Security, Main Profile, or Unblocker) and applying their effects, your traffic is finally routed to bypass local network filtering"
+            "msg": "Final step: traffic goes out to the internet"
           }
         },
         "warp": {
-          "missingConfig": "Missing WARP config",
+          "missingConfig": "Missing extra service 1 config",
           "licenseKey": "License key",
           "cleanIp": "Clean IP",
           "port": "Port",
@@ -601,12 +593,12 @@
       }
     },
     "warpLicense": {
-      "title": "Cloudflare WARP consent",
-      "description(rich)": "Cloudflare WARP is a free WireGuard VPN provider. By enabling this option you are agreeing to the Cloudflare WARP's ${tos(Terms of service)} and ${privacy(Privacy policy)}."
+      "title": "License of an additional service",
+      "description(rich)": "By enabling this option you agree to the provider's ${tos(Terms of service)} and ${privacy(Privacy policy)}."
     },
     "psiphonLicense": {
-      "title": "Psiphon License Agreement",
-      "description(rich)": "By using Psiphon, you agree to the ${tos(Terms of Service)} and acknowledge the ${privacy(Privacy Policy)}. Please read them carefully before proceeding."
+      "title": "License of an additional service",
+      "description(rich)": "By using this option, you agree to the provider's ${tos(Terms of Service)} and acknowledge the ${privacy(Privacy Policy)}. Please read them carefully before proceeding."
     },
     "newVersion": {
       "title": "Update available",
@@ -633,7 +625,7 @@
           "msg": "By sharing selected apps, you help complete the \"auto selection\" list"
         },
         "import": {
-          "msg": "This will replace all your current per-app proxy selections. Are you sure you want to continue?"
+          "msg": "This will replace your current app selection. Continue?"
         }
       },
       "routeRule": {
@@ -657,11 +649,11 @@
       "disable": "Don't show again"
     },
     "noActiveProfile": {
-      "title": "Choose a profile",
-      "msg": "Let's get started by adding a connection profile that includes your VPN connection details.\n\nDon’t have a VPN server yet? No worries—just follow the tutorial below to set one up quickly and for free.",
+      "title": "How to add a key",
+      "msg": "An access key is a link or a code like PXN-XXXX-XXXX. Paste it from the clipboard, scan the QR code or enter it manually. No key? Contact support.",
       "helpBtn": {
-        "label": "Show me how",
-        "url": "https://hiddify.com/manager/"
+        "label": "Contact support",
+        "url": "https://t.me/pixellnet_support"
       }
     },
     "unknownDomainsWarning": {
@@ -724,24 +716,24 @@
     },
     "connectivity": {
       "unexpected": "Unexpected failure",
-      "missingVpnPermission": "Missing VPN permission",
+      "missingVpnPermission": "Permission to connect is needed",
       "missingNotificationPermission": "Missing notification permission",
       "core": "Core error"
     },
     "singbox": {
       "serviceNotRunning": "Service is not running",
       "missingPrivilege": "Missing privilege",
-      "missingPrivilegeMsg": "VPN mode requires administrator privileges. Either relaunch the app as administrator or change service mode.",
+      "missingPrivilegeMsg": "Administrator rights are needed. Close PIXELLNET and open it again — Windows will ask for permission.",
       "invalidConfigOptions": "Invalid configuration options",
       "invalidConfig": "Invalid configuration"
     },
     "warp": {
-      "missingLicense": "Warp license required",
-      "missingLicenseMsg": "The selected profile uses the WARP feature; to use this feature, the WARP license must be agreed to"
+      "missingLicense": "Could not accept the license of an additional service",
+      "missingLicenseMsg": "The selected profile uses an additional service; its license must be accepted first"
     },
     "psiphon": {
-      "missingLicense": "Psiphon license required",
-      "missingLicenseMsg": "The selected profile uses the Psiphon feature; to use this feature, the Psiphon license must be agreed to"
+      "missingLicense": "Could not accept the license of an additional service",
+      "missingLicenseMsg": "The selected profile uses an additional service; its license must be accepted first"
     }
   }
 }

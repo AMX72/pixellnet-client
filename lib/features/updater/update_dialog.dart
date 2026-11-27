@@ -180,13 +180,12 @@ class _UpdateDialogState extends State<UpdateDialog> {
   String _errorText(Object e, NetworkDiagnostics diag) {
     final raw = e.toString().replaceFirst('Exception: ', '');
     if (diag.state == NetworkState.noCellSignal) {
-      return 'Возможно вышка твоего оператора сейчас не раздаёт '
-          'интернет в этом районе. Это не VPN — попробуй сменить '
-          'район или подожди раздачи от вышки.';
+      return 'Похоже, вышка оператора сейчас не раздаёт интернет в этом районе. '
+          'Дело не в приложении — попробуйте позже или подключитесь к Wi-Fi.';
     }
     if (diag.state == NetworkState.cellSignalButNoData) {
-      return 'Сигнал сотовой сети есть, но интернет не идёт. '
-          'Возможно оператор ограничил доступ — попробуй через Wi-Fi.';
+      return 'Сигнал есть, но интернет не идёт. '
+          'Возможно, у оператора перебои — попробуйте через Wi-Fi.';
     }
     return raw;
   }

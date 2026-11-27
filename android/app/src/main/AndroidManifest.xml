@@ -51,9 +51,12 @@
             android:name="flutter_deeplinking_enabled"
             android:value="true" />
 
-        <meta-data
-            android:name="android.app.shortcuts"
-            android:resource="@xml/shortcuts" />
+        <!-- 0.1.105: статический ярлык (xml/shortcuts) убран. Он указывал на чужой пакет
+             и к тому же был объявлен на application, а не на launcher-активности,
+             поэтому система его не показывала. Починить без applicationId из gradle
+             (resValue) нельзя: у бета-сборки с суффиксом .core5 пакет другой.
+             Ярлык «Переключить» из виджета ярлыков работает через ShortcutActivity
+             (CREATE_SHORTCUT) и берёт пакет приложения в рантайме. -->
 
         <activity
             android:name=".MainActivity"

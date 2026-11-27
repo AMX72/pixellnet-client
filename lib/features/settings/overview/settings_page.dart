@@ -23,6 +23,9 @@ enum ConfigOptionSection {
   };
 }
 
+/// Показывать расширенные разделы настроек. Выключено в 0.1.105 (Р0.3).
+const bool _kShowAdvancedSections = false;
+
 class SettingsPage extends HookConsumerWidget {
   SettingsPage({super.key, String? section})
     : section = section != null ? ConfigOptionSection.values.byName(section) : null;
@@ -147,33 +150,37 @@ class SettingsPage extends HookConsumerWidget {
             icon: Icons.layers_outlined,
             namedLocation: context.namedLocation('general'),
           ),
-          if (ref.watch(hasAnyProfileProvider).value ?? false)
+          // 0.1.105 (Р0.3): разделы «Цепь», «Маршрутизация», «DNS», «Входящие» и «Трюки TLS»
+          // скрыты из интерфейса. Код и сохранённые значения не тронуты — всё работает как раньше.
+          if (_kShowAdvancedSections) ...[
+            if (ref.watch(hasAnyProfileProvider).value ?? false)
+              SettingsSection(
+                title: t.pages.settings.chain.title,
+                icon: Icons.webhook_outlined,
+                subtitle: Text(t.pages.settings.chain.subtitle),
+                namedLocation: context.namedLocation('chainOptions'),
+              ),
             SettingsSection(
-              title: t.pages.settings.chain.title,
-              icon: Icons.webhook_outlined,
-              subtitle: Text(t.pages.settings.chain.subtitle),
-              namedLocation: context.namedLocation('chainOptions'),
+              title: t.pages.settings.routing.title,
+              icon: Icons.route_outlined,
+              namedLocation: context.namedLocation('routingOptions'),
             ),
-          SettingsSection(
-            title: t.pages.settings.routing.title,
-            icon: Icons.route_outlined,
-            namedLocation: context.namedLocation('routingOptions'),
-          ),
-          SettingsSection(
-            title: t.pages.settings.dns.title,
-            icon: Icons.dns_outlined,
-            namedLocation: context.namedLocation('dnsOptions'),
-          ),
-          SettingsSection(
-            title: t.pages.settings.inbound.title,
-            icon: Icons.input_outlined,
-            namedLocation: context.namedLocation('inboundOptions'),
-          ),
-          SettingsSection(
-            title: t.pages.settings.tlsTricks.title,
-            icon: Icons.content_cut_outlined,
-            namedLocation: context.namedLocation('tlsTricks'),
-          ),
+            SettingsSection(
+              title: t.pages.settings.dns.title,
+              icon: Icons.dns_outlined,
+              namedLocation: context.namedLocation('dnsOptions'),
+            ),
+            SettingsSection(
+              title: t.pages.settings.inbound.title,
+              icon: Icons.input_outlined,
+              namedLocation: context.namedLocation('inboundOptions'),
+            ),
+            SettingsSection(
+              title: t.pages.settings.tlsTricks.title,
+              icon: Icons.content_cut_outlined,
+              namedLocation: context.namedLocation('tlsTricks'),
+            ),
+          ],
           if (PlatformUtils.isIOS)
             Material(
               child: ListTile(

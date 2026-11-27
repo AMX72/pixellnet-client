@@ -17,7 +17,9 @@ class AppInfoEntity with _$AppInfoEntity {
     required Environment environment,
   }) = _AppInfoEntity;
 
-  String get userAgent => "PixellnetVPN/$version ($operatingSystem) like ClashMeta v2ray sing-box";
+  // 0.1.105 (Р0.7): без «VPN» в подписи. Сервер принимает её с 27.11 (CHANGELOG part 59).
+  // «like ClashMeta v2ray sing-box» — служебные слова, по ним сервер выбирает формат подписки.
+  String get userAgent => "Pixellnet/$version ($operatingSystem) like ClashMeta v2ray sing-box";
 
   String get presentVersion => environment == Environment.prod ? version : "$version ${environment.name}";
 

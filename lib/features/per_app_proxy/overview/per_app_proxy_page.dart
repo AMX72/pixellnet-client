@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hiddify/core/localization/locale_extensions.dart';
+import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/region.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
@@ -20,6 +22,9 @@ import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:installed_apps/index.dart';
+
+/// Показывать «Автовыбор» и «Поделиться со всеми» (списки Android-GFW-Apps). Скрыто в 0.1.105 (Р0.3).
+const bool _kShowAutoSelection = false;
 
 class PerAppProxyPage extends HookConsumerWidget with PresLogger {
   const PerAppProxyPage({super.key});
@@ -272,7 +277,7 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
               ),
             )
           : AppBar(
-              title: const Text('Отключить для приложений'),
+              title: Text(t.pages.settings.routing.generalOptions.perAppProxy.title),
               actions: [
                 IconButton(
                   icon: const Icon(FluentIcons.search_24_regular),
@@ -323,7 +328,7 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
                       ],
                       child: Text(t.common.export),
                     ),
-                    if (ref.watch(ConfigOptions.region) != Region.other)
+                    if (_kShowAutoSelection && ref.watch(ConfigOptions.region) != Region.other)
                       MenuItemButton(
                         child: Text(t.pages.settings.routing.generalOptions.perAppProxy.options.shareToAll),
                         onPressed: () async => await ref
@@ -411,7 +416,7 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
                   scrollController.animateTo(0.0, duration: const Duration(milliseconds: 500), curve: Curves.easeOut),
               child: const Icon(Icons.keyboard_arrow_up_outlined),
             )
-          : (ref.watch(ConfigOptions.region) != Region.other)
+          : (_kShowAutoSelection && ref.watch(ConfigOptions.region) != Region.other)
           ? FloatingActionButton.extended(
               onPressed: () async =>
                   await ref.read(bottomSheetsNotifierProvider.notifier).showAutoAppsSelection(mode: mode!),
@@ -429,7 +434,11 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
           controller: scrollController,
           itemBuilder: (context, index) {
             if (index == 0) {
-              return _buildExplanation(context, ref.watch(Preferences.perAppProxyMode));
+              return _buildExplanation(
+                context,
+                ref.watch(Preferences.perAppProxyMode),
+                ref.watch(localePreferencesProvider).isRussian,
+              );
             }
             final package = packages[index - 1];
             final flag = selectedApps.requireValue[package.packageName];
@@ -479,21 +488,39 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
     );
   }
 
-  Widget _buildExplanation(BuildContext context, PerAppProxyMode mode) {
+  Widget _buildExplanation(BuildContext context, PerAppProxyMode mode, bool isRu) {
     final theme = Theme.of(context);
     final (title, hint) = switch (mode) {
-      PerAppProxyMode.off => (
-        'Все приложения через VPN',
-        'VPN работает для всех программ. Нажмите на режим вверху ⋮, чтобы выбрать по-другому.',
-      ),
-      PerAppProxyMode.include => (
-        'Только отмеченные приложения через VPN',
-        'VPN работает только для отмеченных ✓ приложений. Остальные выходят в интернет напрямую.',
-      ),
-      PerAppProxyMode.exclude => (
-        'Все приложения через VPN, кроме отмеченных',
-        'Отмеченные ✓ приложения выходят в интернет напрямую (без VPN). Удобно для банков, госуслуг, Ozon — они часто блокируют VPN.',
-      ),
+      PerAppProxyMode.off =>
+        isRu
+            ? (
+                'Все приложения через PIXELLNET',
+                'PIXELLNET работает для всех программ. Чтобы выбрать иначе, нажмите на режим вверху экрана.',
+              )
+            : (
+                'All apps go through PIXELLNET',
+                'PIXELLNET works for all apps. To change this, tap the mode at the top of the screen.',
+              ),
+      PerAppProxyMode.include =>
+        isRu
+            ? (
+                'Через PIXELLNET — только отмеченные',
+                'PIXELLNET работает только для отмеченных ✓ приложений. Остальные выходят в интернет напрямую.',
+              )
+            : (
+                'Only checked apps go through PIXELLNET',
+                'PIXELLNET works only for checked ✓ apps. Other apps connect to the internet directly.',
+              ),
+      PerAppProxyMode.exclude =>
+        isRu
+            ? (
+                'Все через PIXELLNET, кроме отмеченных',
+                'Отмеченные ✓ приложения выходят в интернет напрямую, без PIXELLNET. Удобно для банков, Госуслуг и Ozon — они лучше работают напрямую.',
+              )
+            : (
+                'All apps go through PIXELLNET except checked ones',
+                'Checked ✓ apps connect to the internet directly, without PIXELLNET. Handy for banking and shopping apps that work better directly.',
+              ),
     };
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),

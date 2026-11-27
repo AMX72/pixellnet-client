@@ -28,7 +28,9 @@ class AutoStartNotifier extends _$AutoStartNotifier with InfraLogger {
       launchAtStartup.setup(
         appName: appInfo.name,
         appPath: Platform.resolvedExecutable,
-        packageName: "Pixellnet.PixellnetVPN",
+        // launch_at_startup берёт packageName только для MSIX на Windows, а Windows сюда не
+        // доходит (там WindowsAutostart) — на macOS/Linux значение ни на что не влияет.
+        packageName: "Pixellnet.Pixellnet",
       );
       try {
         final isEnabled = await launchAtStartup.isEnabled();
@@ -62,6 +64,15 @@ class AutoStartNotifier extends _$AutoStartNotifier with InfraLogger {
           await WindowsAutostart.enable(Platform.resolvedExecutable);
         }
         await WindowsAutostart.removeLegacy(appName);
+      }
+      // 0.1.105: описание задачи без слова «VPN» — старую задачу пересоздаём один раз
+      // (то же имя, без дубля; «включено/выключено» не меняется). Сбой не должен ломать статус.
+      try {
+        if (await WindowsAutostart.refreshStaleTask(Platform.resolvedExecutable)) {
+          loggy.info("auto start task re-created with new description");
+        }
+      } catch (e, st) {
+        loggy.warning("auto start task description refresh failed", e, st);
       }
       final isEnabled = await WindowsAutostart.isEnabled();
       loggy.info("windows auto start (scheduled task) is [${isEnabled ? "Enabled" : "Disabled"}]");

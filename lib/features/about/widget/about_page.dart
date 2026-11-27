@@ -4,7 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
+import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/core/directories/directories_provider.dart';
+import 'package:hiddify/core/localization/locale_extensions.dart';
+import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/core/model/failures.dart';
@@ -19,11 +22,6 @@ import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
-
-const String kPixellnetShareText =
-    'PIXELLNET VPN — быстрый и приватный доступ к Интернету\n\n'
-    'Скачать для Android и Windows:\n'
-    'https://download.pixellnet.com';
 
 class AboutPage extends HookConsumerWidget {
   const AboutPage({super.key});
@@ -137,18 +135,30 @@ class AboutPage extends HookConsumerWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Column(
                 children: [
-                  Assets.images.logo.svg(width: 64, height: 64),
-                  const Gap(16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(t.common.appTitle, style: Theme.of(context).textTheme.titleLarge),
-                      const Gap(4),
-                      Text("${t.common.version} ${appInfo.presentVersion}"),
+                      Assets.images.logo.svg(width: 64, height: 64),
+                      const Gap(16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(t.common.appTitle, style: Theme.of(context).textTheme.titleLarge),
+                          const Gap(4),
+                          Text("${t.common.version} ${appInfo.presentVersion}"),
+                        ],
+                      ),
                     ],
+                  ),
+                  const Gap(12),
+                  Text(
+                    t.pages.about.tagline,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -163,7 +173,10 @@ class AboutPage extends HookConsumerWidget {
                 subtitle: const Text('Отправить ссылку на скачивание друзьям'),
                 leading: const Icon(Icons.share_outlined),
                 onTap: () async {
-                  await Share.share(kPixellnetShareText, subject: 'PIXELLNET VPN');
+                  await Share.share(
+                    PixellnetBrand.shareText(ru: ref.read(localePreferencesProvider).isRussian),
+                    subject: PixellnetBrand.appName,
+                  );
                 },
               ),
               ListTile(

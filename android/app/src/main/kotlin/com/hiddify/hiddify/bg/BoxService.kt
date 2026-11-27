@@ -425,7 +425,7 @@ class BoxService(
     fun notifyVpnPermissionRevoked() {
         GlobalScope.launch(Dispatchers.Main) {
             // stopAndAlert: status = Stopped + broadcast alert → EventHandler → Flutter.
-            stopAndAlert(Alert.RequestVPNPermission, "VPN permission revoked or missing")
+            stopAndAlert(Alert.RequestVPNPermission, "Connection permission revoked or missing")
         }
     }
 

@@ -78,6 +78,9 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
             // переход на экраны производителя (MIUI, EMUI, ColorOS, Funtouch).
             BackgroundStatus("background_status"),
             OpenBackgroundSettings("open_background_settings"),
+            // 0.1.105: ANDROID_ID для device_id пробного периода (раньше был Build.ID —
+            // одинаков у всех телефонов одной прошивки). Имя метода — ровно "getAndroidId".
+            GetAndroidId("getAndroidId"),
         }
 
         // MIUI: скрытая операция AppOps «Автозапуск» (видна как MIUIOP(10008)).
@@ -299,6 +302,20 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
             Trigger.OpenBackgroundSettings.method -> {
                 val kind = call.argument<String>("kind") ?: "autostart"
                 result.runCatching { success(openBackgroundSettings(kind)) }
+            }
+
+            // 0.1.105: String ANDROID_ID или null при любой ошибке. Без новых разрешений.
+            // Полное имя android.provider.Settings — в пакете есть свой объект Settings.
+            Trigger.GetAndroidId.method -> {
+                val androidId: String? = try {
+                    android.provider.Settings.Secure.getString(
+                        (activity?.applicationContext ?: Application.application).contentResolver,
+                        android.provider.Settings.Secure.ANDROID_ID,
+                    )
+                } catch (e: Exception) {
+                    null
+                }
+                result.success(androidId)
             }
 
             else -> result.notImplemented()

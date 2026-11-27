@@ -58,8 +58,8 @@ class ShareBottomSheet extends StatelessWidget {
               icon: Icons.vpn_key_outlined,
               iconColor: PixellnetBrand.mochaOnDark,
               iconBg: PixellnetBrand.mocha.withOpacity(0.12),
-              title: 'Ключ для другого VPN-приложения',
-              subtitle: 'Если у друга уже стоит Happ, V2rayNG — отправьте только ключ',
+              title: 'Ключ для другого приложения',
+              subtitle: 'Если у друга уже есть приложение для подключения — отправьте только ключ',
               onTap: () {
                 Navigator.of(context).pop();
                 _openShareForExternal(context);
@@ -83,8 +83,8 @@ class ShareBottomSheet extends StatelessWidget {
               icon: Icons.card_giftcard_outlined,
               iconColor: PixellnetBrand.olive,
               iconBg: PixellnetBrand.olive.withOpacity(0.14),
-              title: 'Пригласить друга и получить бонус',
-              subtitle: 'За каждого друга — 7 дней бесплатно вам обоим',
+              title: 'Пригласить друга',
+              subtitle: 'Другу — 7 дней бесплатно',
               onTap: () {
                 Navigator.of(context).pop();
                 ShareReferralSheet.show(context, profileName: profileName);
@@ -97,16 +97,14 @@ class ShareBottomSheet extends StatelessWidget {
   }
 
   void _openShareForExternal(BuildContext context) {
-    // Плитка 1: универсальная ссылка (HTTPS). Happ автодетект по буферу.
-    // Плюс поддерживаем deep-links для Hiddify/Karing/V2rayNG/Shadowrocket.
+    // Плитка 1: универсальная ссылка (HTTPS). Приложение друга само находит её в буфере.
     ShareActionSheet.show(
       context,
-      title: 'Ключ для другого VPN',
+      title: 'Ключ для другого приложения',
       subtitle: 'Получатель откроет ссылку в своём приложении',
       primaryLink: subUrl,
       qrPayload: subUrl,
-      messengerPreamble:
-          'Держи ключ для VPN — вставь ссылку в Happ / V2rayNG / любой Xray-клиент. Работает без блокировок:',
+      messengerPreamble: 'Держи ключ доступа. Вставь ссылку в своё приложение для подключения:',
       profileName: profileName,
     );
   }

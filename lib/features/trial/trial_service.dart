@@ -1,18 +1,29 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:hiddify/features/diagnostics/diagnostics_service.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Zero-config trial: при первом запуске автоматически создаёт trial-подписку
 /// на 7 дней через `POST /api/trial` (pixellnet-api). Юзер не вводит ссылку.
 ///
-/// Backend: `https://pixellnet.com/api/trial` — идемпотентен по device_id,
-/// повторный вызов с тем же device_id возвращает существующую подписку.
+/// Backend: `https://pixellnet.com/api/trial`. Сервер ищет пробный период по
+/// `install_id` (случайный UUID, создаётся один раз при первом обращении и лежит
+/// в SharedPreferences): повторный вызов с тем же `install_id` возвращает
+/// существующую подписку. Защиту от повторных пробных периодов на одном
+/// устройстве ведёт по `hw_id` (хеш Android ID / machine GUID Windows).
+///
+/// Поле `device_id` оставлено только для совместимости со старым сервером:
+/// на Android это sha256 от `Build.ID`, одинаковый у всех телефонов одной
+/// прошивки, поэтому опираться на него одного нельзя. Старый сервер лишние
+/// поля игнорирует.
 ///
 /// URL стабильный: при переходе trial → paid ссылка НЕ меняется.
 class TrialService {
@@ -24,6 +35,76 @@ class TrialService {
   static const _kPrefExpiresAt = 'pixellnet.trial.expires_at';
   static const _kPrefTrialId = 'pixellnet.trial.id';
   static const _kPrefDeviceId = 'pixellnet.device.id_hash';
+  static const _kPrefInstallId = 'pixellnet.install_id';
+
+  static const _platformChannel = MethodChannel('com.hiddify.app/platform');
+
+  /// Случайный UUID v4 этой установки. Создаётся один раз и хранится в
+  /// SharedPreferences. Без пакета uuid: 16 байт из Random.secure().
+  Future<String> _installId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cached = prefs.getString(_kPrefInstallId);
+    if (cached != null && cached.isNotEmpty) return cached;
+
+    final rnd = Random.secure();
+    final b = List<int>.generate(16, (_) => rnd.nextInt(256));
+    b[6] = (b[6] & 0x0f) | 0x40; // версия 4
+    b[8] = (b[8] & 0x3f) | 0x80; // вариант RFC 4122
+    String h(int from, int to) => b.sublist(from, to).map((x) => x.toRadixString(16).padLeft(2, '0')).join();
+    final id = '${h(0, 4)}-${h(4, 6)}-${h(6, 8)}-${h(8, 10)}-${h(10, 16)}';
+    await prefs.setString(_kPrefInstallId, id);
+    return id;
+  }
+
+  /// sha256 от аппаратного идентификатора: Android — Settings.Secure.ANDROID_ID
+  /// (через нативный метод `getAndroidId`), Windows — machine GUID (тот же
+  /// исходник, что и у `device_id`). null, если получить не удалось: тогда
+  /// поле `hw_id` в запрос не кладём.
+  Future<String?> _hwIdHash() async {
+    try {
+      String? raw;
+      if (Platform.isAndroid) {
+        raw = await _platformChannel.invokeMethod<String>('getAndroidId').timeout(const Duration(seconds: 3));
+      } else if (Platform.isWindows) {
+        raw = (await DeviceInfoPlugin().windowsInfo).deviceId;
+      }
+      if (raw == null || raw.trim().isEmpty) return null;
+      return sha256.convert(utf8.encode(raw)).toString();
+    } catch (e) {
+      if (kDebugMode) debugPrint('[TrialService] hw_id unavailable: $e');
+      return null;
+    }
+  }
+
+  Future<String> _deviceModel() async {
+    try {
+      if (Platform.isAndroid) {
+        final model = (await DeviceInfoPlugin().androidInfo).model;
+        if (model.trim().isNotEmpty) return model;
+      }
+    } catch (_) {}
+    return Platform.operatingSystem;
+  }
+
+  Future<String> _appVersion() async {
+    try {
+      return (await PackageInfo.fromPlatform()).version;
+    } catch (_) {
+      return '';
+    }
+  }
+
+  /// Поля, которые идут в тело `POST /api/trial` вместе с `device_id`.
+  Future<Map<String, dynamic>> _identityFields() async {
+    final hwId = await _hwIdHash();
+    return {
+      'install_id': await _installId(),
+      if (hwId != null) 'hw_id': hwId,
+      'os': Platform.operatingSystem, // android | windows | ios | ...
+      'app_version': await _appVersion(),
+      'device_model': await _deviceModel(),
+    };
+  }
 
   /// SHA-256 от стабильного device id (Android ID / Windows machine GUID).
   /// Хранится в SharedPreferences после первой генерации — чтобы фактори-ресет
@@ -84,7 +165,10 @@ class TrialService {
         .post(
           Uri.parse('$_apiBase/trial'),
           headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'device_id': deviceId}),
+          body: jsonEncode({
+            'device_id': deviceId, // старый сервер: только это поле
+            ...await _identityFields(),
+          }),
         )
         .timeout(const Duration(seconds: 15));
 
@@ -135,8 +219,9 @@ class TrialService {
   Future<TrialStatus?> checkStatus() async {
     try {
       final deviceId = await _deviceIdHash();
+      final installId = await _installId();
       final resp = await http
-          .get(Uri.parse('$_apiBase/trial/status?device_id=$deviceId'))
+          .get(Uri.parse('$_apiBase/trial/status?device_id=$deviceId&install_id=$installId'))
           .timeout(const Duration(seconds: 10));
       if (resp.statusCode != 200) return null;
       final data = jsonDecode(resp.body) as Map<String, dynamic>;

@@ -6,11 +6,9 @@ import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
-import 'package:hiddify/features/settings/data/config_option_repository.dart';
 import 'package:hiddify/features/window/notifier/window_notifier.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
-import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tray_manager/tray_manager.dart';
@@ -47,14 +45,14 @@ class SystemTrayNotifier extends _$SystemTrayNotifier with TrayListener, AppLogg
           return const ConnectionStatus.disconnected();
         })
         .then((connection) => _modifyConnectionStatus(connection, urlTestDelay));
-    final serviceMode = ref.watch(ConfigOptions.serviceMode);
 
     await trayManager.setIcon(_trayIconPath(connection), isTemplate: PlatformUtils.isMacOS);
     if (!PlatformUtils.isLinux) await trayManager.setToolTip(_trayTooltip(connection, urlTestDelay, t));
-    await trayManager.setContextMenu(_trayMenu(connection, serviceMode, t));
+    await trayManager.setContextMenu(_trayMenu(connection, t));
   }
 
-  Menu _trayMenu(ConnectionStatus connection, ServiceMode serviceMode, Translations t) => Menu(
+  // 0.1.105: подменю «Режим службы» убрано (Р0.2) — режим один, «Все приложения».
+  Menu _trayMenu(ConnectionStatus connection, Translations t) => Menu(
     items: [
       if (PlatformUtils.isLinux) ...[MenuItem(key: 'dashboard', label: t.common.dashboard), MenuItem.separator()],
       MenuItem(
@@ -66,17 +64,6 @@ class SystemTrayNotifier extends _$SystemTrayNotifier with TrayListener, AppLogg
           Disconnecting() => t.connection.disconnecting,
         },
         disabled: connection.isSwitching,
-      ),
-      MenuItem.submenu(
-        label: t.pages.settings.inbound.serviceMode,
-        icon: Assets.images.trayIconIco,
-        submenu: Menu(
-          items: [
-            ...ServiceMode.values.map(
-              (e) => MenuItem.checkbox(checked: e == serviceMode, key: e.name, label: e.present(t)),
-            ),
-          ],
-        ),
       ),
       MenuItem.separator(),
       MenuItem(key: 'quit', label: t.common.quit),
@@ -134,10 +121,6 @@ class SystemTrayNotifier extends _$SystemTrayNotifier with TrayListener, AppLogg
       await ref.read(connectionNotifierProvider.notifier).toggleConnection();
     } else if (menuItem.key == 'quit') {
       await ref.read(windowNotifierProvider.notifier).exit();
-    } else {
-      final newMode = ServiceMode.values.byName(menuItem.key!);
-      loggy.debug("switching service mode: [$newMode]");
-      await ref.read(ConfigOptions.serviceMode.notifier).update(newMode);
     }
   }
 

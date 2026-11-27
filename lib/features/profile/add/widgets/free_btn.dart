@@ -16,7 +16,8 @@ class FreeBtn extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
     final locale = ref.watch(localePreferencesProvider);
-    final isFa = locale.name == AppLocale.fa.name;
+    // Остались только ru и en (0.1.105): персидского перевода больше нет.
+    final isFa = locale.name == 'fa';
     final theme = Theme.of(context);
     final borderRadius = BorderRadius.circular(18);
 
