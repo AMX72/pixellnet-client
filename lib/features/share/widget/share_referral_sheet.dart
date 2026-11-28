@@ -5,8 +5,9 @@ import 'package:hiddify/features/common/qr_code_dialog.dart';
 import 'package:hiddify/features/share/data/referral_api_service.dart';
 import 'package:share_plus/share_plus.dart';
 
-/// Реферальный share sheet — «Пригласить друга». Бонуса пригласившему нет (0.1.105):
-/// код приглашения пока нигде не применяется, поэтому экран обещает только 7 дней другу.
+/// Реферальный share sheet — «Пригласить друга и получить бонус».
+/// Обещание бонуса пригласившему, значок «+N дн» и счётчик возвращены как в 0.1.104 (решение владельца Р-21, 28.11);
+/// систему бонусов владелец поставил в план отдельной работой (В9.23).
 /// v0.1.46+: тянет real ref-код из /api/referral/my через ReferralApiService.
 /// Fallback: если API недоступен — детерминистичный код из имени профиля.
 class ShareReferralSheet extends StatefulWidget {
@@ -89,6 +90,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
     }
 
     final profile = _profile!;
+    final hasBonus = profile.bonusDaysEarned > 0 || profile.referralsConfirmed > 0;
 
     return SafeArea(
       top: false,
@@ -114,7 +116,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
             const SizedBox(height: 16),
             Center(
               child: Text(
-                'Подарите другу 7 дней',
+                'Дарите 7 дней — получайте 7 дней',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
@@ -122,7 +124,8 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
             const SizedBox(height: 8),
             Center(
               child: Text(
-                'Друг переходит по вашей ссылке и получает 7 дней бесплатно.',
+                'Друг переходит по вашей ссылке и получает 7 дней бесплатно. '
+                'Как только он оплатит подписку — вы тоже получаете 7 дней бесплатно.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -158,6 +161,24 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
                           letterSpacing: 1,
                         ),
                       ),
+                      if (hasBonus) ...[
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: PixellnetBrand.olive.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '+${profile.bonusDaysEarned} дн',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: PixellnetBrand.olive,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -170,6 +191,16 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
                       fontSize: 12,
                     ),
                   ),
+                  if (profile.referralsConfirmed > 0 || profile.referralsPending > 0) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Подтверждено: ${profile.referralsConfirmed} · ждём оплату: ${profile.referralsPending}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

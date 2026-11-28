@@ -59,7 +59,7 @@ class ShareBottomSheet extends StatelessWidget {
               iconColor: PixellnetBrand.mochaOnDark,
               iconBg: PixellnetBrand.mocha.withOpacity(0.12),
               title: 'Ключ для другого приложения',
-              subtitle: 'Если у друга уже есть приложение для подключения — отправьте только ключ',
+              subtitle: 'Если у друга уже стоит Happ, V2rayNG — отправьте только ключ',
               onTap: () {
                 Navigator.of(context).pop();
                 _openShareForExternal(context);
@@ -83,8 +83,8 @@ class ShareBottomSheet extends StatelessWidget {
               icon: Icons.card_giftcard_outlined,
               iconColor: PixellnetBrand.olive,
               iconBg: PixellnetBrand.olive.withOpacity(0.14),
-              title: 'Пригласить друга',
-              subtitle: 'Другу — 7 дней бесплатно',
+              title: 'Пригласить друга и получить бонус',
+              subtitle: 'За каждого друга — 7 дней бесплатно вам обоим',
               onTap: () {
                 Navigator.of(context).pop();
                 ShareReferralSheet.show(context, profileName: profileName);

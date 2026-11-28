@@ -23,8 +23,8 @@ import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:installed_apps/index.dart';
 
-/// Показывать «Автовыбор» и «Поделиться со всеми» (списки Android-GFW-Apps). Скрыто в 0.1.105 (Р0.3).
-const bool _kShowAutoSelection = false;
+/// Показывать «Автовыбор» и «Поделиться со всеми» (списки Android-GFW-Apps). Скрыто в 0.1.105, возвращено в 0.1.106 (Р-21, 28.11).
+const bool _kShowAutoSelection = true;
 
 class PerAppProxyPage extends HookConsumerWidget with PresLogger {
   const PerAppProxyPage({super.key});

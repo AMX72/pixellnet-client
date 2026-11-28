@@ -23,8 +23,8 @@ enum ConfigOptionSection {
   };
 }
 
-/// Показывать расширенные разделы настроек. Выключено в 0.1.105 (Р0.3).
-const bool _kShowAdvancedSections = false;
+/// Показывать расширенные разделы настроек. Выключено в 0.1.105, возвращено в 0.1.106 (Р-21, 28.11).
+const bool _kShowAdvancedSections = true;
 
 class SettingsPage extends HookConsumerWidget {
   SettingsPage({super.key, String? section})

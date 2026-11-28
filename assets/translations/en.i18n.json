@@ -23,7 +23,7 @@
     "addToClipboard": "Add to clipboard",
     "scanQr": "Scan QR",
     "free": "Free",
-    "warp": "Extra service 1",
+    "warp": "WARP",
     "fragment": "Fragment",
     "help": "Help",
     "save": "Save",
@@ -51,7 +51,7 @@
     "sort": "Sort",
     "dashboard": "Dashboard",
     "disable": "Disable",
-    "psiphon": "Extra service 2",
+    "psiphon": "Psiphon",
     "profile": "Profile",
     "configuration": "Configuration",
     "file": "File",
@@ -100,6 +100,7 @@
   "pages": {
     "home": {
       "title": "Home",
+      "mode": "Mode",
       "key": "Key",
       "autoConnect": "Auto-connect on startup",
       "language": "Language",
@@ -501,7 +502,7 @@
           }
         },
         "warp": {
-          "missingConfig": "Missing extra service 1 config",
+          "missingConfig": "Missing WARP config",
           "licenseKey": "License key",
           "cleanIp": "Clean IP",
           "port": "Port",
@@ -593,12 +594,12 @@
       }
     },
     "warpLicense": {
-      "title": "License of an additional service",
+      "title": "Cloudflare WARP consent",
       "description(rich)": "By enabling this option you agree to the provider's ${tos(Terms of service)} and ${privacy(Privacy policy)}."
     },
     "psiphonLicense": {
-      "title": "License of an additional service",
-      "description(rich)": "By using this option, you agree to the provider's ${tos(Terms of Service)} and acknowledge the ${privacy(Privacy Policy)}. Please read them carefully before proceeding."
+      "title": "Psiphon License Agreement",
+      "description(rich)": "By using Psiphon, you agree to the ${tos(Terms of Service)} and acknowledge the ${privacy(Privacy Policy)}. Please read them carefully before proceeding."
     },
     "newVersion": {
       "title": "Update available",
@@ -728,12 +729,12 @@
       "invalidConfig": "Invalid configuration"
     },
     "warp": {
-      "missingLicense": "Could not accept the license of an additional service",
-      "missingLicenseMsg": "The selected profile uses an additional service; its license must be accepted first"
+      "missingLicense": "Warp license required",
+      "missingLicenseMsg": "The selected profile uses the WARP feature; to use this feature, the WARP license must be agreed to"
     },
     "psiphon": {
-      "missingLicense": "Could not accept the license of an additional service",
-      "missingLicenseMsg": "The selected profile uses an additional service; its license must be accepted first"
+      "missingLicense": "Psiphon license required",
+      "missingLicenseMsg": "The selected profile uses the Psiphon feature; to use this feature, the Psiphon license must be agreed to"
     }
   }
 }

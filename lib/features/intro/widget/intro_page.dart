@@ -20,8 +20,8 @@ import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hiddify/utils/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-/// Показывать выбор региона на первом экране. Выключено в 0.1.105: регион определяется сам.
-const bool _kShowRegionChoice = false;
+/// Показывать выбор региона на первом экране. Скрыто в 0.1.105, возвращено в 0.1.106 (Р-21, 28.11).
+const bool _kShowRegionChoice = true;
 
 class IntroPage extends HookConsumerWidget with PresLogger {
   const IntroPage({super.key});
