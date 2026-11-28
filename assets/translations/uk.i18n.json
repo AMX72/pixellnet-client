@@ -1,11 +1,111 @@
 {
+  "common": {
+    "appTitle": "PIXELLNET",
+    "start": "Почати",
+    "version": "Версія",
+    "ok": "OK",
+    "cancel": "Скасувати",
+    "kContinue": "Продовжити",
+    "showMore": "Показати більше",
+    "showLess": "Показати менше",
+    "filter": "Фільтр",
+    "all": "Усі",
+    "pause": "Пауза",
+    "resume": "Відновити",
+    "clear": "Очистити",
+    "close": "Закрити",
+    "auto": "Авто",
+    "manually": "Вручну",
+    "name": "Назва",
+    "url": "URL",
+    "add": "Додати",
+    "clipboard": "Буфер обміну",
+    "addToClipboard": "Копіювати в буфер обміну",
+    "scanQr": "Сканувати QR",
+    "free": "Безкоштовно",
+    "warp": "WARP",
+    "fragment": "Фрагмент",
+    "help": "Довідка",
+    "save": "Зберегти",
+    "update": "Оновити",
+    "share": "Поділитися",
+    "edit": "Змінити",
+    "delete": "Видалити",
+    "discard": "Не зберігати",
+    "import": "Імпорт",
+    "export": "Експорт",
+    "later": "Пізніше",
+    "ignore": "Ігнорувати",
+    "quit": "Вихід",
+    "notSet": "Не задано",
+    "hide": "Приховати",
+    "exit": "Вийти",
+    "reset": "Скинути",
+    "done": "Готово",
+    "decline": "Відхилити",
+    "agree": "Погоджуюся",
+    "empty": "Порожньо",
+    "unknown": "Невідомо",
+    "hidden": "Прихований",
+    "timeout": "Тайм-аут",
+    "sort": "Сортувати",
+    "dashboard": "Панель керування",
+    "disable": "Вимкнути",
+    "psiphon": "Дод. сервіс 2",
+    "profile": "Профіль",
+    "configuration": "Конфігурація",
+    "file": "Файл",
+    "interval": {
+      "day": {
+        "one": "$n день",
+        "other": "$n дня",
+        "few": "$n дні",
+        "many": "$n днів"
+      },
+      "hour": {
+        "one": "$n година",
+        "other": "$n години",
+        "few": "$n години",
+        "many": "$n годин"
+      }
+    },
+    "msg": {
+      "permission": {
+        "denied": "Доступ заборонено"
+      },
+      "export": {
+        "clipboard": {
+          "success": "Скопійовано в буфер обміну",
+          "failure": "Не вдалося скопіювати в буфер обміну",
+          "contentTooLarge": "Завеликий обсяг. Експортуйте у файл"
+        },
+        "file": {
+          "success": "Файл JSON створено",
+          "failure": "Не вдалося створити файл"
+        }
+      },
+      "import": {
+        "confirm": "Підтвердити імпорт",
+        "success": "Імпорт виконано",
+        "failure": "Не вдалося імпортувати"
+      },
+      "autoSave": {
+        "success": "Зміни збережено автоматично"
+      }
+    }
+  },
+  "intro": {
+    "banner": "Стабільний зв'язок однією кнопкою",
+    "termsAndPolicyCaution(rich)": "Продовжуючи, ви приймаєте ${tap(@:pages.about.termsAndConditions)}",
+    "info(rich)": "Створено командою PIXELLNET - ${tap_source(Відкритий вихідний код)} (${tap_license(Ліцензія)})"
+  },
   "pages": {
     "home": {
       "title": "Головна",
-      "server": "Сервер",
-      "protocol": "Протокол",
       "mode": "Режим",
-      "vpnTun": "VPN (TUN)",
+      "channelWorking": "Працює",
+      "channelNotResponding": "Не відповідає",
+      "channelChecking": "Перевіряємо зв'язок…",
       "key": "Ключ",
       "autoConnect": "Автопідключення при запуску",
       "language": "Мова",
@@ -15,18 +115,951 @@
       "cancel": "Скасувати",
       "support": "Підтримка",
       "languageTitle": "Мова інтерфейсу",
-      "copied": "Скопійовано",
-      "serverSoon": "Список серверів — незабаром",
-      "protocolSoon": "Вибір протоколу — незабаром",
-      "modeSoon": "VPN (TUN) · Системний проксі — незабаром",
-      "developerSoon": "Журнали, DNS, MTU, експорт — незабаром"
+      "copied": "Скопійовано"
+    },
+    "proxies": {
+      "title": "Канали",
+      "sort": "Сортувати канали",
+      "testDelay": "Перевірити затримку",
+      "empty": "Каналів поки немає",
+      "activeProxy": "Поточний канал",
+      "unknownIp": "Невідомий IP",
+      "sortOptions": {
+        "unsorted": "За замовчуванням",
+        "name": "За абеткою",
+        "delay": "За затримкою",
+        "usage": "За використанням"
+      },
+      "ipInfo": {
+        "address": "IP-адреса",
+        "country": "Країна",
+        "organization": "Організація"
+      },
+      "delay": {
+        "result": "Затримка: ${delay} мс",
+        "timeout": "Тайм-аут перевірки затримки",
+        "testing": "Затримка: перевірка..."
+      }
+    },
+    "profiles": {
+      "title": "Ключі",
+      "add": "Додати ключ",
+      "update": "Оновити ключ",
+      "viewAllProfiles": "Переглянути всі профілі",
+      "activeProfileName": "Назва активного профілю: «${name}».",
+      "nonActiveProfileName": "Вибрати «${name}» як активний профіль",
+      "freeSubNotFound": "Безкоштовну підписку не знайдено",
+      "freeSubNotFoundForRegion": "Безкоштовну підписку для регіону «${region}» не знайдено",
+      "failedToLoad": "Не вдалося завантажити",
+      "updateSubscriptions": "Оновити підписки",
+      "share": {
+        "urlToClipboard": "URL у буфер обміну",
+        "showUrlQr": "Показати QR-код URL",
+        "jsonToClipboard": "JSON у буфер обміну"
+      },
+      "msg": {
+        "save": {
+          "success": "Профіль збережено"
+        },
+        "invalidUrl": "Неправильний URL",
+        "add": {
+          "failure": "Не вдалося додати профіль"
+        },
+        "update": {
+          "success": "Профіль оновлено",
+          "successNamed": "«${name}» оновлено",
+          "failure": "Не вдалося оновити профіль",
+          "failureNamed": "Не вдалося оновити «${name}»"
+        },
+        "delete": {
+          "success": "Профіль видалено"
+        }
+      }
+    },
+    "profileDetails": {
+      "title": "Профіль",
+      "lastUpdate": "Останнє оновлення",
+      "form": {
+        "nameHint": "Назва профілю",
+        "emptyName": "Назва обов'язкова",
+        "invalidUrl": "Неправильний URL",
+        "urlHint": "Повний URL конфігурації",
+        "disableAutoUpdate": "Вимкнути автооновлення",
+        "autoUpdateInterval": "Інтервал автооновлення",
+        "loading": "Додаємо профіль..."
+      }
+    },
+    "logs": {
+      "title": "Журнал",
+      "shareCoreLogs": "Поділитися журналом ядра",
+      "shareAppLogs": "Поділитися журналом застосунку"
+    },
+    "about": {
+      "title": "Про програму",
+      "tagline": "Стабільний зв'язок однією кнопкою. Незабаром — ШІ-помічник і розширення.",
+      "notAvailableMsg": "Версія актуальна — новішої поки немає",
+      "checkForUpdate": "Перевірити оновлення",
+      "openWorkingDir": "Відкрити робочу папку",
+      "sourceCode": "Вихідний код",
+      "telegramChannel": "Канал у Telegram",
+      "termsAndConditions": "Умови використання",
+      "privacyPolicy": "Політика конфіденційності"
+    },
+    "settings": {
+      "title": "Налаштування",
+      "resetTunnel": "Скинути з'єднання",
+      "options": {
+        "import": {
+          "clipboard": "Імпортувати налаштування з буфера обміну",
+          "file": "Імпортувати налаштування з файлу"
+        },
+        "export": {
+          "anonymousToClipboard": "Копіювати налаштування без особистих даних",
+          "anonymousToFile": "Зберегти у файл без особистих даних",
+          "allToClipboard": "Копіювати всі налаштування в буфер обміну",
+          "allToFile": "Експортувати всі налаштування у файл"
+        },
+        "reset": "Скинути налаштування"
+      },
+      "general": {
+        "title": "Загальні",
+        "locale": "Мова",
+        "themeMode": "Тема оформлення",
+        "themeModes": {
+          "system": "Системна",
+          "dark": "Темна",
+          "light": "Світла",
+          "black": "Чорна"
+        },
+        "enableAnalytics": "Повідомляти про збої",
+        "enableAnalyticsMsg": "Якщо щось піде не так, застосунок зможе надіслати нам короткий звіт — так ми швидше все виправимо. Без ваших особистих даних. Нікому не передаємо.",
+        "autoIpCheck": "Автоматично перевіряти IP-адресу",
+        "dynamicNotification": "Показувати швидкість у сповіщенні",
+        "hapticFeedback": "Тактильний відгук",
+        "actionAtClosing": "Дія під час закриття",
+        "autoStart": "Запускати під час входу в систему",
+        "silentStart": "Запускати згорнутим",
+        "ignoreBatteryOptimizations": "Вимкнути оптимізацію батареї",
+        "ignoreBatteryOptimizationsMsg": "Щоб телефон не закривав PIXELLNET",
+        "memoryLimit": "Обмеження пам'яті",
+        "memoryLimitMsg": "Увімкніть, якщо застосунку бракує пам'яті або він часто дає збої",
+        "debugMode": "Режим налагодження",
+        "debugModeMsg": "Перезапустіть застосунок, щоб зміна набула чинності",
+        "logLevel": "Рівень журналювання",
+        "connectionTestUrl": "URL для перевірки з'єднання",
+        "urlTestInterval": "Інтервал перевірки URL",
+        "clashApiPort": "Порт Clash API",
+        "useXrayCoreWhenPossible": "Запасний формат ключа",
+        "useXrayCoreWhenPossibleMsg": "Щоб увімкнути, додайте ключ заново."
+      },
+      "routing": {
+        "title": "Маршрутизація",
+        "routeRule": {
+          "empty": "Правил поки немає\n\nНатисніть кнопку +, щоб створити нове правило або вибрати з готових",
+          "delete": "Видалити правило",
+          "create": "Створити нове правило",
+          "options": {
+            "import": {
+              "clipboard": "Імпортувати правила з буфера обміну",
+              "file": "Імпортувати правила з файлу"
+            },
+            "export": {
+              "clipboard": "Копіювати правила в буфер обміну",
+              "file": "Зберегти правила у файл"
+            },
+            "reset": "Скинути правила"
+          },
+          "rule": {
+            "title": "Правило",
+            "onlyTunMode": "Працює лише в режимі «Усі застосунки»",
+            "notAvailabeInThisPlatform": "Недоступно на цій платформі",
+            "canNotBeEmpty": "Не може бути порожнім",
+            "validUrlEx": "https://example.com",
+            "validUrl": "Коректний «URL», наприклад\n@:pages.settings.routing.routeRule.rule.validUrlEx",
+            "validProcessNameEx": "Chrome.exe або google chrome або chrome",
+            "validProcessName": "Коректна «Назва процесу», наприклад\n@:pages.settings.routing.routeRule.rule.validProcessNameEx",
+            "validProcessPathEx": "C:\\Pro...\\chrome.exe\n/App.../Google Chrome\n/usr/lib.../chrome",
+            "validProcessPath": "Коректний «Шлях до процесу», наприклад\n@:pages.settings.routing.routeRule.rule.validProcessPathEx",
+            "validPortRangeEx": "80 або 1:65000",
+            "validPortRange": "Коректний «Порт» або «Діапазон портів», наприклад\n@:pages.settings.routing.routeRule.rule.validPortRangeEx",
+            "validIpCidrEx": "8.8.8.8 або 10.0.0.0/24",
+            "validIpCidr": "Коректний IP CIDR, наприклад\n@:pages.settings.routing.routeRule.rule.validIpCidrEx",
+            "validDomainEx": "Google.com або dl.google.com",
+            "validDomain": "Коректний «Домен», наприклад\n@:pages.settings.routing.routeRule.rule.validDomainEx",
+            "validDomainSuffixEx": ".com або .ua",
+            "validDomainSuffix": "Коректний «Суфікс домену», наприклад\n@:pages.settings.routing.routeRule.rule.validDomainSuffixEx",
+            "tileTitle(map)": {
+              "name": "Назва",
+              "outbound": "Вихідне з'єднання в разі збігу",
+              "rule_set": "URL набору правил",
+              "package_name": "Назви пакетів",
+              "process_name": "Назви процесів",
+              "process_path": "Шляхи до процесів",
+              "network": "Мережі",
+              "port_range": "Порти призначення",
+              "source_port_range": "Порти джерела",
+              "protocol": "Протокол",
+              "ip_cidr": "IP CIDR призначення",
+              "source_ip_cidr": "IP CIDR джерела",
+              "domain": "Домен",
+              "domain_suffixe": "Суфікс домену",
+              "domain_keyword": "Ключове слово домену",
+              "domain_regex": "Регулярний вираз домену"
+            },
+            "outbound(map)": {
+              "proxy": "Через PIXELLNET",
+              "direct": "Напряму",
+              "direct_with_fragment": "Напряму з фрагментацією",
+              "block": "Заборонити"
+            },
+            "network(map)": {
+              "all": "Усі",
+              "tcp": "TCP",
+              "udp": "UDP"
+            },
+            "protocol(map)": {
+              "": "Усі",
+              "tls": "TLS",
+              "http": "HTTP",
+              "quic": "QUIC",
+              "stun": "STUN",
+              "dns": "DNS",
+              "bittorrent": "BitTorrent"
+            }
+          },
+          "genericList": {
+            "addNew": "Додати нове значення",
+            "update": "Оновити значення",
+            "clearList": "Очистити список",
+            "clearListMsg": "Усі елементи видалено"
+          }
+        },
+        "generalOptions": {
+          "title": "Загальні параметри маршрутизації",
+          "region": "Регіон",
+          "regions": {
+            "ir": "Іран (ir)",
+            "cn": "Китай (cn)",
+            "ru": "Росія (ru)",
+            "af": "Афганістан (af)",
+            "id": "Індонезія (id)",
+            "tr": "Туреччина (tr)",
+            "br": "Бразилія (br)",
+            "other": "Інший"
+          },
+          "balancerStrategy": {
+            "title": "Стратегія балансування",
+            "roundRobin": "Round robin",
+            "consistentHash": "Consistent hash",
+            "stickySession": "Sticky session"
+          },
+          "resolveDestination": "Визначати адресу призначення",
+          "ipv6Route": "Маршрут IPv6",
+          "ipv6Modes": {
+            "disable": "Вимкнути",
+            "enable": "Увімкнути",
+            "prefer": "Переважно",
+            "only": "Лише"
+          },
+          "perAppProxy": {
+            "title": "Вимкнути для застосунків",
+            "hideSysApps": "Приховати системні застосунки",
+            "options": {
+              "import": {
+                "clipboard": "Імпортувати вибір з буфера обміну",
+                "file": "Імпортувати вибір з файлу",
+                "msg": "Імпорт замінить ваш поточний вибір. Ви впевнені, що хочете продовжити?"
+              },
+              "export": {
+                "clipboard": "Копіювати вибір у буфер обміну",
+                "file": "Експортувати вибір у файл"
+              },
+              "shareToAll": "Поділитися з усіма",
+              "clearAllSelections": "Очистити весь вибір"
+            },
+            "modes": {
+              "all": "Усі",
+              "proxy": "Лише позначені",
+              "bypass": "Крім позначених",
+              "allMsg": "Усі застосунки через PIXELLNET",
+              "proxyMsg": "Через PIXELLNET — лише позначені",
+              "bypassMsg": "Позначені — напряму, без PIXELLNET"
+            },
+            "autoSelection": {
+              "title": "Автовибір",
+              "performNow": "Виконати зараз",
+              "resetToDefault": "Скинути до стандартних",
+              "autoUpdateInterval": "Інтервал автооновлення",
+              "toast": {
+                "success": "Автовибір застосунків завершено",
+                "failure": "Помилка автовибору",
+                "regionNotFound": "Автовибір для регіону «${region}» не знайдено",
+                "alreadyInAuto": "Ваш вибір уже є в списку автовибору"
+              },
+              "dialog": {
+                "title": "Автовибір застосунків",
+                "msg": "Автовибір застосунків вимкнено: регіон змінився на «${region}»"
+              }
+            }
+          }
+        },
+        "predefinedRules": {
+          "title": "Готові правила",
+          "ads": {
+            "name": "Прибрати рекламу",
+            "description": ""
+          },
+          "bypassLan": {
+            "name": "Домашня мережа — напряму",
+            "description": ""
+          }
+        }
+      },
+      "dns": {
+        "title": "DNS",
+        "remoteDns": "Віддалений DNS",
+        "remoteDnsDomainStrategy": "Стратегія домену віддаленого DNS",
+        "directDns": "DNS для вихідного сервера (напряму)",
+        "directDnsDomainStrategy": "Стратегія вихідного домену",
+        "enableFakeDns": "Увімкнути фіктивний DNS",
+        "domainStrategy": {
+          "auto": "Авто",
+          "preferIpv6": "Переважно IPv6",
+          "preferIpv4": "Переважно IPv4",
+          "ipv4Only": "Лише IPv4",
+          "ipv6Only": "Лише IPv6"
+        }
+      },
+      "inbound": {
+        "title": "Вхідні",
+        "serviceMode": "Режим роботи",
+        "serviceModes": {
+          "proxy": "Лише локальний порт",
+          "systemProxy": "Системні налаштування",
+          "tun": "Усі застосунки"
+        },
+        "shortServiceModes": {
+          "proxy": "Локальний порт",
+          "systemProxy": "Системні",
+          "tun": "Усі застосунки"
+        },
+        "strictRoute": "Сувора маршрутизація",
+        "tunImplementation": "Реалізація TUN",
+        "tunImplementations": {
+          "mixed": "Змішана",
+          "system": "Системна",
+          "gvisor": "gVisor"
+        },
+        "mixedPort": "Змішаний порт",
+        "tproxyPort": "Порт прозорого режиму",
+        "directPort": "Порт прямого з'єднання",
+        "redirectPort": "Порт перенаправлення",
+        "lanSharing": "Доступ для інших пристроїв у мережі",
+        "lanSharingPasswordNotSet": "Пароль не встановлено",
+        "lanSharingPassword": "Пароль для інших пристроїв",
+        "copyLink": "Копіювати посилання",
+        "qrCode": "QR-код",
+        "lanIPError": "Не вдалося отримати локальну IP-адресу"
+      },
+      "tlsTricks": {
+        "title": "Трюки TLS",
+        "enable": "Увімкнути фрагментацію",
+        "packets": "Пакети фрагментації",
+        "packetsTlsHello": "TLS Hello",
+        "packets1_1": "1-1",
+        "packets1_2": "1-2",
+        "packets1_3": "1-3",
+        "packets1_4": "1-4",
+        "packets1_5": "1-5",
+        "size": "Розмір фрагмента",
+        "sleep": "Затримка фрагмента",
+        "mixedSniCase": {
+          "enable": "Увімкнути змішаний регістр SNI"
+        },
+        "padding": {
+          "enable": "Увімкнути доповнення",
+          "size": "Розмір доповнення"
+        }
+      },
+      "chain": {
+        "title": "Ланцюг",
+        "subtitle": "Додатковий захист і запасний шлях",
+        "finalIp": "Кінцевий IP",
+        "levels": {
+          "app": {
+            "title": "Застосунок",
+            "msg": "Тут починається шлях трафіку ваших застосунків"
+          },
+          "extraSecurity": {
+            "title": "Додаткова безпека",
+            "msg": "Додає ще один рівень захисту, щоб ваші дані залишалися приватними, навіть якщо основному профілю не можна довіряти"
+          },
+          "mainProfile": {
+            "title": "Основний профіль"
+          },
+          "unblocker": {
+            "title": "Запасний шлях",
+            "msg": "Якщо основний канал не відповідає, зв'язок піде запасним шляхом"
+          },
+          "filtering": {
+            "title": "Фільтрація",
+            "msg": "Останній крок: трафік виходить в інтернет"
+          }
+        },
+        "warp": {
+          "missingConfig": "Немає конфігурації WARP",
+          "licenseKey": "Ліцензійний ключ",
+          "cleanIp": "Чистий IP",
+          "port": "Порт",
+          "noise": {
+            "count": "Кількість шуму",
+            "mode": "Режим шуму",
+            "size": "Розмір шуму",
+            "delay": "Затримка шуму"
+          }
+        },
+        "psiphon": {
+          "selectServerRegion": "Виберіть регіон сервера",
+          "regions": {
+            "auto": "@:common.auto",
+            "at": "Австрія (at)",
+            "au": "Австралія (au)",
+            "be": "Бельгія (be)",
+            "bg": "Болгарія (bg)",
+            "ca": "Канада (ca)",
+            "ch": "Швейцарія (ch)",
+            "cz": "Чехія (cz)",
+            "de": "Німеччина (de)",
+            "dk": "Данія (dk)",
+            "ee": "Естонія (ee)",
+            "es": "Іспанія (es)",
+            "fi": "Фінляндія (fi)",
+            "fr": "Франція (fr)",
+            "gb": "Велика Британія (gb)",
+            "hr": "Хорватія (hr)",
+            "hu": "Угорщина (hu)",
+            "ie": "Ірландія (ie)",
+            "in": "Індія (in)",
+            "it": "Італія (it)",
+            "jp": "Японія (jp)",
+            "lv": "Латвія (lv)",
+            "nl": "Нідерланди (nl)",
+            "no": "Норвегія (no)",
+            "pl": "Польща (pl)",
+            "pt": "Португалія (pt)",
+            "ro": "Румунія (ro)",
+            "rs": "Сербія (rs)",
+            "se": "Швеція (se)",
+            "sg": "Сінгапур (sg)",
+            "sk": "Словаччина (sk)",
+            "us": "США (us)"
+          }
+        },
+        "profile": {
+          "selectProfile": "Виберіть профіль",
+          "conduitPairingId": "ID сполучення Conduit"
+        }
+      }
+    }
+  },
+  "components": {
+    "stats": {
+      "connection": "З'єднання",
+      "traffic": "Трафік",
+      "trafficLive": "Поточний трафік",
+      "trafficTotal": "Загальний трафік",
+      "uplink": "Відправлення",
+      "downlink": "Отримання",
+      "speed": "Швидкість",
+      "totalTransferred": "Усього передано"
+    },
+    "subscriptionInfo": {
+      "upload": "Відправлено",
+      "download": "Отримано",
+      "total": "Усього трафіку",
+      "expireDate": "Дата закінчення",
+      "expired": "Термін минув",
+      "noTraffic": "Ліміт вичерпано",
+      "remainingTime": "Залишок часу",
+      "remainingDuration": "залишилося ${duration} дн.",
+      "remainingDurationNew": "${duration} дн.",
+      "remainingTrafficSemanticLabel": "використано ${consumed} з ${total} трафіку",
+      "remainingTraffic": "Залишок трафіку",
+      "remainingUsage": "Залишилося",
+      "profileSite": "Провайдер",
+      "profileSupport": "Підтримка"
+    }
+  },
+  "dialogs": {
+    "sortProfiles": {
+      "title": "Сортувати за",
+      "sort": {
+        "name": "За абеткою",
+        "lastUpdate": "За останнім оновленням"
+      }
+    },
+    "warpLicense": {
+      "title": "Угода про WARP від Cloudflare",
+      "description(rich)": "Вмикаючи цю опцію, ви погоджуєтеся з ${tos(Умовами обслуговування)} і ${privacy(Політикою конфіденційності)} постачальника додаткового сервісу."
+    },
+    "psiphonLicense": {
+      "title": "Ліцензія додаткового сервісу",
+      "description(rich)": "Використовуючи цю опцію, ви погоджуєтеся з ${tos(Умовами обслуговування)} і приймаєте ${privacy(Політику конфіденційності)} постачальника додаткового сервісу. Будь ласка, уважно прочитайте їх, перш ніж продовжити."
+    },
+    "newVersion": {
+      "title": "Доступне оновлення",
+      "msg": "Доступна нова версія @:common.appTitle. Бажаєте оновити зараз?",
+      "currentVersion": "Поточна версія: ",
+      "newVersion": "Нова версія: ",
+      "updateNow": "Оновити зараз"
+    },
+    "confirmation": {
+      "settings": {
+        "import": {
+          "msg": "Це перезапише всі параметри конфігурації наданими значеннями. Ви впевнені?"
+        }
+      },
+      "profile": {
+        "delete": {
+          "title": "Видалити профіль",
+          "msg": "Ви впевнені, що хочете назавжди видалити цей профіль?"
+        }
+      },
+      "perAppProxy": {
+        "shareOnGithub": {
+          "title": "Покращення автовибору",
+          "msg": "Ділячись вибраними застосунками, ви допомагаєте поповнити список «автовибору»"
+        },
+        "import": {
+          "msg": "Це замінить ваш поточний вибір застосунків. Продовжити?"
+        }
+      },
+      "routeRule": {
+        "delete": {
+          "title": "Видалити правило",
+          "msg": "Ви впевнені, що хочете видалити правило «$rulename»?"
+        }
+      },
+      "addProfileByDeepLinkWarning": {
+        "title": "Додати профіль?",
+        "message": "Зовнішнє посилання від «${host}» просить додати новий профіль. Імпортувати його?"
+      },
+      "importRouteRuleByDeepLinkWarning": {
+        "title": "Імпортувати правило маршрутизації?",
+        "message": "Імпорт правил маршрутизації з ненадійних джерел може бути небезпечним\nПродовжуйте, лише якщо довіряєте цьому посиланню"
+      }
+    },
+    "experimentalNotice": {
+      "title": "Використовуються експериментальні функції",
+      "msg": "Ви ввімкнули деякі експериментальні функції, які можуть вплинути на якість з'єднання та спричинити неочікувані помилки. Ви завжди можете змінити або скинути ці параметри на сторінці налаштувань.",
+      "disable": "Більше не показувати"
+    },
+    "noActiveProfile": {
+      "title": "Як додати ключ",
+      "msg": "Ключ доступу — це посилання або код вигляду PXN-XXXX-XXXX. Вставте його з буфера, відскануйте QR-код або введіть вручну. Немає ключа — напишіть у підтримку.",
+      "helpBtn": {
+        "label": "Написати в підтримку",
+        "url": "https://t.me/pixellnet_bot?start=support"
+      }
+    },
+    "unknownDomainsWarning": {
+      "title": "Попередження про зовнішнє посилання",
+      "youAreAboutToVisit": "Ви збираєтеся перейти на сайт:",
+      "thisWebsiteIsNotInOurTrustedList": "Цього сайту немає в нашому списку довірених. Будьте обережні."
+    },
+    "proxyInfo": {
+      "fullTag": "Повний тег:",
+      "type": "Тип:",
+      "testTime": "Час перевірки:",
+      "testDelay": "Затримка перевірки:",
+      "isSelected": "Вибрано:",
+      "isGroup": "Це група",
+      "isSecure": "Захищено:",
+      "port": "Порт:",
+      "host": "Хост:",
+      "ip": "IP:",
+      "countryCode": "Код країни:",
+      "region": "Регіон:",
+      "city": "Місто:",
+      "asn": "ASN:",
+      "organization": "Організація:",
+      "location": "Розташування:",
+      "postalCode": "Поштовий індекс:",
+      "download": "Отримано:",
+      "upload": "Відправлено:"
+    },
+    "windowClosing": {
+      "askEachTime": "Питати щоразу",
+      "alertMessage": "Приховати чи вийти із застосунку?",
+      "remember": "Запам'ятати мій вибір"
     }
   },
   "connection": {
+    "tapToConnect": "Натисніть, щоб підключити",
     "connect": "Підключити",
-    "connected": "Підключено",
     "connecting": "Підключення…",
+    "connected": "Підключено",
     "disconnect": "Відключити",
-    "tapToConnect": "Натисніть, щоб підключити"
+    "disconnecting": "Відключення…",
+    "reconnect": "Перепідключення…",
+    "reconnectMsg": "Налаштування змінилися — оновлюємо з'єднання…"
+  },
+  "errors": {
+    "unexpected": "Неочікувана помилка",
+    "connection": {
+      "unexpected": "Неочікувана помилка підключення",
+      "timeout": "Тайм-аут підключення",
+      "badResponse": "Неправильна відповідь",
+      "connectionError": "Помилка підключення",
+      "badCertificate": "Недійсний сертифікат"
+    },
+    "profiles": {
+      "unexpected": "Неочікувана помилка",
+      "notFound": "Профіль не знайдено",
+      "invalidConfig": "Неправильна конфігурація",
+      "invalidUrl": "Неправильний URL",
+      "canceledByUser": "Скасовано користувачем"
+    },
+    "connectivity": {
+      "unexpected": "Неочікуваний збій",
+      "missingVpnPermission": "Потрібен дозвіл на підключення",
+      "missingNotificationPermission": "Немає дозволу на сповіщення",
+      "core": "Помилка ядра"
+    },
+    "singbox": {
+      "serviceNotRunning": "Службу не запущено",
+      "missingPrivilege": "Немає прав",
+      "missingPrivilegeMsg": "Потрібні права адміністратора. Закрийте PIXELLNET і відкрийте знову — Windows запитає дозвіл.",
+      "invalidConfigOptions": "Неправильні параметри конфігурації",
+      "invalidConfig": "Неправильна конфігурація"
+    },
+    "warp": {
+      "missingLicense": "Немає ліцензії Warp",
+      "missingLicenseMsg": "Вибраний профіль використовує функцію WARP; щоб нею користуватися, потрібно прийняти ліцензію WARP"
+    },
+    "psiphon": {
+      "missingLicense": "Не вдалося прийняти ліцензію додаткового сервісу",
+      "missingLicenseMsg": "Вибраний профіль використовує додатковий сервіс; спершу потрібно прийняти його ліцензію"
+    }
+  },
+  "ui": {
+    "share": {
+      "appText": "PIXELLNET — стабільний зв'язок однією кнопкою. Незабаром — ШІ-помічник і розширення.\n\nЗавантажити для Android і Windows:\n$url",
+      "inviteText": "Користуюся PIXELLNET — стабільний зв'язок однією кнопкою. За моїм посиланням — 7 днів безкоштовно: $link",
+      "whatToSend": "Що надіслати?",
+      "chooseWhat": "Виберіть, що потрібно другові",
+      "keyForOtherApp": "Ключ для іншого застосунку",
+      "keyForOtherAppHint": "Якщо в друга вже встановлено Happ чи V2rayNG — надішліть лише ключ",
+      "keyForApp": "Ключ для PIXELLNET",
+      "keyForAppHint": "Відкриється одразу в застосунку PIXELLNET в одержувача",
+      "inviteTitle": "Запросити друга й отримати бонус",
+      "inviteSubtitle": "За кожного друга — 7 днів безкоштовно вам обом",
+      "otherAppSheetSubtitle": "Одержувач відкриє посилання у своєму застосунку",
+      "otherAppPreamble": "Тримай ключ доступу. Встав посилання у свій застосунок, щоб підключитися:",
+      "keyForAppSheetSubtitle": "Відкриється одразу в застосунку PIXELLNET",
+      "appPreamble": "Завантажте PIXELLNET (pixellnet.com) і відкрийте це посилання — усі канали підключаться автоматично:",
+      "recommended": "Радимо",
+      "sendViaMessenger": "Надіслати через месенджер",
+      "showQr": "Показати QR-код",
+      "linkCopied": "Посилання скопійовано",
+      "copyLink": "Скопіювати посилання",
+      "linkValidUntil": "Посилання діє до закінчення вашої підписки",
+      "referralTitle": "Даруйте 7 днів — отримуйте 7 днів",
+      "referralText": "Друг переходить за вашим посиланням і отримує 7 днів безкоштовно. Щойно він оплатить підписку — ви теж отримаєте 7 днів безкоштовно.",
+      "yourCode": "Ваш код:",
+      "bonusBadge": "+$days дн.",
+      "referralCounts": "Підтверджено: $confirmed · чекаємо на оплату: $pending",
+      "referralSubject": "PIXELLNET — 7 днів безкоштовно",
+      "sendInvite": "Надіслати запрошення",
+      "inviteLinkCopied": "Посилання-запрошення скопійовано"
+    },
+    "about": {
+      "collectDiagnostics": "Зібрати діагностику",
+      "collectDiagnosticsHint": "Дані про пристрій та інтернет і останні події — у буфер обміну",
+      "diagnosticsCopied": "Діагностику скопійовано ($count симв.)",
+      "shareApp": "Поділитися застосунком",
+      "shareAppHint": "Надіслати друзям посилання на завантаження"
+    },
+    "welcome": {
+      "title": "Ласкаво просимо",
+      "subtitle": "Стабільний доступ до закордонних сервісів",
+      "trialTitle": "Спробувати 7 днів безкоштовно",
+      "trialSubtitle": "Без картки, без реєстрації",
+      "haveKey": "У мене вже є ключ",
+      "clipboardFound": "У буфері обміну знайдено посилання",
+      "enterKeyHint": "Введіть ключ або посилання на підписку",
+      "questions": "Є питання? Напишіть "
+    },
+    "trial": {
+      "expiredTitle": "Пробний період уже\nвикористано",
+      "expiredText": "Цьому пристрою ми вже надавали 7 днів.\nЩоб продовжити — введіть платний ключ.",
+      "enterKey": "Ввести ключ",
+      "renew": "Продовжити доступ",
+      "errServer": "Сервер повернув $code. Спробуйте пізніше.",
+      "errEmpty": "Порожня відповідь сервера",
+      "errImport": "Не вдалося додати профіль: $failure",
+      "preparing": "Готуємо пробний період",
+      "oneSecond": "Одну секунду",
+      "createFailed": "Не вдалося створити пробний доступ",
+      "checkInternet": "Перевірте інтернет і спробуйте ще раз",
+      "retry": "Повторити"
+    },
+    "perApp": {
+      "offTitle": "Усі застосунки через PIXELLNET",
+      "offHint": "PIXELLNET працює для всіх програм. Щоб змінити, натисніть на режим угорі екрана.",
+      "includeTitle": "Через PIXELLNET — лише позначені",
+      "includeHint": "PIXELLNET працює лише для позначених ✓ застосунків. Інші виходять в інтернет напряму.",
+      "excludeTitle": "Усі через PIXELLNET, крім позначених",
+      "excludeHint": "Позначені ✓ застосунки виходять в інтернет напряму, без PIXELLNET. Зручно для банків, державних послуг і магазинів — вони краще працюють напряму."
+    },
+    "profile": {
+      "share": "Поділитися…",
+      "refreshDone": "Список каналів оновлено",
+      "refreshWithErrors": "Оновлено $done з $total, помилок: $errors",
+      "refreshPartial": "Оновлено $done з $total",
+      "channelsCount": "Канали ($count)",
+      "searching": "Шукаємо канали…",
+      "connectToSee": "Підключіться, щоб побачити всі канали"
+    },
+    "general": {
+      "autoStartOnFailed": "Не вдалося ввімкнути автозапуск",
+      "autoStartOffFailed": "Не вдалося вимкнути автозапуск",
+      "logSize": "Розмір журналу",
+      "logSizeHint": "$mb МБ — старі записи перезаписуються",
+      "mb": "$mb МБ",
+      "updateHow": "Як оновлювати",
+      "modeAuto": "Автоматично",
+      "modeAsk": "Запитати",
+      "modeManual": "Вручну",
+      "updateWhen": "Коли перевіряти",
+      "hourNight": "Уночі",
+      "hourMorning": "Уранці",
+      "hourDay": "Удень",
+      "hourEvening": "Увечері",
+      "hourAny": "Будь-коли",
+      "checkNow": "Перевірити зараз",
+      "checkNowHint": "Не чекаємо — шукаємо оновлення просто зараз",
+      "upToDate": "Версія актуальна — новішої поки немає",
+      "newVersion": "Є нова версія · $version",
+      "refreshHow": "Як оновлювати канали",
+      "refreshWhen": "Коли оновлювати канали",
+      "refreshNow": "Оновити канали зараз",
+      "refreshNowHint": "Завантажити свіжий список серверів",
+      "listCurrent": "Список актуальний — змін немає",
+      "updateModeAuto": "Завантажить і встановить без запитань",
+      "updateModeAsk": "Запитаємо — ви вирішите",
+      "updateModeManual": "Лише коли ви самі натиснете",
+      "hourLabelNight": "Уночі (близько 3:00) — поки ви спите",
+      "hourLabelMorning": "Уранці (близько 7:00)",
+      "hourLabelDay": "Удень (близько 14:00)",
+      "hourLabelEvening": "Увечері (близько 21:00)",
+      "hourLabelAny": "Будь-коли протягом дня",
+      "hourAt": "О $hour:00",
+      "refreshModeAuto": "Оновить список серверів без запитань"
+    },
+    "guard": {
+      "xiaomiTitle": "Контроль активності",
+      "bgTitle": "Робота у фоні",
+      "xiaomiHint": "Виберіть «Без обмежень»",
+      "allowHint": "У вікні телефона натисніть «Дозволити»",
+      "open": "Відкрити",
+      "allow": "Дозволити",
+      "autostartTitle": "Автозапуск",
+      "autostartHint": "Знайдіть PIXELLNET (можна через пошук) і ввімкніть перемикач",
+      "launchTitle": "Запуск застосунків",
+      "launchHint": "Для PIXELLNET вимкніть «Автоматично» і ввімкніть усі перемикачі",
+      "switchHint": "Увімкніть перемикач біля PIXELLNET",
+      "allowBgHint": "Дозвольте PIXELLNET працювати у фоні",
+      "banner": "PIXELLNET може вимикатися вночі",
+      "setup": "Налаштувати",
+      "remindTomorrow": "Нагадати завтра",
+      "sheetTitle": "Щоб PIXELLNET не вимикався",
+      "sheetDone": "Готово. Телефон більше не закриватиме PIXELLNET, щоб заощадити батарею.",
+      "sheetText": "Телефон заощаджує батарею і може закрити PIXELLNET уночі — уранці захист буде вимкнено. Дозвольте роботу у фоні, це займе хвилину.",
+      "done": "Готово",
+      "close": "Закрити"
+    },
+    "dev": {
+      "reportCopied": "Звіт скопійовано — вставте його в чат підтримки",
+      "error": "Помилка: $error",
+      "deviceCopied": "Дані пристрою скопійовано",
+      "title": "Для розробника",
+      "about": "Про застосунок",
+      "version": "Версія",
+      "package": "Пакет",
+      "platform": "Платформа",
+      "diagnostics": "Діагностика",
+      "connectionLog": "Журнал з'єднання",
+      "collecting": "Збираємо…",
+      "copyReport": "Скопіювати звіт",
+      "copyReportHint": "ОС, версія, провайдер, останні події",
+      "shareReport": "Поділитися звітом",
+      "copyDevice": "Скопіювати дані пристрою",
+      "other": "Інше",
+      "aboutProgram": "Про програму"
+    },
+    "common": {
+      "close": "Закрити",
+      "update": "Оновити",
+      "cancel": "Скасувати",
+      "hide": "Приховати",
+      "copied": "Скопійовано",
+      "allow": "Дозволити",
+      "delete": "Видалити",
+      "add": "Додати",
+      "notNow": "Не зараз",
+      "ms": "$ms мс"
+    },
+    "changelog": {
+      "whatsNew": "Що нового в $version",
+      "tellMain": "Розповімо головне",
+      "sectionNew": "Нове",
+      "sectionFixed": "Виправили",
+      "sectionImproved": "Стало краще",
+      "fallback": "Багато дрібних покращень і стабільніша робота."
+    },
+    "update": {
+      "available": "Доступне оновлення",
+      "version": "Версія $version",
+      "connecting": "Підключаємося до сервера...",
+      "downloaded": "Завантажено $percent%",
+      "openSettings": "Відкрити налаштування",
+      "downloading": "Завантажуємо…",
+      "again": "Ще раз",
+      "allowInstall": "Дозвольте встановлення → поверніться → Повторити",
+      "permissionNeeded": "Дозвольте встановлення застосунків із цього джерела в налаштуваннях Android",
+      "hintXiaomi": "MIUI/HyperOS покаже: «Застосунок містить ризики». Натисніть «Усе одно встановити» → «Готово».",
+      "hintHuawei": "EMUI попросить підтвердити встановлення. Щоразу вибирайте «Дозволити».",
+      "hintOppo": "ColorOS/PurityScan може позначити його як «ризик». Натисніть «Усе одно встановити».",
+      "noCell": "Схоже, вишка оператора зараз не роздає інтернет у цьому районі. Справа не в застосунку — спробуйте пізніше або підключіться до Wi-Fi.",
+      "noData": "Сигнал є, але інтернету немає. Можливо, в оператора збої — спробуйте через Wi-Fi.",
+      "errChecksum": "Файл оновлення пошкоджено (контрольна сума не збіглася). Спробуйте ще раз.",
+      "errSizeMismatch": "Завантажено $actual байт із $total. Файл пошкоджено, спробуйте ще раз.",
+      "errTooSmall": "Завантажений файл замалий ($size байт). Перевірте інтернет.",
+      "errInstaller": "Не вдалося відкрити інсталятор: $message",
+      "errTimeout": "Тайм-аут підключення до сервера оновлень",
+      "errOtherFile": "Джерело віддає інший файл ($length байт замість $expected)",
+      "errPartial": "Завантажено $actual байт із $total",
+      "errUnpack": "Не вдалося розпакувати zip: $message"
+    },
+    "country": {
+      "de": "Німеччина",
+      "nl": "Нідерланди",
+      "lt": "Литва",
+      "fi": "Фінляндія",
+      "fr": "Франція",
+      "se": "Швеція",
+      "us": "США",
+      "gb": "Велика Британія",
+      "ch": "Швейцарія",
+      "at": "Австрія",
+      "pl": "Польща",
+      "cz": "Чехія",
+      "ru": "Росія",
+      "ua": "Україна",
+      "by": "Білорусь",
+      "kz": "Казахстан",
+      "tr": "Туреччина"
+    },
+    "units": {
+      "b": "$n Б",
+      "kb": "$n КБ",
+      "mb": "$n МБ",
+      "gb": "$n ГБ",
+      "bps": "$n Б/с",
+      "kbps": "$n КБ/с",
+      "mbps": "$n МБ/с"
+    },
+    "home": {
+      "menu": "Меню",
+      "logs": "Журнали",
+      "bgHint": "Щоб телефон не закривав PIXELLNET",
+      "shareHint": "Надіслати посилання друзям",
+      "otherVersions": "Завантажити інші версії",
+      "otherVersionsHint": "Windows · старі версії",
+      "refreshAskTitle": "Оновити список каналів?",
+      "refreshAskText": "З'явилися нові канали. Оновити зараз?",
+      "auto": "Авто",
+      "modeTitle": "Режим роботи",
+      "modeRecommended": "Рекомендовано — працює з усіма застосунками",
+      "modeSystemHint": "Лише HTTP/HTTPS, ламає Node.js і Docker",
+      "modeProxyHint": "Для досвідчених — порт SOCKS5",
+      "serverTitle": "Вибір сервера",
+      "refreshList": "Оновити список",
+      "checkPing": "Перевірити пінг",
+      "noServers": "Немає серверів — додайте ключ підписки.",
+      "connectToSeeServers": "Підключіться, щоб побачити список серверів",
+      "loadError": "Помилка завантаження: $error",
+      "today": "Сьогодні",
+      "speed": "Швидкість",
+      "expiry": "Термін дії",
+      "expired": "термін минув",
+      "until": "до $date · $days",
+      "days(plural, param=n)": {
+        "one": "$n день",
+        "other": "$n дня",
+        "few": "$n дні",
+        "many": "$n днів"
+      },
+      "monthsShort": [
+        "січ.",
+        "лют.",
+        "бер.",
+        "квіт.",
+        "трав.",
+        "черв.",
+        "лип.",
+        "серп.",
+        "вер.",
+        "жовт.",
+        "лист.",
+        "груд."
+      ],
+      "keyExpired": "Ключ $masked · термін минув",
+      "keyExpiresIn": "Термін ключа $masked спливає через $days ($date)",
+      "renewTitle": "Продовження підписки",
+      "renew": "Продовжити",
+      "renewHint": "Відкриється чат підтримки @pixellnet_bot",
+      "subscriptionN": "Підписка $n",
+      "keys": "Ключі",
+      "pasteFromClipboard": "Вставити з буфера",
+      "clipboardNoKey": "У буфері немає ключа",
+      "added": "Додано",
+      "addSubscription": "Додати підписку",
+      "activeKey": "Активний ключ · $name",
+      "copy": "Копіювати",
+      "share": "Поділитися",
+      "qrCode": "QR-код",
+      "scanWithOther": "Відскануйте іншим пристроєм",
+      "validUntil": "діє до $date",
+      "deleteLast": "Після видалення застосунок попросить новий ключ. Видалити?",
+      "deleteActive": "Активною стане «$name». Цю дію не можна скасувати.",
+      "deleteTitle": "Видалити «$name»?",
+      "deleted": "Підписку видалено",
+      "undo": "Скасувати",
+      "clipboardEmpty": "Буфер порожній",
+      "enterManually": "Ввести вручну",
+      "pasteSupportSettings": "Вставити налаштування від підтримки",
+      "pasteSupportSettingsHint": "Якщо підтримка надіслала налаштування текстом",
+      "scanQrCode": "Сканувати QR-код",
+      "scanQr": "Сканувати QR",
+      "flash": "Спалах",
+      "switchCamera": "Змінити камеру",
+      "cameraDenied": "Немає доступу до камери. Дозвольте його в налаштуваннях Android.",
+      "cameraUnsupported": "Камера не підтримується на цьому пристрої.",
+      "cameraError": "Помилка камери: $code",
+      "pointCamera": "Наведіть камеру на QR-код підписки",
+      "newSubscription": "Нова підписка",
+      "keyOrUrl": "Ключ або URL підписки",
+      "activate": "Активувати",
+      "supportSettingsTitle": "Налаштування від підтримки",
+      "supportSettingsText": "Вставте повністю текст налаштувань, який надіслала підтримка.",
+      "hideFor3Days": "Приховати на 3 дні",
+      "updatedTo": "Оновлено до $version",
+      "whatsNew": "Що нового →",
+      "permRequesting": "Запитуємо дозвіл на з'єднання...",
+      "permNeeded": "Потрібен дозвіл на з'єднання",
+      "permTap": "Натисніть, щоб дозволити й перепідключитися"
+    }
   }
 }
