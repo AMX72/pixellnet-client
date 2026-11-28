@@ -238,7 +238,7 @@
         "ignoreBatteryOptimizations": "Batareya optimallashtirishini oʻchirish",
         "ignoreBatteryOptimizationsMsg": "Telefon PIXELLNET ilovasini yopib qoʻymasligi uchun",
         "memoryLimit": "Xotira cheklovi",
-        "memoryLimitMsg": "Agar xotira yetishmasligi haqida xatolar chiqsa yoki ilova tez-tez yopilib qolsa, yoqing",
+        "memoryLimitMsg": "Agar xotira yetishmasligi haqida xatolar chiqsa yoki ilova tez-tez ishdan chiqib qolsa, yoqing",
         "debugMode": "Nosozliklarni tuzatish rejimi",
         "debugModeMsg": "Bu oʻzgarish kuchga kirishi uchun ilovani qayta ishga tushiring",
         "logLevel": "Log darajasi",
