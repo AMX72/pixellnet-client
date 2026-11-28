@@ -51,7 +51,7 @@
     "sort": "Ordenar",
     "dashboard": "Panel",
     "disable": "Desactivar",
-    "psiphon": "Psiphon",
+    "psiphon": "Servicio adicional 2",
     "profile": "Perfil",
     "configuration": "Configuración",
     "file": "Archivo",
@@ -93,21 +93,34 @@
     }
   },
   "intro": {
-    "banner": "Todo lo que necesitas para un internet sin restricciones",
+    "banner": "Conexión estable con un solo toque",
     "termsAndPolicyCaution(rich)": "Al continuar, aceptas los ${tap(@:pages.about.termsAndConditions)}",
     "info(rich)": "Hecho con ❤️ por Hiddify - ${tap_source(Código Abierto)} (${tap_license(Licencia)})"
   },
   "pages": {
     "home": {
       "title": "Inicio",
-      "quickSettings": "Opciones de ajustes rápidos"
+      "mode": "Modo",
+      "channelWorking": "Funciona",
+      "channelNotResponding": "No responde",
+      "channelChecking": "Comprobando la conexión…",
+      "key": "Clave",
+      "autoConnect": "Conexión automática al iniciar",
+      "language": "Idioma",
+      "developer": "Opciones para desarrolladores",
+      "notConnected": "Desconectado",
+      "establishing": "Estableciendo la conexión",
+      "cancel": "Cancelar",
+      "support": "Soporte",
+      "languageTitle": "Idioma de la interfaz",
+      "copied": "Copiado"
     },
     "proxies": {
-      "title": "Proxies",
-      "sort": "Ordenar proxies",
+      "title": "Canales",
+      "sort": "Ordenar canales",
       "testDelay": "Probar latencia",
-      "empty": "No hay proxies disponibles",
-      "activeProxy": "Proxy activo",
+      "empty": "Aún no hay canales",
+      "activeProxy": "Canal actual",
       "unknownIp": "IP desconocida",
       "sortOptions": {
         "unsorted": "Por defecto",
@@ -181,6 +194,7 @@
     },
     "about": {
       "title": "Acerca de",
+      "tagline": "Conexión estable con un solo toque. Próximamente: asistente de IA y extensiones.",
       "notAvailableMsg": "Ya estás usando la última versión",
       "checkForUpdate": "Buscar actualizaciones",
       "openWorkingDir": "Abrir directorio de trabajo",
@@ -191,15 +205,15 @@
     },
     "settings": {
       "title": "Ajustes",
-      "resetTunnel": "Restablecer perfil de VPN",
+      "resetTunnel": "Restablecer la conexión",
       "options": {
         "import": {
           "clipboard": "Importar opciones desde el portapapeles",
           "file": "Importar opciones desde un archivo"
         },
         "export": {
-          "anonymousToClipboard": "Copiar opciones anónimas al portapapeles",
-          "anonymousToFile": "Exportar opciones anónimas a un archivo",
+          "anonymousToClipboard": "Copiar opciones sin datos personales",
+          "anonymousToFile": "Guardar en un archivo sin datos personales",
           "allToClipboard": "Copiar todas las opciones al portapapeles",
           "allToFile": "Exportar todas las opciones a un archivo"
         },
@@ -224,7 +238,7 @@
         "autoStart": "Iniciar al arrancar",
         "silentStart": "Iniciar minimizado",
         "ignoreBatteryOptimizations": "Desactivar optimización de batería",
-        "ignoreBatteryOptimizationsMsg": "Eliminar restricciones para un rendimiento óptimo de la VPN",
+        "ignoreBatteryOptimizationsMsg": "Para que el teléfono no cierre PIXELLNET",
         "memoryLimit": "Límite de memoria",
         "memoryLimitMsg": "Habilitar si experimentas errores de falta de memoria o fallos frecuentes de la aplicación",
         "debugMode": "Modo de depuración",
@@ -233,8 +247,8 @@
         "connectionTestUrl": "URL de prueba de conexión",
         "urlTestInterval": "Intervalo de prueba de URL",
         "clashApiPort": "Puerto de la API de Clash",
-        "useXrayCoreWhenPossible": "Usar xray-core cuando sea posible",
-        "useXrayCoreWhenPossibleMsg": "Usa xray-core al analizar enlaces de suscripción. Necesitas reimportar el enlace para habilitar esta opción"
+        "useXrayCoreWhenPossible": "Formato de clave alternativo",
+        "useXrayCoreWhenPossibleMsg": "Para activarlo, vuelva a añadir la clave."
       },
       "routing": {
         "title": "Enrutamiento",
@@ -255,7 +269,7 @@
           },
           "rule": {
             "title": "Regla",
-            "onlyTunMode": "Disponible solo en modo TUN",
+            "onlyTunMode": "Solo funciona en el modo «Todas las aplicaciones»",
             "notAvailabeInThisPlatform": "No disponible en esta plataforma",
             "canNotBeEmpty": "No puede estar vacío",
             "validUrlEx": "https://example.com",
@@ -291,7 +305,7 @@
               "domain_regex": "Expresión regular de dominio"
             },
             "outbound(map)": {
-              "proxy": "Proxy",
+              "proxy": "A través de PIXELLNET",
               "direct": "Directo",
               "direct_with_fragment": "Directo con Fragment",
               "block": "Bloquear"
@@ -346,7 +360,7 @@
             "only": "Exclusivo"
           },
           "perAppProxy": {
-            "title": "Proxy por aplicación",
+            "title": "Desactivar para aplicaciones",
             "hideSysApps": "Ocultar aplicaciones del sistema",
             "options": {
               "import": {
@@ -363,11 +377,11 @@
             },
             "modes": {
               "all": "Todo",
-              "proxy": "Proxy",
-              "bypass": "Omitir",
-              "allMsg": "Usar proxy en todas las aplicaciones",
-              "proxyMsg": "Usar proxy solo en aplicaciones seleccionadas",
-              "bypassMsg": "No usar proxy en aplicaciones seleccionadas"
+              "proxy": "Solo las marcadas",
+              "bypass": "Todas excepto las marcadas",
+              "allMsg": "Todas las aplicaciones a través de PIXELLNET",
+              "proxyMsg": "A través de PIXELLNET, solo las marcadas",
+              "bypassMsg": "Las marcadas se conectan directamente, sin PIXELLNET"
             },
             "autoSelection": {
               "title": "Selección automática",
@@ -382,7 +396,7 @@
               },
               "dialog": {
                 "title": "Selección automática de aplicaciones",
-                "msg": "La función de selección automática para el proxy por aplicación se ha desactivado debido al cambio de región a \"${region}\""
+                "msg": "La selección automática de aplicaciones se desactivó: la región cambió a «${region}»"
               }
             }
           }
@@ -394,7 +408,7 @@
             "description": ""
           },
           "bypassLan": {
-            "name": "Omitir LAN",
+            "name": "Red doméstica, conexión directa",
             "description": ""
           }
         }
@@ -416,16 +430,16 @@
       },
       "inbound": {
         "title": "Entrada",
-        "serviceMode": "Modo de servicio",
+        "serviceMode": "Modo de conexión",
         "serviceModes": {
-          "proxy": "Solo servicio de proxy",
-          "systemProxy": "Establecer proxy del sistema",
-          "tun": "VPN"
+          "proxy": "Solo puerto local",
+          "systemProxy": "Configuración del sistema",
+          "tun": "Todas las aplicaciones"
         },
         "shortServiceModes": {
-          "proxy": "Proxy",
-          "systemProxy": "Proxy del sistema",
-          "tun": "VPN"
+          "proxy": "Puerto local",
+          "systemProxy": "Sistema",
+          "tun": "Todas las apps"
         },
         "strictRoute": "Ruta estricta",
         "tunImplementation": "Implementación de TUN",
@@ -435,12 +449,12 @@
           "gvisor": "gVisor"
         },
         "mixedPort": "Puerto mixto",
-        "tproxyPort": "Puerto de proxy transparente",
+        "tproxyPort": "Puerto del modo transparente",
         "directPort": "Puerto de Directo",
         "redirectPort": "Puerto de redirección",
-        "lanSharing": "Compartir VPN",
+        "lanSharing": "Acceso para otros dispositivos de su red",
         "lanSharingPasswordNotSet": "Contraseña no establecida",
-        "lanSharingPassword": "Contraseña de compartir VPN",
+        "lanSharingPassword": "Contraseña para otros dispositivos",
         "copyLink": "Copiar enlace",
         "qrCode": "Código QR",
         "lanIPError": "Error al obtener la IP local"
@@ -467,12 +481,12 @@
       },
       "chain": {
         "title": "Cadena",
-        "subtitle": "Seguridad extra y Desbloqueador",
+        "subtitle": "Protección adicional y ruta de reserva",
         "finalIp": "IP final",
         "levels": {
           "app": {
             "title": "App",
-            "msg": "Punto de inicio: El tráfico de tu app entra en la cadena aquí y pasa por las siguientes capas para prepararse para el bypass final"
+            "msg": "Aquí empieza el recorrido del tráfico de sus aplicaciones"
           },
           "extraSecurity": {
             "title": "Seguridad extra",
@@ -482,12 +496,12 @@
             "title": "Perfil principal"
           },
           "unblocker": {
-            "title": "Desbloqueador",
-            "msg": "Ayuda a evitar restricciones de red. Si el ayudante se conecta, tu perfil principal puede seguir funcionando incluso si está bloqueado actualmente"
+            "title": "Ruta de reserva",
+            "msg": "Si el canal principal no responde, la conexión seguirá por la ruta de reserva"
           },
           "filtering": {
             "title": "Filtrado",
-            "msg": "Salida final: Después de pasar por las capas activas (Seguridad extra, Perfil principal o Desbloqueador) y aplicar sus efectos, tu tráfico es finalmente enrutado para evitar el filtrado de la red local"
+            "msg": "Último paso: el tráfico sale a internet"
           }
         },
         "warp": {
@@ -584,11 +598,11 @@
     },
     "warpLicense": {
       "title": "Consentimiento de Cloudflare WARP",
-      "description(rich)": "Cloudflare WARP es un proveedor de VPN WireGuard gratuito. Al habilitar esta opción, aceptas los ${tos(Términos de servicio)} y la ${privacy(Política de privacidad)} de Cloudflare WARP."
+      "description(rich)": "Al activar esta opción, usted acepta los ${tos(Términos del servicio)} y la ${privacy(Política de privacidad)} del proveedor del servicio adicional."
     },
     "psiphonLicense": {
-      "title": "Acuerdo de licencia de Psiphon",
-      "description(rich)": "Al usar Psiphon, aceptas los ${tos(Términos de servicio)} y reconoces la ${privacy(Política de privacidad)}. Por favor, léelos detenidamente antes de continuar."
+      "title": "Licencia del servicio adicional",
+      "description(rich)": "Al usar esta opción, usted acepta los ${tos(Términos del servicio)} y reconoce la ${privacy(Política de privacidad)} del proveedor del servicio adicional. Léalos con atención antes de continuar."
     },
     "newVersion": {
       "title": "Actualización disponible",
@@ -615,7 +629,7 @@
           "msg": "Al compartir las aplicaciones seleccionadas, ayudas a completar la lista de \"selección automática\""
         },
         "import": {
-          "msg": "Esto reemplazará todas tus selecciones actuales de proxy por aplicación. ¿Estás seguro de que quieres continuar?"
+          "msg": "Esto reemplazará su selección actual de aplicaciones. ¿Desea continuar?"
         }
       },
       "routeRule": {
@@ -639,11 +653,11 @@
       "disable": "No volver a mostrar"
     },
     "noActiveProfile": {
-      "title": "Elige un perfil",
-      "msg": "Para empezar, añade un perfil de conexión que incluya los detalles de tu conexión VPN.\n\n¿Aún no tienes un servidor VPN? No te preocupes, sigue el tutorial a continuación para configurar uno rápidamente y de forma gratuita.",
+      "title": "Cómo añadir una clave",
+      "msg": "La clave de acceso es un enlace o un código del tipo PXN-XXXX-XXXX. Péguela desde el portapapeles, escanee el código QR o introdúzcala manualmente. ¿No tiene clave? Escriba a soporte.",
       "helpBtn": {
-        "label": "Muéstrame cómo",
-        "url": "https://hiddify.com/manager/"
+        "label": "Escribir a soporte",
+        "url": "https://t.me/pixellnet_bot?start=support"
       }
     },
     "unknownDomainsWarning": {
@@ -706,14 +720,14 @@
     },
     "connectivity": {
       "unexpected": "Fallo inesperado",
-      "missingVpnPermission": "Falta el permiso de VPN",
+      "missingVpnPermission": "Se necesita permiso para conectarse",
       "missingNotificationPermission": "Falta el permiso de notificación",
       "core": "Error del núcleo"
     },
     "singbox": {
       "serviceNotRunning": "El servicio no se está ejecutando",
       "missingPrivilege": "Falta privilegio",
-      "missingPrivilegeMsg": "El modo VPN requiere privilegios de administrador. Reinicia la aplicación como administrador o cambia el modo de servicio.",
+      "missingPrivilegeMsg": "Se necesitan permisos de administrador. Cierre PIXELLNET y vuelva a abrirlo: Windows le pedirá permiso.",
       "invalidConfigOptions": "Opciones de configuración no válidas",
       "invalidConfig": "Configuración no válida"
     },
@@ -722,8 +736,327 @@
       "missingLicenseMsg": "El perfil seleccionado utiliza la función WARP; para utilizar esta función, debe aceptarse la licencia de WARP"
     },
     "psiphon": {
-      "missingLicense": "Se requiere licencia de Psiphon",
-      "missingLicenseMsg": "El perfil seleccionado utiliza la función Psiphon; para utilizar esta función, debe aceptarse la licencia de Psiphon"
+      "missingLicense": "No se pudo aceptar la licencia del servicio adicional",
+      "missingLicenseMsg": "El perfil seleccionado usa un servicio adicional; primero debe aceptar su licencia"
+    }
+  },
+  "ui": {
+    "share": {
+      "appText": "PIXELLNET — conexión estable con un solo toque. Próximamente: asistente de IA y extensiones.\n\nDescargar para Android y Windows:\n$url",
+      "inviteText": "Uso PIXELLNET — conexión estable con un solo toque. Con mi enlace, 7 días gratis: $link",
+      "whatToSend": "¿Qué desea enviar?",
+      "chooseWhat": "Elija lo que necesita su amigo",
+      "keyForOtherApp": "Clave para otra aplicación",
+      "keyForOtherAppHint": "Si su amigo ya tiene Happ o V2rayNG, envíele solo la clave",
+      "keyForApp": "Clave para PIXELLNET",
+      "keyForAppHint": "Se abrirá directamente en la aplicación PIXELLNET del destinatario",
+      "inviteTitle": "Invitar a un amigo y recibir un bono",
+      "inviteSubtitle": "Por cada amigo, 7 días gratis para los dos",
+      "otherAppSheetSubtitle": "El destinatario abrirá el enlace en su propia aplicación",
+      "otherAppPreamble": "Aquí tienes una clave de acceso. Pega el enlace en tu aplicación para conectarte:",
+      "keyForAppSheetSubtitle": "Se abrirá directamente en la aplicación PIXELLNET",
+      "appPreamble": "Descargue PIXELLNET (pixellnet.com) y abra este enlace para añadir todos los canales automáticamente:",
+      "recommended": "Recomendado",
+      "sendViaMessenger": "Enviar por mensajería",
+      "showQr": "Mostrar código QR",
+      "linkCopied": "Enlace copiado",
+      "copyLink": "Copiar enlace",
+      "linkValidUntil": "El enlace es válido hasta que termine su suscripción",
+      "referralTitle": "Regale 7 días y reciba 7 días",
+      "referralText": "Su amigo abre su enlace y recibe 7 días gratis. En cuanto pague una suscripción, usted también recibe 7 días gratis.",
+      "yourCode": "Su código:",
+      "bonusBadge": "+$days días",
+      "referralCounts": "Confirmados: $confirmed · pendientes de pago: $pending",
+      "referralSubject": "PIXELLNET — 7 días gratis",
+      "sendInvite": "Enviar invitación",
+      "inviteLinkCopied": "Enlace de invitación copiado"
+    },
+    "about": {
+      "collectDiagnostics": "Recopilar diagnóstico",
+      "collectDiagnosticsHint": "Copia al portapapeles los datos del dispositivo y de la red, y los eventos recientes",
+      "diagnosticsCopied": "Diagnóstico copiado ($count caracteres)",
+      "shareApp": "Compartir la aplicación",
+      "shareAppHint": "Enviar a sus amigos un enlace de descarga"
+    },
+    "welcome": {
+      "title": "Le damos la bienvenida",
+      "subtitle": "Conexión estable con un solo toque",
+      "trialTitle": "Probar 7 días gratis",
+      "trialSubtitle": "Sin tarjeta y sin registro",
+      "haveKey": "Ya tengo una clave",
+      "clipboardFound": "Hay un enlace en el portapapeles",
+      "enterKeyHint": "Introduzca la clave o el enlace de suscripción",
+      "questions": "¿Tiene preguntas? Escriba a "
+    },
+    "trial": {
+      "expiredTitle": "Su periodo de prueba ha terminado",
+      "expiredText": "Escríbanos y lo ampliaremos gratis. Todavía no hay planes de pago.",
+      "enterKey": "Introducir clave",
+      "renew": "Escribir a soporte",
+      "errServer": "Error del servidor ($code). Inténtelo más tarde.",
+      "errEmpty": "El servidor envió una respuesta vacía",
+      "errImport": "No se pudo añadir la clave: $failure",
+      "preparing": "Preparando su periodo de prueba",
+      "oneSecond": "Un momento",
+      "createFailed": "No se pudo activar el periodo de prueba",
+      "checkInternet": "Compruebe su conexión a internet e inténtelo de nuevo",
+      "retry": "Reintentar"
+    },
+    "perApp": {
+      "offTitle": "Todas las aplicaciones a través de PIXELLNET",
+      "offHint": "PIXELLNET funciona para todas las aplicaciones. Para cambiarlo, toque el modo en la parte superior de la pantalla.",
+      "includeTitle": "A través de PIXELLNET, solo las marcadas",
+      "includeHint": "PIXELLNET funciona solo para las aplicaciones marcadas ✓. Las demás se conectan a internet directamente.",
+      "excludeTitle": "Todas a través de PIXELLNET, excepto las marcadas",
+      "excludeHint": "Las aplicaciones marcadas ✓ se conectan a internet directamente, sin PIXELLNET. Es útil para las apps de bancos, de trámites públicos y de compras: funcionan mejor así."
+    },
+    "profile": {
+      "share": "Compartir…",
+      "refreshDone": "Lista de canales actualizada",
+      "refreshWithErrors": "Actualizado: $done de $total. Con errores: $errors",
+      "refreshPartial": "Actualizado: $done de $total",
+      "channelsCount": "Canales ($count)",
+      "searching": "Buscando canales…",
+      "connectToSee": "Conéctese para ver todos los canales"
+    },
+    "general": {
+      "autoStartOnFailed": "No se pudo activar el inicio automático",
+      "autoStartOffFailed": "No se pudo desactivar el inicio automático",
+      "logSize": "Tamaño del registro",
+      "logSizeHint": "$mb MB: las entradas antiguas se sobrescriben",
+      "mb": "$mb MB",
+      "updateHow": "Cómo actualizar",
+      "modeAuto": "Automático",
+      "modeAsk": "Preguntar",
+      "modeManual": "Manual",
+      "updateWhen": "Cuándo comprobar",
+      "hourNight": "De madrugada",
+      "hourMorning": "Por la mañana",
+      "hourDay": "Por la tarde",
+      "hourEvening": "Por la noche",
+      "hourAny": "A cualquier hora",
+      "checkNow": "Comprobar ahora",
+      "checkNowHint": "Buscar una actualización ahora mismo",
+      "upToDate": "Tiene la versión más reciente",
+      "newVersion": "Hay una versión nueva · $version",
+      "refreshHow": "Cómo actualizar los canales",
+      "refreshWhen": "Cuándo actualizar los canales",
+      "refreshNow": "Actualizar los canales ahora",
+      "refreshNowHint": "Descargar la lista de canales más reciente",
+      "listCurrent": "La lista está al día, sin cambios",
+      "updateModeAuto": "Descarga e instala sin preguntar",
+      "updateModeAsk": "Le preguntaremos; usted decide",
+      "updateModeManual": "Solo cuando usted lo inicie",
+      "hourLabelNight": "De madrugada (hacia las 3:00), mientras duerme",
+      "hourLabelMorning": "Por la mañana (hacia las 7:00)",
+      "hourLabelDay": "Por la tarde (hacia las 14:00)",
+      "hourLabelEvening": "Por la noche (hacia las 21:00)",
+      "hourLabelAny": "A cualquier hora del día",
+      "hourAt": "A las $hour:00",
+      "refreshModeAuto": "Actualiza la lista de canales sin preguntar"
+    },
+    "guard": {
+      "xiaomiTitle": "Ahorro de batería",
+      "bgTitle": "Actividad en segundo plano",
+      "xiaomiHint": "Elija «Sin restricciones»",
+      "allowHint": "Cuando el teléfono lo pida, toque «Permitir»",
+      "open": "Abrir",
+      "allow": "Permitir",
+      "autostartTitle": "Inicio automático",
+      "autostartHint": "Busque PIXELLNET (puede usar la búsqueda) y active el interruptor",
+      "launchTitle": "Inicio de aplicaciones",
+      "launchHint": "Desactive «Gestionar automáticamente» para PIXELLNET y active todos los interruptores",
+      "switchHint": "Active el interruptor de PIXELLNET",
+      "allowBgHint": "Permita que PIXELLNET funcione en segundo plano",
+      "banner": "PIXELLNET puede desconectarse por la noche",
+      "setup": "Configurar",
+      "remindTomorrow": "Recordármelo mañana",
+      "sheetTitle": "Para que PIXELLNET no se desconecte",
+      "sheetDone": "Listo. El teléfono ya no cerrará PIXELLNET para ahorrar batería.",
+      "sheetText": "Para ahorrar batería, el teléfono puede cerrar PIXELLNET por la noche y, por la mañana, la protección estará desactivada. Permita la actividad en segundo plano: solo le llevará un minuto.",
+      "done": "Listo",
+      "close": "Cerrar"
+    },
+    "dev": {
+      "reportCopied": "Informe copiado: péguelo en el chat de soporte",
+      "error": "Error: $error",
+      "deviceCopied": "Datos del dispositivo copiados",
+      "title": "Opciones para desarrolladores",
+      "about": "Información de la aplicación",
+      "version": "Versión",
+      "package": "Paquete",
+      "platform": "Plataforma",
+      "diagnostics": "Diagnóstico",
+      "connectionLog": "Registro de conexión",
+      "collecting": "Recopilando…",
+      "copyReport": "Copiar informe",
+      "copyReportHint": "Sistema, versión de la app, proveedor de internet, eventos recientes",
+      "shareReport": "Compartir informe",
+      "copyDevice": "Copiar datos del dispositivo",
+      "other": "Otros",
+      "aboutProgram": "Acerca de"
+    },
+    "common": {
+      "close": "Cerrar",
+      "update": "Actualizar",
+      "cancel": "Cancelar",
+      "hide": "Ocultar",
+      "copied": "Copiado",
+      "allow": "Permitir",
+      "delete": "Eliminar",
+      "add": "Añadir",
+      "notNow": "Ahora no",
+      "ms": "$ms ms"
+    },
+    "changelog": {
+      "whatsNew": "Novedades de la versión $version",
+      "tellMain": "Lo más importante",
+      "sectionNew": "Nuevo",
+      "sectionFixed": "Corregido",
+      "sectionImproved": "Mejorado",
+      "fallback": "Muchas pequeñas mejoras y más estabilidad."
+    },
+    "update": {
+      "available": "Actualización disponible",
+      "version": "Versión $version",
+      "connecting": "Conectando con el servidor...",
+      "downloaded": "Descargado: $percent%",
+      "openSettings": "Abrir ajustes",
+      "downloading": "Descargando…",
+      "again": "Intentar de nuevo",
+      "allowInstall": "Permita la instalación → vuelva → Intentar de nuevo",
+      "permissionNeeded": "Permita instalar aplicaciones de este origen en los ajustes de Android",
+      "hintXiaomi": "MIUI/HyperOS mostrará: «Esta aplicación contiene riesgos». Toque «Instalar de todos modos» → «Listo».",
+      "hintHuawei": "EMUI le pedirá que confirme la instalación. Elija «Permitir» en todas las solicitudes.",
+      "hintOppo": "ColorOS/PurityScan puede marcarla como «riesgo». Toque «Instalar de todos modos».",
+      "noCell": "Parece que su red móvil no tiene internet en esta zona ahora mismo. No es un problema de la aplicación: inténtelo más tarde o conéctese a una red Wi-Fi.",
+      "noData": "Hay señal, pero no hay internet. Puede que su operador tenga problemas: pruebe con una red Wi-Fi.",
+      "errChecksum": "El archivo de actualización está dañado (la suma de comprobación no coincide). Inténtelo de nuevo.",
+      "errSizeMismatch": "Descargados $actual bytes de $total. El archivo está dañado; inténtelo de nuevo.",
+      "errTooSmall": "El archivo descargado es demasiado pequeño ($size bytes). Compruebe su conexión a internet.",
+      "errInstaller": "No se pudo abrir el instalador: $message",
+      "errTimeout": "El servidor de actualizaciones tarda demasiado en responder",
+      "errOtherFile": "El origen entrega otro archivo ($length bytes en lugar de $expected)",
+      "errPartial": "Descargados $actual bytes de $total",
+      "errUnpack": "No se pudo descomprimir el zip: $message"
+    },
+    "country": {
+      "de": "Alemania",
+      "nl": "Países Bajos",
+      "lt": "Lituania",
+      "fi": "Finlandia",
+      "fr": "Francia",
+      "se": "Suecia",
+      "us": "EE. UU.",
+      "gb": "Reino Unido",
+      "ch": "Suiza",
+      "at": "Austria",
+      "pl": "Polonia",
+      "cz": "Chequia",
+      "ru": "Rusia",
+      "ua": "Ucrania",
+      "by": "Belarús",
+      "kz": "Kazajistán",
+      "tr": "Turquía"
+    },
+    "units": {
+      "b": "$n B",
+      "kb": "$n KB",
+      "mb": "$n MB",
+      "gb": "$n GB",
+      "bps": "$n B/s",
+      "kbps": "$n KB/s",
+      "mbps": "$n MB/s"
+    },
+    "home": {
+      "menu": "Menú",
+      "logs": "Registros",
+      "bgHint": "Para que el teléfono no cierre PIXELLNET",
+      "shareHint": "Enviar un enlace a sus amigos",
+      "otherVersions": "Descargar otras versiones",
+      "otherVersionsHint": "Windows · versiones anteriores",
+      "refreshAskTitle": "¿Actualizar la lista de canales?",
+      "refreshAskText": "Hay canales nuevos. ¿Actualizar ahora?",
+      "auto": "Automático",
+      "modeTitle": "Modo de conexión",
+      "modeRecommended": "Recomendado: funciona con todas las aplicaciones",
+      "modeSystemHint": "Solo HTTP/HTTPS; no funciona con Node.js ni Docker",
+      "modeProxyHint": "Para usuarios avanzados: puerto SOCKS5",
+      "serverTitle": "Elegir canal",
+      "refreshList": "Actualizar la lista",
+      "checkPing": "Comprobar canales",
+      "noServers": "No hay canales: añada una clave de suscripción.",
+      "connectToSeeServers": "Conéctese para ver la lista de canales",
+      "loadError": "Error de carga: $error",
+      "today": "Hoy",
+      "speed": "Velocidad",
+      "expiry": "Vigencia",
+      "expired": "plazo vencido",
+      "until": "hasta el $date · $days",
+      "days(plural, param=n)": {
+        "one": "$n día",
+        "other": "$n días",
+        "many": "$n días"
+      },
+      "monthsShort": [
+        "ene.",
+        "feb.",
+        "mar.",
+        "abr.",
+        "may.",
+        "jun.",
+        "jul.",
+        "ago.",
+        "sept.",
+        "oct.",
+        "nov.",
+        "dic."
+      ],
+      "keyExpired": "Clave $masked · plazo vencido",
+      "keyExpiresIn": "La clave $masked vence en $days ($date)",
+      "renewTitle": "Renovación de la suscripción",
+      "renew": "Renovar",
+      "renewHint": "Se abrirá el chat de soporte @pixellnet_bot",
+      "subscriptionN": "Suscripción $n",
+      "keys": "Claves",
+      "pasteFromClipboard": "Pegar del portapapeles",
+      "clipboardNoKey": "No hay ninguna clave en el portapapeles",
+      "added": "Añadido",
+      "addSubscription": "Añadir suscripción",
+      "activeKey": "Clave activa · $name",
+      "copy": "Copiar",
+      "share": "Compartir",
+      "qrCode": "Código QR",
+      "scanWithOther": "Escanéelo con otro dispositivo",
+      "validUntil": "válida hasta el $date",
+      "deleteLast": "Si la elimina, la aplicación le pedirá una clave nueva. ¿Eliminar?",
+      "deleteActive": "«$name» pasará a ser la suscripción activa. Esta acción no se puede deshacer.",
+      "deleteTitle": "¿Eliminar «$name»?",
+      "deleted": "Suscripción eliminada",
+      "undo": "Deshacer",
+      "clipboardEmpty": "El portapapeles está vacío",
+      "enterManually": "Introducir manualmente",
+      "pasteSupportSettings": "Pegar ajustes de soporte",
+      "pasteSupportSettingsHint": "Si el equipo de soporte le envió los ajustes en un texto",
+      "scanQrCode": "Escanear código QR",
+      "scanQr": "Escanear QR",
+      "flash": "Linterna",
+      "switchCamera": "Cambiar de cámara",
+      "cameraDenied": "No hay acceso a la cámara. Permítalo en los ajustes de Android.",
+      "cameraUnsupported": "La cámara no es compatible con este dispositivo.",
+      "cameraError": "Error de cámara: $code",
+      "pointCamera": "Apunte la cámara al código QR de la suscripción",
+      "newSubscription": "Nueva suscripción",
+      "keyOrUrl": "Clave o enlace de suscripción",
+      "activate": "Activar",
+      "supportSettingsTitle": "Ajustes de soporte",
+      "supportSettingsText": "Pegue el texto completo de los ajustes que le envió el equipo de soporte.",
+      "hideFor3Days": "Ocultar durante 3 días",
+      "updatedTo": "Actualizado a la versión $version",
+      "whatsNew": "Novedades →",
+      "permRequesting": "Solicitando permiso para conectarse...",
+      "permNeeded": "Se necesita permiso para conectarse",
+      "permTap": "Toque para permitir y volver a conectarse"
     }
   }
 }
