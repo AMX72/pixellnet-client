@@ -21,8 +21,7 @@ class FreeBtns extends ConsumerWidget {
     final freeProfilesFilteredByRegion = ref.watch(freeProfilesFilteredByRegionProvider);
     final theme = Theme.of(context);
     final locale = ref.watch(localePreferencesProvider);
-    // Остались только ru и en (0.1.105): персидского перевода больше нет.
-    final isFa = locale.name == 'fa';
+    final isFa = locale.name == AppLocale.fa.name;
     return freeProfilesFilteredByRegion.when(
       data: (data) => data.isNotEmpty
           ? ScrollConfiguration(

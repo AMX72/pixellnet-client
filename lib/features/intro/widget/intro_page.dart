@@ -98,7 +98,7 @@ class IntroPage extends HookConsumerWidget with PresLogger {
                   ),
                   const Gap(24),
                   const LocalePrefTile(),
-                  // 0.1.105 (Р0.3): список регионов скрыт, регион ставится сам (autoSelectRegion).
+                  // Выбор региона виден (0.1.106). Регион по-прежнему ставится сам (autoSelectRegion).
                   if (_kShowRegionChoice)
                     ChoicePreferenceWidget(
                       selected: ref.watch(ConfigOptions.region),
@@ -233,20 +233,26 @@ class IntroPage extends HookConsumerWidget with PresLogger {
     }
   }
 
-  /// Регион (для настроек маршрутов) ставится сам, как и раньше. Язык — только ru или en
-  /// (0.1.105): русский для России и стран СНГ, для остальных — по языку устройства.
+  /// Регион и язык по стране — как в 0.1.104 (T-026, шаг 5). Одно отличие: для «прочих» стран язык
+  /// берётся по языку устройства среди 21 языков (`resolveAppLocale(null)`), а не всегда английский.
+  /// Иначе у человека из Казахстана или Узбекистана на первом экране казахский/узбекский сменился бы на английский.
   RegionLocale _getRegionLocale(String country) {
-    final Region region = switch (country.toUpperCase()) {
-      "IR" => Region.ir,
-      "CN" => Region.cn,
-      "RU" => Region.ru,
-      "AF" => Region.af,
-      "BR" => Region.br,
-      "TR" => Region.tr,
-      _ => Region.other,
-    };
-    final locale = region == Region.ru ? AppLocale.ru : resolveAppLocale(null);
-    return RegionLocale(region, locale);
+    switch (country.toUpperCase()) {
+      case "IR":
+        return RegionLocale(Region.ir, AppLocale.fa);
+      case "CN":
+        return RegionLocale(Region.cn, AppLocale.zhCn);
+      case "RU":
+        return RegionLocale(Region.ru, AppLocale.ru);
+      case "AF":
+        return RegionLocale(Region.af, AppLocale.fa);
+      case "BR":
+        return RegionLocale(Region.br, AppLocale.ptBr);
+      case "TR":
+        return RegionLocale(Region.tr, AppLocale.tr);
+      default:
+        return RegionLocale(Region.other, resolveAppLocale(null));
+    }
   }
 }
 
