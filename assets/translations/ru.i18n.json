@@ -559,7 +559,7 @@
         },
         "profile": {
           "selectProfile": "Выберите профиль",
-          "conduitPairingId": "ID сопряжения Conduit"
+          "conduitPairingId": "ID сопряжения дополнительного сервиса"
         }
       }
     }

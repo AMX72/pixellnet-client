@@ -555,7 +555,7 @@
         },
         "profile": {
           "selectProfile": "Select profile",
-          "conduitPairingId": "Conduit pairing ID"
+          "conduitPairingId": "Additional service pairing ID"
         }
       }
     }
