@@ -22,8 +22,6 @@ import 'package:hiddify/gen/translations.g.dart' show Translations;
 import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/utils/alerts.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
-import 'package:hiddify/features/settings/data/config_option_repository.dart';
-import 'package:hiddify/singbox/model/singbox_config_enum.dart';
 import 'package:hiddify/features/auto_start/notifier/auto_start_notifier.dart';
 import 'package:hiddify/features/background_guard/background_guard.dart';
 import 'package:hiddify/features/background_guard/channel_recheck.dart';
@@ -122,7 +120,6 @@ class HomePage extends HookConsumerWidget {
                   const SliverToBoxAdapter(child: _StatusHero()),
                   const SliverToBoxAdapter(child: _SubscriptionSection()),
                   const SliverToBoxAdapter(child: _ExpirySection()),
-                  const SliverToBoxAdapter(child: _ConnectionSection()),
                   const SliverToBoxAdapter(child: _TrafficSection()),
                   const SliverToBoxAdapter(child: _SettingsSection()),
                   const SliverToBoxAdapter(child: _FooterRow()),
@@ -778,116 +775,7 @@ class _StatusDotState extends State<_StatusDot> with SingleTickerProviderStateMi
   }
 }
 
-// Строка «Режим» и окно выбора режима — как в 0.1.104 (решение владельца Р-21, 28.11).
-// Строку «Протокол» (тип канала из ядра) не возвращаем: подпись канала владелец заменит по итогам опроса.
-// Окно-справка про протокол (`_showPlaceholderSheet`) вызывалось только строкой «Протокол» — без неё не возвращено.
-class _ConnectionSection extends ConsumerWidget {
-  const _ConnectionSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = ref.watch(translationsProvider).requireValue;
-    final mode = ref.watch(ConfigOptions.serviceMode);
-    final modeLabel = _serviceModeLabel(t, mode);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: 10),
-        _Row(
-          label: t.pages.home.mode,
-          value: modeLabel,
-          onTap: () => _showModeSheet(context, ref),
-        ),
-      ],
-    );
-  }
-}
-
-/// Названия режимов — формулировки 0.1.105 («Все приложения», «Локальный порт», «Системные настройки»):
-/// слова «VPN» и «прокси» словарь (Р-12) в тексте для людей не допускает.
-String _serviceModeLabel(Translations t, ServiceMode m) {
-  switch (m) {
-    case ServiceMode.tun: return t.pages.settings.inbound.serviceModes.tun;
-    case ServiceMode.systemProxy: return t.pages.settings.inbound.serviceModes.systemProxy;
-    case ServiceMode.proxy: return t.pages.settings.inbound.shortServiceModes.proxy;
-  }
-}
-
-void _showModeSheet(BuildContext context, WidgetRef ref) {
-  final t = ref.read(translationsProvider).requireValue;
-  final current = ref.read(ConfigOptions.serviceMode);
-  final choices = ServiceMode.choices;
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
-    builder: (ctx) {
-      final theme = Theme.of(ctx);
-      return SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-              child: Text(
-                t.ui.home.modeTitle,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-            ),
-            for (final m in choices)
-              InkWell(
-                onTap: () async {
-                  Navigator.of(ctx).pop();
-                  if (m != current) {
-                    await ref.read(ConfigOptions.serviceMode.notifier).update(m);
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _serviceModeLabel(t, m),
-                              style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
-                            ),
-                            if (m == ServiceMode.tun)
-                              Text(t.ui.home.modeRecommended,
-                                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
-                            if (m == ServiceMode.systemProxy)
-                              Text(t.ui.home.modeSystemHint,
-                                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
-                            if (m == ServiceMode.proxy)
-                              Text(t.ui.home.modeProxyHint,
-                                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
-                          ],
-                        ),
-                      ),
-                      if (m == current)
-                        Icon(Icons.check_outlined, size: 18, color: theme.colorScheme.primary),
-                    ],
-                  ),
-                ),
-              ),
-            const Gap(8),
-          ],
-        ),
-      );
-    },
-  );
-}
+// Строки «Режим» на главной нет: владелец 28.11 — «строка режим на главной… мы это удалим… Нам достаточно вкладки «Отключить для приложений»». Переключатель режима работы остаётся в «Настройки → Входящие» и в меню у часов (Windows).
 
 void _showServerSheet(BuildContext context, WidgetRef ref) {
   showModalBottomSheet<void>(
