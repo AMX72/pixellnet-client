@@ -77,3 +77,11 @@ windows/sign.cer
 /libs/windows-amd64/
 
 hiddify-core/bin/
+
+# T-027 / А2.5 (закон L-25): ключи подписи в git не кладём. Ключ v3 живёт только в секретах GitHub и на раннере во время сборки.
+# (Существующий ключ v2 — android/app/pixellnet.keystore и android/key.properties — уже в репозитории, его не трогаем:
+#  он нужен только для моста 0.1.106; после моста его убирают из рабочих веток.)
+*.p12
+*.jks
+*.pfx
+android/key-v3*

@@ -29,6 +29,39 @@ if (localPropertiesFile.exists()) {
     }
 }
 
+// ---------------------------------------------------------------------------
+// T-027 / А2.5: режим сборки Android — «мост» (старый пакет) или «новое приложение».
+//
+//   -PpixellnetMode=bridge  (по умолчанию)  com.pixellnet.vpn, «PIXELLNET (старое)»,
+//                           подпись ключом v2 из репозитория (android/key.properties) — как раньше
+//   -PpixellnetMode=app                     com.pxllnet.app, «PXLLNET»,
+//                           подпись ключом v3 ТОЛЬКО из переменных окружения (в CI — из секретов ANDROID_V3_*)
+//
+//   flutter build apk --release --android-project-arg=pixellnetMode=app
+//
+// Пробная копия рядом с рабочей (как и раньше): pixellnetIdSuffix=.mig (или .core5) и при желании pixellnetLabel=...
+// Пара β: мост com.pixellnet.vpn.mig + новое com.pxllnet.app.mig. PEER_APP_ID у каждого указывает на другого (с тем же суффиксом).
+// Имена, метки, отпечатки — android/pixellnet-identities.properties (единый источник, читает и CI).
+// ---------------------------------------------------------------------------
+def identities = new Properties()
+rootProject.file('pixellnet-identities.properties').withReader('UTF-8') { reader -> identities.load(reader) }
+
+def pixellnetMode = (project.findProperty('pixellnetMode') ?: 'bridge').toString()
+if (!(pixellnetMode in ['bridge', 'app'])) {
+    throw new GradleException("pixellnetMode должен быть 'bridge' или 'app', получено '${pixellnetMode}'")
+}
+def peerMode = pixellnetMode == 'bridge' ? 'app' : 'bridge'
+def pixellnetIdSuffixValue = project.hasProperty('pixellnetIdSuffix') ? project.property('pixellnetIdSuffix').toString() : ''
+def modeApplicationId = identities.getProperty("${pixellnetMode}.package")
+def modeLabel = identities.getProperty("${pixellnetMode}.label")
+// Метка: явная pixellnetLabel (CI для .core5) или метка режима; у пробной копии с суффиксом — с « β».
+def pixellnetLabelValue = project.findProperty('pixellnetLabel')?.toString() ?:
+        (pixellnetIdSuffixValue ? "${modeLabel} β" : modeLabel)
+def peerApplicationId = identities.getProperty("${peerMode}.package") + pixellnetIdSuffixValue
+def peerCertSha256 = identities.getProperty("${peerMode}.cert.sha256").replace(':', '').toLowerCase()
+
+// Ключ v2 (мост): android/key.properties + android/app/pixellnet.keystore, лежат в git (публичный, скомпрометирован;
+// используется ТОЛЬКО для моста — иначе мост не встанет поверх 0.1.105).
 boolean hasKeyStore = false
 
 def keystoreProperties = new Properties()
@@ -36,7 +69,7 @@ def keystorePropertiesFile = rootProject.file('key.properties')
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
     hasKeyStore = true
-} else {
+} else if (pixellnetMode == 'bridge') {
     println "+++"
     println "No keystore defined. The app will not be signed."
     println "Create a android/key.properties file with the following properties:"
@@ -45,6 +78,26 @@ if (keystorePropertiesFile.exists()) {
     println "keyAlias"
     println "storeFile"
     println "+++"
+}
+
+// Ключ v3 (новое приложение): только окружение. Файла с паролями нет; хранилище на раннере создаётся перед сборкой и удаляется после.
+def v3Store = System.getenv('ANDROID_V3_STORE_FILE')
+def v3StorePassword = System.getenv('ANDROID_V3_STORE_PASSWORD')
+def v3KeyAlias = System.getenv('ANDROID_V3_KEY_ALIAS')
+def v3KeyPassword = System.getenv('ANDROID_V3_KEY_PASSWORD')
+boolean hasV3Key = [v3Store, v3StorePassword, v3KeyAlias, v3KeyPassword].every { it != null && !it.isEmpty() } &&
+        new File(v3Store).isFile()
+
+// Новое приложение без ключа v3 не собираем и не подписываем «чем попало» (ни v2, ни debug): падаем с понятной ошибкой.
+gradle.taskGraph.whenReady { graph ->
+    if (pixellnetMode == 'app' && !hasV3Key &&
+            graph.allTasks.any { it.project == project && it.name ==~ /(assemble|package|bundle)Release/ }) {
+        throw new GradleException(
+                "PIXELLNET: сборка pixellnetMode=app (${modeApplicationId}) без ключа подписи v3.\n" +
+                "Нужны переменные окружения ANDROID_V3_STORE_FILE (существующий файл PKCS12), ANDROID_V3_STORE_PASSWORD, " +
+                "ANDROID_V3_KEY_ALIAS, ANDROID_V3_KEY_PASSWORD (в CI — из секретов GitHub ANDROID_V3_*; у форков и PR их нет).\n" +
+                "Ключ v2 и debug-ключ для нового приложения не используются.")
+    }
 }
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')?: '1'
@@ -71,7 +124,8 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.pixellnet.vpn"
+        // По режиму (см. выше): bridge → com.pixellnet.vpn (как раньше), app → com.pxllnet.app.
+        applicationId modeApplicationId
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
@@ -79,11 +133,19 @@ android {
         multiDexEnabled true
         // Тестовая сборка рядом с рабочим приложением (не обновляет его):
         //   flutter build apk --android-project-arg=pixellnetIdSuffix=.core5 --android-project-arg=pixellnetLabel=PIXELLNET-β
-        // Без этих свойств (релизы) — обычные com.pixellnet.vpn и «PIXELLNET».
-        if (project.hasProperty('pixellnetIdSuffix')) {
-            applicationIdSuffix project.property('pixellnetIdSuffix')
+        // Без этих свойств (релизы) — обычные пакет и метка выбранного режима.
+        if (pixellnetIdSuffixValue) {
+            applicationIdSuffix pixellnetIdSuffixValue
         }
-        manifestPlaceholders += [pixellnetLabel: project.findProperty('pixellnetLabel') ?: 'PIXELLNET']
+        manifestPlaceholders += [
+                pixellnetLabel      : pixellnetLabelValue,
+                // Пакет второго приложения пары (для <queries> и проверок; у пробной копии — с тем же суффиксом).
+                pixellnetPeerAppId  : peerApplicationId,
+        ]
+        // Для кода моста и нового приложения (А2.7/А2.8): кто я и кого проверять при передаче ключа.
+        buildConfigField 'String', 'PIXELLNET_MODE', "\"${pixellnetMode}\""
+        buildConfigField 'String', 'PEER_APP_ID', "\"${peerApplicationId}\""
+        buildConfigField 'String', 'PEER_CERT_SHA256', "\"${peerCertSha256}\""
     }
 
     splits {
@@ -97,24 +159,39 @@ android {
         }
     }
 
-    if (hasKeyStore) {
-        signingConfigs {
+    signingConfigs {
+        if (pixellnetMode == 'bridge') {
+            if (hasKeyStore) {
+                release {
+                    keyAlias keystoreProperties['keyAlias']
+                    keyPassword keystoreProperties['keyPassword']
+                    storeFile file(keystoreProperties['storeFile'])
+                    storePassword keystoreProperties['storePassword']
+                }
+            }
+        } else if (hasV3Key) {
             release {
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
+                storeFile new File(v3Store)
+                storeType 'pkcs12'
+                storePassword v3StorePassword
+                keyAlias v3KeyAlias
+                keyPassword v3KeyPassword
             }
         }
     }
 
     buildTypes {
         release {
-            if (hasKeyStore) {
+            if (pixellnetMode == 'bridge') {
+                if (hasKeyStore) {
+                    signingConfig signingConfigs.release
+                } else {
+                    signingConfig signingConfigs.debug
+                }
+            } else if (hasV3Key) {
                 signingConfig signingConfigs.release
-            } else {
-                signingConfig signingConfigs.debug
             }
+            // app без ключа v3: подписи нет, а сборка release падает в gradle.taskGraph.whenReady выше.
             ndk {
                 //noinspection ChromeOsAbiSupport
                 abiFilters "x86_64", "armeabi-v7a", "arm64-v8a"
@@ -148,6 +225,19 @@ android.applicationVariants.all { variant ->
 
 flutter {
     source '../..'
+}
+
+// Быстрая проверка без сборки: ./gradlew -q :app:pixellnetIdentity -PpixellnetMode=app -PpixellnetIdSuffix=.mig
+// (её гоняет .github/workflows/android-gradle-smoke.yml). Паролей не печатает.
+tasks.register('pixellnetIdentity') {
+    doLast {
+        println "pixellnet.mode=${pixellnetMode}"
+        println "pixellnet.applicationId=${modeApplicationId}${pixellnetIdSuffixValue}"
+        println "pixellnet.label=${pixellnetLabelValue}"
+        println "pixellnet.peerAppId=${peerApplicationId}"
+        println "pixellnet.peerCertSha256=${peerCertSha256}"
+        println "pixellnet.signing=${pixellnetMode == 'bridge' ? (hasKeyStore ? 'v2 (key.properties)' : 'debug') : (hasV3Key ? 'v3 (ANDROID_V3_*)' : 'NONE (release build will fail)')}"
+    }
 }
 
 dependencies {

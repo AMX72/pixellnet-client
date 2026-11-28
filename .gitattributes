@@ -1,0 +1,5 @@
+# T-027: скрипты и файл варианта сборки всегда с LF (иначе на Windows bash падает на \r)
+scripts/*.sh text eol=lf
+scripts/*.py text eol=lf
+.github/android-release-variant text eol=lf
+android/pixellnet-identities.properties text eol=lf
