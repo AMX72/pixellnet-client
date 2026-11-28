@@ -657,7 +657,7 @@
       "msg": "An access key is a link or a code like PXN-XXXX-XXXX. Paste it from the clipboard, scan the QR code or enter it manually. No key? Contact support.",
       "helpBtn": {
         "label": "Contact support",
-        "url": "https://t.me/pixellnet_support"
+        "url": "https://t.me/pixellnet_bot?start=support"
       }
     },
     "unknownDomainsWarning": {

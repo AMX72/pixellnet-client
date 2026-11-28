@@ -661,7 +661,7 @@
       "msg": "Ключ доступа — это ссылка или код вида PXN-XXXX-XXXX. Вставьте его из буфера, отсканируйте QR-код или введите вручную. Нет ключа — напишите в поддержку.",
       "helpBtn": {
         "label": "Написать в поддержку",
-        "url": "https://t.me/pixellnet_support"
+        "url": "https://t.me/pixellnet_bot?start=support"
       }
     },
     "unknownDomainsWarning": {
