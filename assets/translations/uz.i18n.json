@@ -107,9 +107,9 @@
       "language": "Til",
       "developer": "Dasturchi uchun",
       "notConnected": "Ulanmagan",
-      "establishing": "Aloqa o'rnatilmoqda",
+      "establishing": "Aloqa oʻrnatilmoqda",
       "cancel": "Bekor qilish",
-      "support": "Qo'llab-quvvatlash",
+      "support": "Qoʻllab-quvvatlash",
       "languageTitle": "Interfeys tili",
       "copied": "Nusxalandi"
     },
@@ -553,7 +553,7 @@
         },
         "profile": {
           "selectProfile": "Profilni tanlang",
-          "conduitPairingId": "Conduit juftlash ID raqami"
+          "conduitPairingId": "Qoʻshimcha xizmatni juftlash ID raqami"
         }
       }
     }
@@ -771,14 +771,14 @@
     },
     "about": {
       "collectDiagnostics": "Diagnostikani yigʻish",
-      "collectDiagnosticsHint": "Qurilma va internet haqida maʼlumot + soʻnggi hodisalar — almashuv buferiga",
+      "collectDiagnosticsHint": "Qurilma va tarmoq haqidagi maʼlumotlarni hamda soʻnggi hodisalarni almashuv buferiga nusxalaydi",
       "diagnosticsCopied": "Diagnostika buferga nusxalandi ($count belgi)",
       "shareApp": "Ilovani ulashish",
       "shareAppHint": "Doʻstlarga yuklab olish havolasini yuborish"
     },
     "welcome": {
       "title": "Xush kelibsiz",
-      "subtitle": "Xorijiy xizmatlardan barqaror foydalanish",
+      "subtitle": "Bir tugma bilan barqaror aloqa",
       "trialTitle": "7 kun bepul sinab koʻrish",
       "trialSubtitle": "Kartasiz, roʻyxatdan oʻtmasdan",
       "haveKey": "Menda allaqachon kalit bor",
@@ -787,13 +787,13 @@
       "questions": "Savollaringiz bormi? Yozing: "
     },
     "trial": {
-      "expiredTitle": "Sinov muddatidan\nallaqachon foydalanilgan",
-      "expiredText": "Bu qurilmaga 7 kun allaqachon berilgan.\nDavom etish uchun pullik kalitni kiriting.",
+      "expiredTitle": "Sinov muddati tugadi",
+      "expiredText": "Bizga yozing — bepul uzaytirib beramiz. Pullik tariflar hozircha yoʻq.",
       "enterKey": "Kalitni kiritish",
-      "renew": "Muddatni uzaytirish",
-      "errServer": "Server $code kodini qaytardi. Keyinroq urinib koʻring.",
+      "renew": "Qoʻllab-quvvatlashga yozish",
+      "errServer": "Server xatosi ($code). Keyinroq urinib koʻring.",
       "errEmpty": "Serverdan boʻsh javob keldi",
-      "errImport": "Profilni qoʻshib boʻlmadi: $failure",
+      "errImport": "Kalitni qoʻshib boʻlmadi: $failure",
       "preparing": "Sinov muddatini tayyorlayapmiz",
       "oneSecond": "Bir soniya",
       "createFailed": "Sinov uchun kirishni yaratib boʻlmadi",
@@ -835,12 +835,12 @@
       "hourAny": "Istalgan vaqt",
       "checkNow": "Hozir tekshirish",
       "checkNowHint": "Kutmaymiz — yangilanishni hoziroq qidiramiz",
-      "upToDate": "Sizda eng soʻnggi versiya — yangisi hozircha yoʻq",
+      "upToDate": "Sizda eng soʻnggi versiya",
       "newVersion": "Yangi versiya bor · $version",
       "refreshHow": "Kanallar qanday yangilansin",
       "refreshWhen": "Kanallar qachon yangilansin",
       "refreshNow": "Kanallarni hozir yangilash",
-      "refreshNowHint": "Serverlarning yangi roʻyxatini yuklab olish",
+      "refreshNowHint": "Kanallarning yangi roʻyxatini yuklab olish",
       "listCurrent": "Roʻyxat dolzarb — oʻzgarishlar yoʻq",
       "updateModeAuto": "Soʻramasdan yuklab oladi va oʻrnatadi",
       "updateModeAsk": "Sizdan soʻraymiz — oʻzingiz hal qilasiz",
@@ -851,7 +851,7 @@
       "hourLabelEvening": "Kechqurun (taxminan 21:00)",
       "hourLabelAny": "Kunning istalgan vaqtida",
       "hourAt": "Soat $hour:00 da",
-      "refreshModeAuto": "Serverlar roʻyxatini soʻramasdan yangilaydi"
+      "refreshModeAuto": "Kanallar roʻyxatini soʻramasdan yangilaydi"
     },
     "guard": {
       "xiaomiTitle": "Faollik nazorati",
@@ -912,7 +912,7 @@
       "sectionNew": "Yangi",
       "sectionFixed": "Tuzatildi",
       "sectionImproved": "Yaxshilandi",
-      "fallback": "Koʻplab kichik yaxshilanishlar va barqarorlik."
+      "fallback": "Koʻplab kichik yaxshilanishlar — ishlash barqarorroq boʻldi."
     },
     "update": {
       "available": "Yangilanish mavjud",
@@ -933,7 +933,7 @@
       "errSizeMismatch": "$total baytdan $actual bayt yuklab olindi. Fayl buzilgan, qayta urinib koʻring.",
       "errTooSmall": "Yuklab olingan fayl juda kichik ($size bayt). Internetni tekshiring.",
       "errInstaller": "Oʻrnatuvchini ochib boʻlmadi: $message",
-      "errTimeout": "Yangilanish serveriga ulanish vaqti tugadi",
+      "errTimeout": "Yangilanish serveri uzoq vaqt javob bermayapti",
       "errOtherFile": "Manba boshqa faylni bermoqda ($expected bayt oʻrniga $length bayt)",
       "errPartial": "$total baytdan $actual bayt yuklab olindi",
       "errUnpack": "Zip arxivni ochib boʻlmadi: $message"
@@ -968,7 +968,7 @@
     },
     "home": {
       "menu": "Menyu",
-      "logs": "Loglar",
+      "logs": "Jurnal",
       "bgHint": "Telefon PIXELLNET ilovasini yopib qoʻymasligi uchun",
       "shareHint": "Doʻstlarga havola yuborish",
       "otherVersions": "Boshqa versiyalarni yuklab olish",
@@ -980,11 +980,11 @@
       "modeRecommended": "Tavsiya etiladi — barcha ilovalar bilan ishlaydi",
       "modeSystemHint": "Faqat HTTP/HTTPS, Node.js va Docker ishlamay qoladi",
       "modeProxyHint": "Tajribali foydalanuvchilar uchun — SOCKS5 port",
-      "serverTitle": "Serverni tanlash",
+      "serverTitle": "Kanalni tanlash",
       "refreshList": "Roʻyxatni yangilash",
-      "checkPing": "Pingni tekshirish",
-      "noServers": "Serverlar yoʻq — obuna kalitini qoʻshing.",
-      "connectToSeeServers": "Serverlar roʻyxatini koʻrish uchun ulaning",
+      "checkPing": "Kanallarni tekshirish",
+      "noServers": "Kanallar yoʻq — obuna kalitini qoʻshing.",
+      "connectToSeeServers": "Kanallar roʻyxatini koʻrish uchun ulaning",
       "loadError": "Yuklashda xato: $error",
       "today": "Bugun",
       "speed": "Tezlik",
@@ -1044,7 +1044,7 @@
       "cameraError": "Kamera xatosi: $code",
       "pointCamera": "Kamerani obunaning QR kodiga qarating",
       "newSubscription": "Yangi obuna",
-      "keyOrUrl": "Kalit yoki obuna URL manzili",
+      "keyOrUrl": "Kalit yoki obuna havolasi",
       "activate": "Faollashtirish",
       "supportSettingsTitle": "Qoʻllab-quvvatlashdan kelgan sozlamalar",
       "supportSettingsText": "Qoʻllab-quvvatlash xizmati yuborgan sozlamalar matnini toʻliq joylang.",

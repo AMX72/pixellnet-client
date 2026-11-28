@@ -553,7 +553,7 @@
         },
         "profile": {
           "selectProfile": "Profil seçin",
-          "conduitPairingId": "Conduit cütləşmə ID-si"
+          "conduitPairingId": "Əlavə xidmətin cütləşmə ID-si"
         }
       }
     }
@@ -771,14 +771,14 @@
     },
     "about": {
       "collectDiagnostics": "Diaqnostika topla",
-      "collectDiagnosticsHint": "Cihaz və internet barədə məlumat + son hadisələr — mübadilə buferinə",
+      "collectDiagnosticsHint": "Cihaz və şəbəkə barədə məlumatı və son hadisələri mübadilə buferinə kopyalayır",
       "diagnosticsCopied": "Diaqnostika buferdədir ($count simvol)",
       "shareApp": "Tətbiqi paylaş",
       "shareAppHint": "Dostlara yükləmə linki göndər"
     },
     "welcome": {
       "title": "Xoş gəlmisiniz",
-      "subtitle": "Xarici xidmətlərə sabit giriş",
+      "subtitle": "Bir düyməylə sabit bağlantı",
       "trialTitle": "7 gün pulsuz sınayın",
       "trialSubtitle": "Kartsız, qeydiyyatsız",
       "haveKey": "Artıq açarım var",
@@ -787,13 +787,13 @@
       "questions": "Sualınız var? Yazın: "
     },
     "trial": {
-      "expiredTitle": "Sınaq müddətindən\nartıq istifadə olunub",
-      "expiredText": "Bu cihaza artıq 7 gün vermişik.\nDavam etmək üçün ödənişli açar daxil edin.",
+      "expiredTitle": "Sınaq müddəti bitdi",
+      "expiredText": "Bizə yazın — pulsuz uzadacağıq. Ödənişli tariflər hələ yoxdur.",
       "enterKey": "Açarı daxil et",
-      "renew": "Girişi uzat",
-      "errServer": "Server $code kodunu qaytardı. Bir az sonra yenidən cəhd edin.",
+      "renew": "Dəstəyə yaz",
+      "errServer": "Server xətası ($code). Bir az sonra yenidən cəhd edin.",
       "errEmpty": "Serverdən boş cavab gəldi",
-      "errImport": "Profil əlavə etmək alınmadı: $failure",
+      "errImport": "Açarı əlavə etmək alınmadı: $failure",
       "preparing": "Sınaq müddəti hazırlanır",
       "oneSecond": "Bir saniyə",
       "createFailed": "Sınaq girişi yaratmaq alınmadı",
@@ -835,12 +835,12 @@
       "hourAny": "İstənilən vaxt",
       "checkNow": "İndi yoxla",
       "checkNowHint": "Gözləmirik — yeniləməni elə indi axtarırıq",
-      "upToDate": "Ən son versiya sizdədir — hələ yenisi yoxdur",
+      "upToDate": "Ən son versiya sizdədir",
       "newVersion": "Yeni versiya var · $version",
       "refreshHow": "Kanallar necə yenilənsin",
       "refreshWhen": "Kanallar nə vaxt yenilənsin",
       "refreshNow": "Kanalları indi yenilə",
-      "refreshNowHint": "Serverlərin yeni siyahısını yüklə",
+      "refreshNowHint": "Kanalların yeni siyahısını yüklə",
       "listCurrent": "Siyahı aktualdır — dəyişiklik yoxdur",
       "updateModeAuto": "Soruşmadan yükləyib quraşdıracaq",
       "updateModeAsk": "Soruşacağıq — siz qərar verəcəksiniz",
@@ -851,7 +851,7 @@
       "hourLabelEvening": "Axşam (təxminən 21:00)",
       "hourLabelAny": "Günün istənilən vaxtı",
       "hourAt": "Saat $hour:00",
-      "refreshModeAuto": "Server siyahısını soruşmadan yeniləyəcək"
+      "refreshModeAuto": "Kanal siyahısını soruşmadan yeniləyəcək"
     },
     "guard": {
       "xiaomiTitle": "Fəaliyyətə nəzarət",
@@ -912,7 +912,7 @@
       "sectionNew": "Yeni",
       "sectionFixed": "Düzəltdik",
       "sectionImproved": "Daha yaxşı oldu",
-      "fallback": "Çoxlu kiçik təkmilləşdirmə və daha çox sabitlik."
+      "fallback": "Çoxlu kiçik təkmilləşdirmə — iş daha sabit oldu."
     },
     "update": {
       "available": "Yeniləmə var",
@@ -933,7 +933,7 @@
       "errSizeMismatch": "$total baytdan $actual bayt yükləndi. Fayl zədələnib, yenidən cəhd edin.",
       "errTooSmall": "Yüklənmiş fayl çox kiçikdir ($size bayt). İnterneti yoxlayın.",
       "errInstaller": "Quraşdırıcını açmaq alınmadı: $message",
-      "errTimeout": "Yeniləmə serverinə qoşulmanın vaxtı bitdi",
+      "errTimeout": "Yeniləmə serveri uzun müddət cavab vermir",
       "errOtherFile": "Mənbə başqa fayl verir ($expected əvəzinə $length bayt)",
       "errPartial": "$total baytdan $actual bayt yükləndi",
       "errUnpack": "Zip faylını açmaq alınmadı: $message"
@@ -968,7 +968,7 @@
     },
     "home": {
       "menu": "Menyu",
-      "logs": "Loqlar",
+      "logs": "Jurnal",
       "bgHint": "Telefon PIXELLNET tətbiqini bağlamasın deyə",
       "shareHint": "Dostlara link göndər",
       "otherVersions": "Digər versiyaları yüklə",
@@ -980,11 +980,11 @@
       "modeRecommended": "Tövsiyə olunur — bütün tətbiqlərlə işləyir",
       "modeSystemHint": "Yalnız HTTP/HTTPS; Node.js və Docker ilə problem yaradır",
       "modeProxyHint": "Təcrübəli istifadəçilər üçün — SOCKS5 portu",
-      "serverTitle": "Server seçimi",
+      "serverTitle": "Kanal seçimi",
       "refreshList": "Siyahını yenilə",
-      "checkPing": "Pinqi yoxla",
-      "noServers": "Server yoxdur — abunəlik açarı əlavə edin.",
-      "connectToSeeServers": "Serverlərin siyahısını görmək üçün qoşulun",
+      "checkPing": "Kanalları yoxla",
+      "noServers": "Kanal yoxdur — abunəlik açarı əlavə edin.",
+      "connectToSeeServers": "Kanal siyahısını görmək üçün qoşulun",
       "loadError": "Yükləmə xətası: $error",
       "today": "Bu gün",
       "speed": "Sürət",
@@ -1044,7 +1044,7 @@
       "cameraError": "Kamera xətası: $code",
       "pointCamera": "Kameranı abunəliyin QR koduna tutun",
       "newSubscription": "Yeni abunəlik",
-      "keyOrUrl": "Açar və ya abunəlik URL-i",
+      "keyOrUrl": "Açar və ya abunəlik linki",
       "activate": "Aktivləşdir",
       "supportSettingsTitle": "Dəstəkdən gələn ayarlar",
       "supportSettingsText": "Dəstəyin göndərdiyi ayarların mətnini tam yapışdırın.",
