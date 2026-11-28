@@ -1,11 +1,107 @@
 {
+  "common": {
+    "appTitle": "PIXELLNET",
+    "start": "Başla",
+    "version": "Wersiýa",
+    "ok": "OK",
+    "cancel": "Ýatyr",
+    "kContinue": "Dowam et",
+    "showMore": "Köpräk görkez",
+    "showLess": "Azrak görkez",
+    "filter": "Süzgüç",
+    "all": "Ählisi",
+    "pause": "Arakesme",
+    "resume": "Dowam et",
+    "clear": "Arassala",
+    "close": "Ýap",
+    "auto": "Awto",
+    "manually": "El bilen",
+    "name": "Ady",
+    "url": "URL",
+    "add": "Goş",
+    "clipboard": "Alyş-çalyş buferi",
+    "addToClipboard": "Alyş-çalyş buferine göçür",
+    "scanQr": "QR skanirle",
+    "free": "Mugt",
+    "warp": "WARP",
+    "fragment": "Fragment",
+    "help": "Kömek",
+    "save": "Ýatda sakla",
+    "update": "Täzele",
+    "share": "Paýlaş",
+    "edit": "Üýtget",
+    "delete": "Poz",
+    "discard": "Ýatda saklama",
+    "import": "Import",
+    "export": "Eksport",
+    "later": "Soňrak",
+    "ignore": "Üns berme",
+    "quit": "Çykyş",
+    "notSet": "Bellenmedik",
+    "hide": "Gizle",
+    "exit": "Çyk",
+    "reset": "Deslapky ýagdaý",
+    "done": "Taýýar",
+    "decline": "Ret et",
+    "agree": "Razylaşýaryn",
+    "empty": "Boş",
+    "unknown": "Näbelli",
+    "hidden": "Gizlin",
+    "timeout": "Wagt gutardy",
+    "sort": "Tertiple",
+    "dashboard": "Dolandyryş paneli",
+    "disable": "Öçür",
+    "psiphon": "Goşmaça hyzmat 2",
+    "profile": "Profil",
+    "configuration": "Konfigurasiýa",
+    "file": "Faýl",
+    "interval": {
+      "day": {
+        "one": "$n gün",
+        "other": "$n gün"
+      },
+      "hour": {
+        "one": "$n sagat",
+        "other": "$n sagat"
+      }
+    },
+    "msg": {
+      "permission": {
+        "denied": "Rugsat ýok"
+      },
+      "export": {
+        "clipboard": {
+          "success": "Alyş-çalyş buferine göçürildi",
+          "failure": "Alyş-çalyş buferine göçürip bolmady",
+          "contentTooLarge": "Mazmun gaty uly. Faýla eksport ediň"
+        },
+        "file": {
+          "success": "JSON faýly döredildi",
+          "failure": "Faýly döredip bolmady"
+        }
+      },
+      "import": {
+        "confirm": "Importy tassyklaň",
+        "success": "Üstünlikli import edildi",
+        "failure": "Import edip bolmady"
+      },
+      "autoSave": {
+        "success": "Üýtgeşmeler awtomatik ýatda saklandy"
+      }
+    }
+  },
+  "intro": {
+    "banner": "Bir düwme bilen durnukly aragatnaşyk",
+    "termsAndPolicyCaution(rich)": "Dowam etmek bilen, Siz ${tap(@:pages.about.termsAndConditions)} bilen razylaşýarsyňyz",
+    "info(rich)": "PIXELLNET topary tarapyndan döredildi - ${tap_source(Açyk çeşme kody)} (${tap_license(Ygtyýarnama)})"
+  },
   "pages": {
     "home": {
       "title": "Baş sahypa",
-      "server": "Server",
-      "protocol": "Protokol",
       "mode": "Režim",
-      "vpnTun": "VPN (TUN)",
+      "channelWorking": "Işleýär",
+      "channelNotResponding": "Jogap bermeýär",
+      "channelChecking": "Aragatnaşygy barlaýarys…",
       "key": "Açar",
       "autoConnect": "Başlanda awtomatik birikme",
       "language": "Dil",
@@ -15,18 +111,949 @@
       "cancel": "Ýatyr",
       "support": "Goldaw",
       "languageTitle": "Interfeýs dili",
-      "copied": "Göçürildi",
-      "serverSoon": "Serwerler sanawy — tiz wagtda",
-      "protocolSoon": "Protokol saýlaw — tiz wagtda",
-      "modeSoon": "VPN (TUN) · Ulgam proksi — tiz wagtda",
-      "developerSoon": "Loglar, DNS, MTU, eksport — tiz wagtda"
+      "copied": "Göçürildi"
+    },
+    "proxies": {
+      "title": "Kanallar",
+      "sort": "Kanallary tertiple",
+      "testDelay": "Gijikmäni barla",
+      "empty": "Entek kanal ýok",
+      "activeProxy": "Häzirki kanal",
+      "unknownIp": "Näbelli IP",
+      "sortOptions": {
+        "unsorted": "Deslapky",
+        "name": "Elipbiý boýunça",
+        "delay": "Gijikme boýunça",
+        "usage": "Ulanylyşy boýunça"
+      },
+      "ipInfo": {
+        "address": "IP-salgy",
+        "country": "Ýurt",
+        "organization": "Gurama"
+      },
+      "delay": {
+        "result": "Gijikme: ${delay} ms",
+        "timeout": "Gijikme barlagynyň wagty gutardy",
+        "testing": "Gijikme: barlanýar..."
+      }
+    },
+    "profiles": {
+      "title": "Açarlar",
+      "add": "Açar goş",
+      "update": "Açary täzele",
+      "viewAllProfiles": "Ähli profilleri gör",
+      "activeProfileName": "Işjeň profiliň ady: «${name}».",
+      "nonActiveProfileName": "«${name}» profilini işjeň profil edip saýla",
+      "freeSubNotFound": "Mugt abuna tapylmady",
+      "freeSubNotFoundForRegion": "«${region}» sebiti üçin mugt abuna tapylmady",
+      "failedToLoad": "Ýükläp bolmady",
+      "updateSubscriptions": "Abunalary täzele",
+      "share": {
+        "urlToClipboard": "URL-i alyş-çalyş buferine göçür",
+        "showUrlQr": "URL-iň QR-kodyny görkez",
+        "jsonToClipboard": "JSON-y alyş-çalyş buferine göçür"
+      },
+      "msg": {
+        "save": {
+          "success": "Profil üstünlikli ýatda saklandy"
+        },
+        "invalidUrl": "Nädogry URL",
+        "add": {
+          "failure": "Profili goşup bolmady"
+        },
+        "update": {
+          "success": "Profil üstünlikli täzelendi",
+          "successNamed": "«${name}» profili üstünlikli täzelendi",
+          "failure": "Profili täzeläp bolmady",
+          "failureNamed": "«${name}» profilini täzeläp bolmady"
+        },
+        "delete": {
+          "success": "Profil üstünlikli pozuldy"
+        }
+      }
+    },
+    "profileDetails": {
+      "title": "Profil",
+      "lastUpdate": "Soňky täzelenme",
+      "form": {
+        "nameHint": "Profiliň ady",
+        "emptyName": "Ady hökman ýazmaly",
+        "invalidUrl": "Nädogry URL",
+        "urlHint": "Konfigurasiýanyň doly URL-i",
+        "disableAutoUpdate": "Awtomatik täzelenmäni öçür",
+        "autoUpdateInterval": "Awtomatik täzelenmäniň aralygy",
+        "loading": "Profil goşulýar..."
+      }
+    },
+    "logs": {
+      "title": "Žurnal",
+      "shareCoreLogs": "Ýadronyň žurnalyny paýlaş",
+      "shareAppLogs": "Programmanyň žurnalyny paýlaş"
+    },
+    "about": {
+      "title": "Programma barada",
+      "tagline": "Bir düwme bilen durnukly aragatnaşyk. Ýakyn wagtda — emeli aň kömekçisi we giňeltmeler.",
+      "notAvailableMsg": "Sizde iň soňky wersiýa — has täzesi entek ýok",
+      "checkForUpdate": "Täzelenmeleri barla",
+      "openWorkingDir": "Iş bukjasyny aç",
+      "sourceCode": "Çeşme kody",
+      "telegramChannel": "Telegram kanaly",
+      "termsAndConditions": "Ulanyş şertleri",
+      "privacyPolicy": "Gizlinlik syýasaty"
+    },
+    "settings": {
+      "title": "Sazlamalar",
+      "resetTunnel": "Birikmäni täzeden gur",
+      "options": {
+        "import": {
+          "clipboard": "Sazlamalary alyş-çalyş buferinden import et",
+          "file": "Sazlamalary faýldan import et"
+        },
+        "export": {
+          "anonymousToClipboard": "Sazlamalary şahsy maglumatlarsyz göçür",
+          "anonymousToFile": "Şahsy maglumatlarsyz faýla sakla",
+          "allToClipboard": "Ähli sazlamalary alyş-çalyş buferine göçür",
+          "allToFile": "Ähli sazlamalary faýla eksport et"
+        },
+        "reset": "Sazlamalary deslapky ýagdaýa gaýtar"
+      },
+      "general": {
+        "title": "Umumy",
+        "locale": "Dil",
+        "themeMode": "Bezeg temasy",
+        "themeModes": {
+          "system": "Ulgam boýunça",
+          "dark": "Garaňky",
+          "light": "Ýagty",
+          "black": "Gara"
+        },
+        "enableAnalytics": "Näsazlyklar barada habar bermek",
+        "enableAnalyticsMsg": "Bir zat ýalňyş gitse, programma bize gysga hasabat iberip biler — şeýdip biz hemme zady has çalt düzederis. Şahsy maglumatlaryňyz onda bolmaýar. Hiç kime bermeýäris.",
+        "autoIpCheck": "IP-salgyny awtomatik barla",
+        "dynamicNotification": "Tizligi habarnamada görkez",
+        "hapticFeedback": "Titreme bilen jogap",
+        "actionAtClosing": "Ýapylanda näme etmeli",
+        "autoStart": "Ulgama girilende işe göýber",
+        "silentStart": "Kiçeldilen görnüşde işe göýber",
+        "ignoreBatteryOptimizations": "Batareýany tygşytlamagy öçür",
+        "ignoreBatteryOptimizationsMsg": "Telefon PIXELLNET-i ýapmaz ýaly",
+        "memoryLimit": "Ýat çägi",
+        "memoryLimitMsg": "Ýat ýetmezçiligi sebäpli ýalňyşlyklar ýa-da programmada ýygy-ýygydan näsazlyklar bolsa, şuny açyň",
+        "debugMode": "Düzediş režimi",
+        "debugModeMsg": "Bu üýtgeşmäni ulanmak üçin programmany täzeden açyň",
+        "logLevel": "Žurnalyň derejesi",
+        "connectionTestUrl": "Birikmäni barlamak üçin URL",
+        "urlTestInterval": "URL barlagynyň aralygy",
+        "clashApiPort": "Clash API porty",
+        "useXrayCoreWhenPossible": "Açaryň ätiýaçlyk formaty",
+        "useXrayCoreWhenPossibleMsg": "Bu sazlamany işletmek üçin açary täzeden goşuň."
+      },
+      "routing": {
+        "title": "Ugrukdyrma",
+        "routeRule": {
+          "empty": "Entek goşulan düzgün ýok\n\nTäze düzgün döretmek ýa-da taýýar düzgünlerden saýlamak üçin + düwmesine basyň",
+          "delete": "Düzgüni poz",
+          "create": "Täze düzgün döret",
+          "options": {
+            "import": {
+              "clipboard": "Düzgünleri alyş-çalyş buferinden import et",
+              "file": "Düzgünleri faýldan import et"
+            },
+            "export": {
+              "clipboard": "Düzgünleri alyş-çalyş buferine göçür",
+              "file": "Düzgünleri faýla sakla"
+            },
+            "reset": "Düzgünleri deslapky ýagdaýa gaýtar"
+          },
+          "rule": {
+            "title": "Düzgün",
+            "onlyTunMode": "Diňe «Ähli programmalar» režiminde işleýär",
+            "notAvailabeInThisPlatform": "Bu platformada elýeterli däl",
+            "canNotBeEmpty": "Boş bolup bilmez",
+            "validUrlEx": "https://example.com",
+            "validUrl": "Dogry «URL», meselem\n@:pages.settings.routing.routeRule.rule.validUrlEx",
+            "validProcessNameEx": "Chrome.exe ýa-da google chrome ýa-da chrome",
+            "validProcessName": "Dogry «Proses ady», meselem\n@:pages.settings.routing.routeRule.rule.validProcessNameEx",
+            "validProcessPathEx": "C:\\Pro...\\chrome.exe\n/App.../Google Chrome\n/usr/lib.../chrome",
+            "validProcessPath": "Dogry «Proses ýoly», meselem\n@:pages.settings.routing.routeRule.rule.validProcessPathEx",
+            "validPortRangeEx": "80 ýa-da 1:65000",
+            "validPortRange": "Dogry «Port» ýa-da «Portlar aralygy», meselem\n@:pages.settings.routing.routeRule.rule.validPortRangeEx",
+            "validIpCidrEx": "8.8.8.8 ýa-da 10.0.0.0/24",
+            "validIpCidr": "Dogry IP CIDR, meselem\n@:pages.settings.routing.routeRule.rule.validIpCidrEx",
+            "validDomainEx": "Google.com ýa-da dl.google.com",
+            "validDomain": "Dogry «Domen», meselem\n@:pages.settings.routing.routeRule.rule.validDomainEx",
+            "validDomainSuffixEx": ".com ýa-da .tm",
+            "validDomainSuffix": "Dogry «Domen goşulmasy», meselem\n@:pages.settings.routing.routeRule.rule.validDomainSuffixEx",
+            "tileTitle(map)": {
+              "name": "Ady",
+              "outbound": "Gabat gelende ugur",
+              "rule_set": "Düzgünler toplumynyň URL-i",
+              "package_name": "Paket atlary",
+              "process_name": "Proses atlary",
+              "process_path": "Proses ýollary",
+              "network": "Torlar",
+              "port_range": "Barmaly portlar",
+              "source_port_range": "Çeşme portlary",
+              "protocol": "Protokol",
+              "ip_cidr": "Barmaly IP CIDR",
+              "source_ip_cidr": "Çeşme IP CIDR",
+              "domain": "Domen",
+              "domain_suffixe": "Domen goşulmasy",
+              "domain_keyword": "Domeniň açar sözi",
+              "domain_regex": "Domeniň regulýar aňlatmasy"
+            },
+            "outbound(map)": {
+              "proxy": "PIXELLNET arkaly",
+              "direct": "Göni",
+              "direct_with_fragment": "Göni, fragment bilen",
+              "block": "Gadagan et"
+            },
+            "network(map)": {
+              "all": "Ählisi",
+              "tcp": "TCP",
+              "udp": "UDP"
+            },
+            "protocol(map)": {
+              "": "Ählisi",
+              "tls": "TLS",
+              "http": "HTTP",
+              "quic": "QUIC",
+              "stun": "STUN",
+              "dns": "DNS",
+              "bittorrent": "BitTorrent"
+            }
+          },
+          "genericList": {
+            "addNew": "Täze baha goş",
+            "update": "Bahany täzele",
+            "clearList": "Sanawy arassala",
+            "clearListMsg": "Ähli elementler pozuldy"
+          }
+        },
+        "generalOptions": {
+          "title": "Ugrukdyrmanyň umumy sazlamalary",
+          "region": "Sebit",
+          "regions": {
+            "ir": "Eýran (ir)",
+            "cn": "Hytaý (cn)",
+            "ru": "Russiýa (ru)",
+            "af": "Owganystan (af)",
+            "id": "Indoneziýa (id)",
+            "tr": "Türkiýe (tr)",
+            "br": "Braziliýa (br)",
+            "other": "Başga"
+          },
+          "balancerStrategy": {
+            "title": "Balancer strategiýasy",
+            "roundRobin": "Round robin",
+            "consistentHash": "Consistent hash",
+            "stickySession": "Sticky session"
+          },
+          "resolveDestination": "Barmaly salgyny kesgitle",
+          "ipv6Route": "IPv6 ugry",
+          "ipv6Modes": {
+            "disable": "Öçür",
+            "enable": "Aç",
+            "prefer": "Ilki IPv6",
+            "only": "Diňe IPv6"
+          },
+          "perAppProxy": {
+            "title": "Programmalar üçin öçür",
+            "hideSysApps": "Ulgam programmalaryny gizle",
+            "options": {
+              "import": {
+                "clipboard": "Saýlananlary alyş-çalyş buferinden import et",
+                "file": "Saýlananlary faýldan import et",
+                "msg": "Import häzirki saýlawyňyzy çalşar. Dowam etmek isleýärsiňizmi?"
+              },
+              "export": {
+                "clipboard": "Saýlananlary alyş-çalyş buferine göçür",
+                "file": "Saýlananlary faýla eksport et"
+              },
+              "shareToAll": "Hemmeler bilen paýlaş",
+              "clearAllSelections": "Ähli saýlananlary arassala"
+            },
+            "modes": {
+              "all": "Ählisi",
+              "proxy": "Diňe bellenenler",
+              "bypass": "Bellenenlerden başgasy",
+              "allMsg": "Ähli programmalar PIXELLNET arkaly",
+              "proxyMsg": "PIXELLNET arkaly — diňe bellenenler",
+              "bypassMsg": "Bellenenler — göni, PIXELLNET-siz"
+            },
+            "autoSelection": {
+              "title": "Awtomatik saýlaw",
+              "performNow": "Häzir ýerine ýetir",
+              "resetToDefault": "Deslapky ýagdaýa gaýtar",
+              "autoUpdateInterval": "Awtomatik täzelenmäniň aralygy",
+              "toast": {
+                "success": "Programmalaryň awtomatik saýlawy üstünlikli tamamlandy",
+                "failure": "Awtomatik saýlawda ýalňyşlyk",
+                "regionNotFound": "«${region}» sebiti üçin awtomatik saýlaw tapylmady",
+                "alreadyInAuto": "Saýlawyňyz eýýäm awtomatik saýlaw sanawynda bar"
+              },
+              "dialog": {
+                "title": "Programmalaryň awtomatik saýlawy",
+                "msg": "Programmalaryň awtomatik saýlawy öçürildi: sebit «${region}» boldy"
+              }
+            }
+          }
+        },
+        "predefinedRules": {
+          "title": "Taýýar düzgünler",
+          "ads": {
+            "name": "Mahabaty aýyr",
+            "description": ""
+          },
+          "bypassLan": {
+            "name": "Öý tory — göni",
+            "description": ""
+          }
+        }
+      },
+      "dns": {
+        "title": "DNS",
+        "remoteDns": "Uzakdaky DNS",
+        "remoteDnsDomainStrategy": "Uzakdaky DNS üçin domen strategiýasy",
+        "directDns": "Çykyş serweri üçin DNS (göni)",
+        "directDnsDomainStrategy": "Çykyş domeniniň strategiýasy",
+        "enableFakeDns": "Galp DNS-i aç",
+        "domainStrategy": {
+          "auto": "Awto",
+          "preferIpv6": "Ilki IPv6",
+          "preferIpv4": "Ilki IPv4",
+          "ipv4Only": "Diňe IPv4",
+          "ipv6Only": "Diňe IPv6"
+        }
+      },
+      "inbound": {
+        "title": "Gelýän birikmeler",
+        "serviceMode": "Iş režimi",
+        "serviceModes": {
+          "proxy": "Diňe ýerli port",
+          "systemProxy": "Ulgam sazlamalary",
+          "tun": "Ähli programmalar"
+        },
+        "shortServiceModes": {
+          "proxy": "Ýerli port",
+          "systemProxy": "Ulgam",
+          "tun": "Ähli programmalar"
+        },
+        "strictRoute": "Berk ugrukdyrma",
+        "tunImplementation": "TUN görnüşi",
+        "tunImplementations": {
+          "mixed": "Garyşyk",
+          "system": "Ulgam",
+          "gvisor": "gVisor"
+        },
+        "mixedPort": "Garyşyk port",
+        "tproxyPort": "Dury režimiň porty",
+        "directPort": "Göni ýerli port",
+        "redirectPort": "Gaýtadan ugrukdyrma porty",
+        "lanSharing": "Tordaky beýleki enjamlar üçin elýeterlik",
+        "lanSharingPasswordNotSet": "Parol bellenmedik",
+        "lanSharingPassword": "Beýleki enjamlar üçin parol",
+        "copyLink": "Salgyny göçür",
+        "qrCode": "QR-kod",
+        "lanIPError": "Ýerli IP-salgyny alyp bolmady"
+      },
+      "tlsTricks": {
+        "title": "TLS usullary",
+        "enable": "Fragmentasiýany aç",
+        "packets": "Fragmentasiýa paketleri",
+        "packetsTlsHello": "TLS Hello",
+        "packets1_1": "1-1",
+        "packets1_2": "1-2",
+        "packets1_3": "1-3",
+        "packets1_4": "1-4",
+        "packets1_5": "1-5",
+        "size": "Fragmentiň ölçegi",
+        "sleep": "Fragmentiň gijikmesi",
+        "mixedSniCase": {
+          "enable": "SNI üçin garyşyk registri aç"
+        },
+        "padding": {
+          "enable": "Doldurmany aç",
+          "size": "Doldurmanyň ölçegi"
+        }
+      },
+      "chain": {
+        "title": "Zynjyr",
+        "subtitle": "Goşmaça gorag we ätiýaçlyk ýol",
+        "finalIp": "Soňky IP",
+        "levels": {
+          "app": {
+            "title": "Programma",
+            "msg": "Programmalaryňyzyň trafiginiň ýoly şu ýerden başlaýar"
+          },
+          "extraSecurity": {
+            "title": "Goşmaça howpsuzlyk",
+            "msg": "Esasy profiliňiz ynamdar bolmasa-da, maglumatlaryňyzyň gizlinligini saklamak üçin goşmaça gorag goşýar"
+          },
+          "mainProfile": {
+            "title": "Esasy profil"
+          },
+          "unblocker": {
+            "title": "Ätiýaçlyk ýol",
+            "msg": "Esasy kanal jogap bermese, aragatnaşyk ätiýaçlyk ýol bilen geçer"
+          },
+          "filtering": {
+            "title": "Süzgüç",
+            "msg": "Soňky ädim: trafik internete çykýar"
+          }
+        },
+        "warp": {
+          "missingConfig": "WARP konfigurasiýasy ýok",
+          "licenseKey": "Ygtyýarnama açary",
+          "cleanIp": "Arassa IP",
+          "port": "Port",
+          "noise": {
+            "count": "Şowhun mukdary",
+            "mode": "Şowhun režimi",
+            "size": "Şowhun ölçegi",
+            "delay": "Şowhun gijikmesi"
+          }
+        },
+        "psiphon": {
+          "selectServerRegion": "Serweriň sebitini saýlaň",
+          "regions": {
+            "auto": "@:common.auto",
+            "at": "Awstriýa (at)",
+            "au": "Awstraliýa (au)",
+            "be": "Belgiýa (be)",
+            "bg": "Bolgariýa (bg)",
+            "ca": "Kanada (ca)",
+            "ch": "Şweýsariýa (ch)",
+            "cz": "Çehiýa (cz)",
+            "de": "Germaniýa (de)",
+            "dk": "Daniýa (dk)",
+            "ee": "Estoniýa (ee)",
+            "es": "Ispaniýa (es)",
+            "fi": "Finlýandiýa (fi)",
+            "fr": "Fransiýa (fr)",
+            "gb": "Beýik Britaniýa (gb)",
+            "hr": "Horwatiýa (hr)",
+            "hu": "Wengriýa (hu)",
+            "ie": "Irlandiýa (ie)",
+            "in": "Hindistan (in)",
+            "it": "Italiýa (it)",
+            "jp": "Ýaponiýa (jp)",
+            "lv": "Latwiýa (lv)",
+            "nl": "Niderlandlar (nl)",
+            "no": "Norwegiýa (no)",
+            "pl": "Polşa (pl)",
+            "pt": "Portugaliýa (pt)",
+            "ro": "Rumyniýa (ro)",
+            "rs": "Serbiýa (rs)",
+            "se": "Şwesiýa (se)",
+            "sg": "Singapur (sg)",
+            "sk": "Slowakiýa (sk)",
+            "us": "ABŞ (us)"
+          }
+        },
+        "profile": {
+          "selectProfile": "Profil saýlaň",
+          "conduitPairingId": "Conduit jübütleme ID-si"
+        }
+      }
+    }
+  },
+  "components": {
+    "stats": {
+      "connection": "Birikme",
+      "traffic": "Trafik",
+      "trafficLive": "Häzirki trafik",
+      "trafficTotal": "Umumy trafik",
+      "uplink": "Ugratma",
+      "downlink": "Kabul etme",
+      "speed": "Tizlik",
+      "totalTransferred": "Jemi geçirilen"
+    },
+    "subscriptionInfo": {
+      "upload": "Ugradyldy",
+      "download": "Alyndy",
+      "total": "Jemi trafik",
+      "expireDate": "Gutarýan senesi",
+      "expired": "Möhleti geçdi",
+      "noTraffic": "Trafik çägi gutardy",
+      "remainingTime": "Galan wagt",
+      "remainingDuration": "${duration} gün galdy",
+      "remainingDurationNew": "${duration} gün",
+      "remainingTrafficSemanticLabel": "${total} trafikden ${consumed} ulanyldy",
+      "remainingTraffic": "Galan trafik",
+      "remainingUsage": "Galdy",
+      "profileSite": "Prowaýder",
+      "profileSupport": "Goldaw"
+    }
+  },
+  "dialogs": {
+    "sortProfiles": {
+      "title": "Tertiplemek",
+      "sort": {
+        "name": "Elipbiý boýunça",
+        "lastUpdate": "Soňky täzelenme boýunça"
+      }
+    },
+    "warpLicense": {
+      "title": "Cloudflare WARP ylalaşygy",
+      "description(rich)": "Bu sazlamany açmak bilen, Siz goşmaça hyzmat üpjünçisiniň ${tos(Hyzmat şertleri)} we ${privacy(Gizlinlik syýasaty)} bilen razylaşýarsyňyz."
+    },
+    "psiphonLicense": {
+      "title": "Goşmaça hyzmatyň ygtyýarnamasy",
+      "description(rich)": "Bu sazlamany ulanmak bilen, Siz goşmaça hyzmat üpjünçisiniň ${tos(Hyzmat şertleri)} bilen razylaşýarsyňyz we ${privacy(Gizlinlik syýasatyny)} tassyklaýarsyňyz. Dowam etmezden öň olary üns bilen okaň."
+    },
+    "newVersion": {
+      "title": "Täzelenme bar",
+      "msg": "@:common.appTitle programmasynyň täze wersiýasy bar. Häzir täzelemek isleýärsiňizmi?",
+      "currentVersion": "Häzirki wersiýa: ",
+      "newVersion": "Täze wersiýa: ",
+      "updateNow": "Häzir täzele"
+    },
+    "confirmation": {
+      "settings": {
+        "import": {
+          "msg": "Bu ähli sazlamalary berlen bahalar bilen çalşar. Hakykatdanam dowam etmek isleýärsiňizmi?"
+        }
+      },
+      "profile": {
+        "delete": {
+          "title": "Profili poz",
+          "msg": "Bu profili hakykatdanam hemişelik pozmak isleýärsiňizmi?"
+        }
+      },
+      "perAppProxy": {
+        "shareOnGithub": {
+          "title": "Awtomatik saýlawy gowulandyrmak",
+          "msg": "Saýlan programmalaryňyzy paýlaşyp, «awtomatik saýlaw» sanawyny doldurmaga kömek edýärsiňiz"
+        },
+        "import": {
+          "msg": "Bu häzirki saýlan programmalaryňyzy çalşar. Dowam etmelimi?"
+        }
+      },
+      "routeRule": {
+        "delete": {
+          "title": "Düzgüni poz",
+          "msg": "«$rulename» düzgünini hakykatdanam pozmak isleýärsiňizmi?"
+        }
+      },
+      "addProfileByDeepLinkWarning": {
+        "title": "Profil goşmalymy?",
+        "message": "«${host}» saýtyndan gelen daşky salgy täze profil goşmagy soraýar. Ony import etmek isleýärsiňizmi?"
+      },
+      "importRouteRuleByDeepLinkWarning": {
+        "title": "Ugrukdyrma düzgünini import etmelimi?",
+        "message": "Ynamsyz çeşmelerden ugrukdyrma düzgünlerini import etmek howpsuzlyk üçin howply bolup biler\nDiňe bu salga ynanýan bolsaňyz dowam ediň"
+      }
+    },
+    "experimentalNotice": {
+      "title": "Synag funksiýalary ulanylýar",
+      "msg": "Siz käbir synag funksiýalaryny açdyňyz, olar birikmäniň hiline täsir edip, garaşylmadyk ýalňyşlyklara getirip biler. Bu sazlamalary islendik wagt sazlamalar sahypasynda üýtgedip ýa-da deslapky ýagdaýa gaýtaryp bilersiňiz.",
+      "disable": "Gaýtadan görkezme"
+    },
+    "noActiveProfile": {
+      "title": "Açary nädip goşmaly",
+      "msg": "Giriş açary — bu salgy ýa-da PXN-XXXX-XXXX görnüşli kod. Ony buferden goýuň, QR-kody skanirläň ýa-da el bilen giriziň. Açaryňyz ýok bolsa, goldawa ýazyň.",
+      "helpBtn": {
+        "label": "Goldawa ýazyň",
+        "url": "https://t.me/pixellnet_bot?start=support"
+      }
+    },
+    "unknownDomainsWarning": {
+      "title": "Daşky salgy barada duýduryş",
+      "youAreAboutToVisit": "Siz şu saýta geçjek bolýarsyňyz:",
+      "thisWebsiteIsNotInOurTrustedList": "Bu saýt biziň ynamdar sanawymyzda ýok. Seresap boluň."
+    },
+    "proxyInfo": {
+      "fullTag": "Doly teg:",
+      "type": "Görnüşi:",
+      "testTime": "Barlag wagty:",
+      "testDelay": "Barlagdaky gijikme:",
+      "isSelected": "Saýlandy:",
+      "isGroup": "Bu topar",
+      "isSecure": "Goralan:",
+      "port": "Port:",
+      "host": "Host:",
+      "ip": "IP:",
+      "countryCode": "Ýurt kody:",
+      "region": "Sebit:",
+      "city": "Şäher:",
+      "asn": "ASN:",
+      "organization": "Gurama:",
+      "location": "Ýerleşýän ýeri:",
+      "postalCode": "Poçta indeksi:",
+      "download": "Alyndy:",
+      "upload": "Ugradyldy:"
+    },
+    "windowClosing": {
+      "askEachTime": "Her gezek sora",
+      "alertMessage": "Programmany gizlemelimi ýa-da ondan çykmalymy?",
+      "remember": "Saýlawymy ýatda sakla"
     }
   },
   "connection": {
+    "tapToConnect": "Birikdirmek üçin basyň",
     "connect": "Birikdir",
-    "connected": "Birikdi",
     "connecting": "Birikdirilýär…",
+    "connected": "Birikdi",
     "disconnect": "Üzmek",
-    "tapToConnect": "Birikdirmek üçin basyň"
+    "disconnecting": "Üzülýär…",
+    "reconnect": "Täzeden birikýär…",
+    "reconnectMsg": "Sazlamalar üýtgedi — birikmäni täzeleýäris…"
+  },
+  "errors": {
+    "unexpected": "Garaşylmadyk ýalňyşlyk",
+    "connection": {
+      "unexpected": "Birikmede garaşylmadyk ýalňyşlyk",
+      "timeout": "Birikmegiň wagty gutardy",
+      "badResponse": "Nädogry jogap",
+      "connectionError": "Birikme ýalňyşlygy",
+      "badCertificate": "Sertifikat hakyky däl"
+    },
+    "profiles": {
+      "unexpected": "Garaşylmadyk ýalňyşlyk",
+      "notFound": "Profil tapylmady",
+      "invalidConfig": "Nädogry konfigurasiýa",
+      "invalidUrl": "Nädogry URL",
+      "canceledByUser": "Ulanyjy tarapyndan ýatyryldy"
+    },
+    "connectivity": {
+      "unexpected": "Garaşylmadyk näsazlyk",
+      "missingVpnPermission": "Birikmek üçin rugsat gerek",
+      "missingNotificationPermission": "Habarnamalar üçin rugsat ýok",
+      "core": "Ýadro ýalňyşlygy"
+    },
+    "singbox": {
+      "serviceNotRunning": "Hyzmat işlemeýär",
+      "missingPrivilege": "Hukuklar ýeterlik däl",
+      "missingPrivilegeMsg": "Administrator hukuklary gerek. PIXELLNET-i ýapyň we täzeden açyň — Windows rugsat sorar.",
+      "invalidConfigOptions": "Nädogry konfigurasiýa sazlamalary",
+      "invalidConfig": "Nädogry konfigurasiýa"
+    },
+    "warp": {
+      "missingLicense": "Warp ygtyýarnamasy ýok",
+      "missingLicenseMsg": "Saýlanan profil WARP funksiýasyny ulanýar; bu funksiýany ulanmak üçin WARP ygtyýarnamasyny kabul etmeli"
+    },
+    "psiphon": {
+      "missingLicense": "Goşmaça hyzmatyň ygtyýarnamasyny kabul edip bolmady",
+      "missingLicenseMsg": "Saýlanan profil goşmaça hyzmaty ulanýar; onuň üçin ilki ygtyýarnamany kabul etmeli"
+    }
+  },
+  "ui": {
+    "share": {
+      "appText": "PIXELLNET — bir düwme bilen durnukly aragatnaşyk. Ýakyn wagtda — emeli aň kömekçisi we giňeltmeler.\n\nAndroid we Windows üçin ýükläp alyň:\n$url",
+      "inviteText": "Men PIXELLNET ulanýaryn — bir düwme bilen durnukly aragatnaşyk. Meniň salgym arkaly — 7 gün mugt: $link",
+      "whatToSend": "Näme ugratmak isleýärsiňiz?",
+      "chooseWhat": "Dostuňyza näme gerekdigini saýlaň",
+      "keyForOtherApp": "Başga programma üçin açar",
+      "keyForOtherAppHint": "Dostuňyzda eýýäm Happ ýa-da V2rayNG bar bolsa, diňe açary ugradyň",
+      "keyForApp": "PIXELLNET üçin açar",
+      "keyForAppHint": "Alyjynyň PIXELLNET programmasynda göni açylar",
+      "inviteTitle": "Dost çagyryň we bonus alyň",
+      "inviteSubtitle": "Çagyran her dostuňyz üçin ikiňiz hem 7 gün mugt alýarsyňyz",
+      "otherAppSheetSubtitle": "Alyjy salgyny öz programmasynda açar",
+      "otherAppPreamble": "Ine, giriş açary. Birikmek üçin salgyny öz programmaňyza goýuň:",
+      "keyForAppSheetSubtitle": "PIXELLNET programmasynda göni açylar",
+      "appPreamble": "PIXELLNET (pixellnet.com) programmasyny ýükläp alyň we bu salgyny açyň — ähli kanallar awtomatik goşular:",
+      "recommended": "Maslahat berýäris",
+      "sendViaMessenger": "Messenjer arkaly ugrat",
+      "showQr": "QR-kody görkez",
+      "linkCopied": "Salgy göçürildi",
+      "copyLink": "Salgyny göçür",
+      "linkValidUntil": "Salgy abunaňyz gutarýança hereket edýär",
+      "referralTitle": "7 gün sowgat ediň — 7 gün alyň",
+      "referralText": "Dostuňyz Siziň salgyňyz arkaly geçip, 7 gün mugt alýar. Ol abuna üçin tölän badyna, Siz hem 7 gün mugt alýarsyňyz.",
+      "yourCode": "Siziň kodyňyz:",
+      "bonusBadge": "+$days gün",
+      "referralCounts": "Tassyklandy: $confirmed · töleg garaşylýar: $pending",
+      "referralSubject": "PIXELLNET — 7 gün mugt",
+      "sendInvite": "Çakylyk ugrat",
+      "inviteLinkCopied": "Çakylyk salgysy göçürildi"
+    },
+    "about": {
+      "collectDiagnostics": "Diagnostika ýygna",
+      "collectDiagnosticsHint": "Enjam we tor barada maglumatlary hem-de soňky wakalary alyş-çalyş buferine göçürýär",
+      "diagnosticsCopied": "Diagnostika buferde ($count nyşan)",
+      "shareApp": "Programmany paýlaş",
+      "shareAppHint": "Dostlaryňyza ýükläp almak üçin salgy ugradyň"
+    },
+    "welcome": {
+      "title": "Hoş geldiňiz",
+      "subtitle": "Bir düwme bilen durnukly aragatnaşyk",
+      "trialTitle": "7 gün mugt synap görüň",
+      "trialSubtitle": "Kartsyz, hasaba durmazdan",
+      "haveKey": "Mende eýýäm açar bar",
+      "clipboardFound": "Alyş-çalyş buferinde salgy tapyldy",
+      "enterKeyHint": "Açary ýa-da abuna salgysyny giriziň",
+      "questions": "Soraglaryňyz barmy? Ýazyň: "
+    },
+    "trial": {
+      "expiredTitle": "Synag döwri gutardy",
+      "expiredText": "Bize ýazyň — mugt uzaldarys. Tölegli tarifler entek ýok.",
+      "enterKey": "Açary giriz",
+      "renew": "Goldawa ýazyň",
+      "errServer": "Serwer ýalňyşlygy ($code). Soňrak synanyşyň.",
+      "errEmpty": "Serwerden boş jogap geldi",
+      "errImport": "Açary goşup bolmady: $failure",
+      "preparing": "Synag döwrüni taýýarlaýarys",
+      "oneSecond": "Bir sekunt",
+      "createFailed": "Mugt synag döwrüni başlap bolmady",
+      "checkInternet": "Interneti barlaň we täzeden synanyşyň",
+      "retry": "Gaýtala"
+    },
+    "perApp": {
+      "offTitle": "Ähli programmalar PIXELLNET arkaly",
+      "offHint": "PIXELLNET ähli programmalar üçin işleýär. Başgaça saýlamak üçin ekranyň ýokarsyndaky režime basyň.",
+      "includeTitle": "PIXELLNET arkaly — diňe bellenenler",
+      "includeHint": "PIXELLNET diňe bellenen ✓ programmalar üçin işleýär. Galanlary internete göni çykýar.",
+      "excludeTitle": "Bellenenlerden başga ählisi PIXELLNET arkaly",
+      "excludeHint": "Bellenen ✓ programmalar internete PIXELLNET-siz, göni çykýar. Bank, döwlet hyzmatlary we söwda programmalary üçin amatly — olar göni has gowy işleýär."
+    },
+    "profile": {
+      "share": "Paýlaş…",
+      "refreshDone": "Kanallaryň sanawy täzelendi",
+      "refreshWithErrors": "Täzelendi: $done / $total, ýalňyşlyk: $errors",
+      "refreshPartial": "Täzelendi: $done / $total",
+      "channelsCount": "Kanallar ($count)",
+      "searching": "Kanallary gözleýäris…",
+      "connectToSee": "Ähli kanallary görmek üçin birigiň"
+    },
+    "general": {
+      "autoStartOnFailed": "Awtomatik işe göýberişi açyp bolmady",
+      "autoStartOffFailed": "Awtomatik işe göýberişi öçürip bolmady",
+      "logSize": "Žurnalyň ölçegi",
+      "logSizeHint": "$mb MB — köne ýazgylar pozulýar",
+      "mb": "$mb MB",
+      "updateHow": "Nädip täzelemeli",
+      "modeAuto": "Awtomatik",
+      "modeAsk": "Soramak",
+      "modeManual": "El bilen",
+      "updateWhen": "Haçan barlamaly",
+      "hourNight": "Gije",
+      "hourMorning": "Irden",
+      "hourDay": "Gündiz",
+      "hourEvening": "Agşam",
+      "hourAny": "Islendik wagt",
+      "checkNow": "Häzir barla",
+      "checkNowHint": "Garaşmaýarys — täzelenmäni şu wagt gözleýäris",
+      "upToDate": "Sizde iň soňky wersiýa",
+      "newVersion": "Täze wersiýa bar · $version",
+      "refreshHow": "Kanallary nädip täzelemeli",
+      "refreshWhen": "Kanallary haçan täzelemeli",
+      "refreshNow": "Kanallary häzir täzele",
+      "refreshNowHint": "Kanallaryň täze sanawyny ýükläp al",
+      "listCurrent": "Sanaw iň täze ýagdaýda — üýtgeşme ýok",
+      "updateModeAuto": "Soramazdan ýükläp alar we gurnar",
+      "updateModeAsk": "Sorarys — Siz karar berersiňiz",
+      "updateModeManual": "Diňe özüňiz basanyňyzda",
+      "hourLabelNight": "Gije (takmynan 3:00) — Siz uklap ýatyrkaňyz",
+      "hourLabelMorning": "Irden (takmynan 7:00)",
+      "hourLabelDay": "Gündiz (takmynan 14:00)",
+      "hourLabelEvening": "Agşam (takmynan 21:00)",
+      "hourLabelAny": "Günüň islendik wagtynda",
+      "hourAt": "Sagat $hour:00",
+      "refreshModeAuto": "Soramazdan kanallaryň sanawyny täzelär"
+    },
+    "guard": {
+      "xiaomiTitle": "Işjeňlige gözegçilik",
+      "bgTitle": "Fonda işlemek",
+      "xiaomiHint": "«Çäklendirme ýok» diýeni saýlaň",
+      "allowHint": "Telefonyň penjiresinde «Rugsat ber» düwmesine basyň",
+      "open": "Aç",
+      "allow": "Rugsat ber",
+      "autostartTitle": "Awtomatik işe göýberiş",
+      "autostartHint": "PIXELLNET-i tapyň (gözleg arkaly hem bolýar) we düwmesini açyk ýagdaýa geçiriň",
+      "launchTitle": "Programmalaryň işe göýberilişi",
+      "launchHint": "PIXELLNET üçin «Awtomatik» diýeni öçüriň we ähli düwmeleri açyk ýagdaýa geçiriň",
+      "switchHint": "PIXELLNET-iň ýanyndaky düwmäni açyk ýagdaýa geçiriň",
+      "allowBgHint": "PIXELLNET-e fonda işlemäge rugsat beriň",
+      "banner": "PIXELLNET gije öçüp biler",
+      "setup": "Sazla",
+      "remindTomorrow": "Ertir ýatlat",
+      "sheetTitle": "PIXELLNET öçmez ýaly",
+      "sheetDone": "Taýýar. Telefon indi batareýany tygşytlamak üçin PIXELLNET-i ýapmaz.",
+      "sheetText": "Telefon batareýany tygşytlaýar we gije PIXELLNET-i ýapyp biler — irden gorag öçük bolar. Fonda işlemäge rugsat beriň, bu bir minut alar.",
+      "done": "Taýýar",
+      "close": "Ýap"
+    },
+    "dev": {
+      "reportCopied": "Hasabat göçürildi — ony goldaw çatyna goýuň",
+      "error": "Ýalňyşlyk: $error",
+      "deviceCopied": "Enjam barada maglumat göçürildi",
+      "title": "Işläp düzüji üçin",
+      "about": "Programma barada",
+      "version": "Wersiýa",
+      "package": "Paket",
+      "platform": "Platforma",
+      "diagnostics": "Diagnostika",
+      "connectionLog": "Birikme žurnaly",
+      "collecting": "Ýygnaýarys…",
+      "copyReport": "Hasabaty göçür",
+      "copyReportHint": "OS, wersiýa, prowaýder, soňky wakalar",
+      "shareReport": "Hasabaty paýlaş",
+      "copyDevice": "Enjam maglumatyny göçür",
+      "other": "Beýlekiler",
+      "aboutProgram": "Programma barada"
+    },
+    "common": {
+      "close": "Ýap",
+      "update": "Täzele",
+      "cancel": "Ýatyr",
+      "hide": "Gizle",
+      "copied": "Göçürildi",
+      "allow": "Rugsat ber",
+      "delete": "Poz",
+      "add": "Goş",
+      "notNow": "Häzir däl",
+      "ms": "$ms ms"
+    },
+    "changelog": {
+      "whatsNew": "$version wersiýasynda näme täze",
+      "tellMain": "Esasy zatlary aýdyp bereris",
+      "sectionNew": "Täze",
+      "sectionFixed": "Düzedildi",
+      "sectionImproved": "Has gowy boldy",
+      "fallback": "Köp ownuk gowulandyrmalar, iş has durnukly boldy."
+    },
+    "update": {
+      "available": "Täzelenme bar",
+      "version": "Wersiýa $version",
+      "connecting": "Serwere birikýäris...",
+      "downloaded": "$percent% ýüklendi",
+      "openSettings": "Sazlamalary aç",
+      "downloading": "Ýükleýäris…",
+      "again": "Ýene bir gezek",
+      "allowInstall": "Gurnamaga rugsat beriň → yzyna gaýdyň → «Ýene bir gezek»",
+      "permissionNeeded": "Android sazlamalarynda şu çeşmeden programma gurnamaga rugsat beriň",
+      "hintXiaomi": "MIUI/HyperOS şuny görkezer: «Programmada howp bar». «Barybir gurna» → «Taýýar» düwmesine basyň.",
+      "hintHuawei": "EMUI gurnamagy tassyklamagy sorar. Ähli soraglarda «Rugsat ber» saýlaň.",
+      "hintOppo": "ColorOS/PurityScan ony «howp» diýip belläp biler. «Barybir gurna» düwmesine basyň.",
+      "noCell": "Operatoryňyzyň diňi häzir bu ýerde internet bermeýän ýaly. Mesele programmada däl — soňrak synanyşyň ýa-da Wi-Fi toruna birigiň.",
+      "noData": "Signal bar, ýöne internet ýok. Belki, operatorda näsazlyk bardyr — Wi-Fi arkaly synanyşyň.",
+      "errChecksum": "Täzelenme faýly zaýalanypdyr (barlag jemi gabat gelmedi). Täzeden synanyşyň.",
+      "errSizeMismatch": "$total baýtdan $actual baýt ýüklendi. Faýl zaýalanypdyr, täzeden synanyşyň.",
+      "errTooSmall": "Ýüklenen faýl gaty kiçi ($size baýt). Interneti barlaň.",
+      "errInstaller": "Gurnaýjyny açyp bolmady: $message",
+      "errTimeout": "Täzelenme serweri uzak wagt jogap bermeýär",
+      "errOtherFile": "Çeşme başga faýl berýär ($expected baýtyň ýerine $length baýt)",
+      "errPartial": "$total baýtdan $actual baýt ýüklendi",
+      "errUnpack": "Zip faýly açyp bolmady: $message"
+    },
+    "country": {
+      "de": "Germaniýa",
+      "nl": "Niderlandlar",
+      "lt": "Litwa",
+      "fi": "Finlýandiýa",
+      "fr": "Fransiýa",
+      "se": "Şwesiýa",
+      "us": "ABŞ",
+      "gb": "Beýik Britaniýa",
+      "ch": "Şweýsariýa",
+      "at": "Awstriýa",
+      "pl": "Polşa",
+      "cz": "Çehiýa",
+      "ru": "Russiýa",
+      "ua": "Ukraina",
+      "by": "Belarus",
+      "kz": "Gazagystan",
+      "tr": "Türkiýe"
+    },
+    "units": {
+      "b": "$n B",
+      "kb": "$n KB",
+      "mb": "$n MB",
+      "gb": "$n GB",
+      "bps": "$n B/s",
+      "kbps": "$n KB/s",
+      "mbps": "$n MB/s"
+    },
+    "home": {
+      "menu": "Menýu",
+      "logs": "Žurnal",
+      "bgHint": "Telefon PIXELLNET-i ýapmaz ýaly",
+      "shareHint": "Dostlaryňyza salgy ugradyň",
+      "otherVersions": "Beýleki wersiýalary ýükläp al",
+      "otherVersionsHint": "Windows · köne wersiýalar",
+      "refreshAskTitle": "Kanallaryň sanawyny täzelemelimi?",
+      "refreshAskText": "Täze kanallar peýda boldy. Häzir täzelemelimi?",
+      "auto": "Awto",
+      "modeTitle": "Iş režimi",
+      "modeRecommended": "Maslahat berilýär — ähli programmalar bilen işleýär",
+      "modeSystemHint": "Diňe HTTP/HTTPS, Node.js we Docker işini bozýar",
+      "modeProxyHint": "Tejribeli ulanyjylar üçin — SOCKS5 porty",
+      "serverTitle": "Kanal saýlawy",
+      "refreshList": "Sanawy täzele",
+      "checkPing": "Kanallary barla",
+      "noServers": "Kanal ýok — abuna açaryny goşuň.",
+      "connectToSeeServers": "Kanallaryň sanawyny görmek üçin birigiň",
+      "loadError": "Ýükleme ýalňyşlygy: $error",
+      "today": "Şu gün",
+      "speed": "Tizlik",
+      "expiry": "Möhlet",
+      "expired": "möhleti geçdi",
+      "until": "$date · $days galdy",
+      "days(plural, param=n)": {
+        "one": "$n gün",
+        "other": "$n gün"
+      },
+      "monthsShort": [
+        "ýan.",
+        "few.",
+        "mart",
+        "apr.",
+        "maý",
+        "iýun",
+        "iýul",
+        "awg.",
+        "sent.",
+        "okt.",
+        "noý.",
+        "dek."
+      ],
+      "keyExpired": "Açar $masked · möhleti geçdi",
+      "keyExpiresIn": "Açar $masked · möhletiň gutarmagyna $days galdy ($date)",
+      "renewTitle": "Abunany uzaltmak",
+      "renew": "Uzalt",
+      "renewHint": "@pixellnet_bot goldaw çaty açylar",
+      "subscriptionN": "Abuna $n",
+      "keys": "Açarlar",
+      "pasteFromClipboard": "Buferden goý",
+      "clipboardNoKey": "Buferde açar ýok",
+      "added": "Goşuldy",
+      "addSubscription": "Abuna goş",
+      "activeKey": "Işjeň açar · $name",
+      "copy": "Göçür",
+      "share": "Paýlaş",
+      "qrCode": "QR-kod",
+      "scanWithOther": "Başga enjam bilen skanirläň",
+      "validUntil": "$date senesine çenli hereket edýär",
+      "deleteLast": "Pozulandan soň programma täze açar sorar. Pozmalymy?",
+      "deleteActive": "«$name» işjeň açar bolar. Bu hereketi yzyna gaýtaryp bolmaz.",
+      "deleteTitle": "«$name» pozulsynmy?",
+      "deleted": "Abuna pozuldy",
+      "undo": "Yzyna gaýtar",
+      "clipboardEmpty": "Bufer boş",
+      "enterManually": "El bilen giriz",
+      "pasteSupportSettings": "Goldawdan gelen sazlamalary goý",
+      "pasteSupportSettingsHint": "Eger goldaw sazlamalary tekst görnüşinde iberen bolsa",
+      "scanQrCode": "QR-kody skanirle",
+      "scanQr": "QR skanirle",
+      "flash": "Fleş",
+      "switchCamera": "Kamerany çalyş",
+      "cameraDenied": "Kamerany ulanmaga rugsat ýok. Android sazlamalarynda rugsat beriň.",
+      "cameraUnsupported": "Bu enjamda kamera goldanylmaýar.",
+      "cameraError": "Kamera ýalňyşlygy: $code",
+      "pointCamera": "Kamerany abunanyň QR-koduna tutuň",
+      "newSubscription": "Täze abuna",
+      "keyOrUrl": "Açar ýa-da abuna salgysy",
+      "activate": "Işjeňleşdir",
+      "supportSettingsTitle": "Goldawdan gelen sazlamalar",
+      "supportSettingsText": "Goldawyň iberen sazlamalar tekstini doly goýuň.",
+      "hideFor3Days": "3 günläp gizle",
+      "updatedTo": "$version wersiýasyna çenli täzelendi",
+      "whatsNew": "Näme täze →",
+      "permRequesting": "Birikmek üçin rugsat soraýarys...",
+      "permNeeded": "Birikmek üçin rugsat gerek",
+      "permTap": "Rugsat bermek we täzeden birikmek üçin basyň"
+    }
   }
 }
