@@ -1,11 +1,107 @@
 {
+  "common": {
+    "appTitle": "PIXELLNET",
+    "start": "Սկսել",
+    "version": "Տարբերակ",
+    "ok": "OK",
+    "cancel": "Չեղարկել",
+    "kContinue": "Շարունակել",
+    "showMore": "Ցույց տալ ավելին",
+    "showLess": "Ցույց տալ ավելի քիչ",
+    "filter": "Զտիչ",
+    "all": "Բոլորը",
+    "pause": "Դադար",
+    "resume": "Վերսկսել",
+    "clear": "Մաքրել",
+    "close": "Փակել",
+    "auto": "Ավտո",
+    "manually": "Ձեռքով",
+    "name": "Անուն",
+    "url": "URL",
+    "add": "Ավելացնել",
+    "clipboard": "Սեղմատախտակ",
+    "addToClipboard": "Պատճենել սեղմատախտակին",
+    "scanQr": "Սկանավորել QR",
+    "free": "Անվճար",
+    "warp": "WARP",
+    "fragment": "Մասնատում",
+    "help": "Օգնություն",
+    "save": "Պահել",
+    "update": "Թարմացնել",
+    "share": "Կիսվել",
+    "edit": "Փոփոխել",
+    "delete": "Ջնջել",
+    "discard": "Չպահել",
+    "import": "Ներմուծում",
+    "export": "Արտահանում",
+    "later": "Ավելի ուշ",
+    "ignore": "Անտեսել",
+    "quit": "Ելք",
+    "notSet": "Նշված չէ",
+    "hide": "Թաքցնել",
+    "exit": "Դուրս գալ",
+    "reset": "Վերակայել",
+    "done": "Պատրաստ է",
+    "decline": "Մերժել",
+    "agree": "Համաձայն եմ",
+    "empty": "Դատարկ է",
+    "unknown": "Անհայտ",
+    "hidden": "Թաքնված",
+    "timeout": "Ժամանակը սպառվեց",
+    "sort": "Դասավորել",
+    "dashboard": "Կառավարման վահանակ",
+    "disable": "Անջատել",
+    "psiphon": "Լրացուցիչ ծառայություն 2",
+    "profile": "Պրոֆիլ",
+    "configuration": "Կոնֆիգուրացիա",
+    "file": "Ֆայլ",
+    "interval": {
+      "day": {
+        "one": "$n օր",
+        "other": "$n օր"
+      },
+      "hour": {
+        "one": "$n ժամ",
+        "other": "$n ժամ"
+      }
+    },
+    "msg": {
+      "permission": {
+        "denied": "Թույլտվությունը մերժված է"
+      },
+      "export": {
+        "clipboard": {
+          "success": "Պատճենվեց սեղմատախտակին",
+          "failure": "Չհաջողվեց պատճենել սեղմատախտակին",
+          "contentTooLarge": "Բովանդակությունը չափազանց մեծ է։ Արտահանեք այն ֆայլի մեջ"
+        },
+        "file": {
+          "success": "JSON ֆայլը ստեղծվեց",
+          "failure": "Չհաջողվեց ստեղծել ֆայլը"
+        }
+      },
+      "import": {
+        "confirm": "Հաստատել ներմուծումը",
+        "success": "Հաջողությամբ ներմուծվեց",
+        "failure": "Չհաջողվեց ներմուծել"
+      },
+      "autoSave": {
+        "success": "Փոփոխություններն ավտոմատ պահվեցին"
+      }
+    }
+  },
+  "intro": {
+    "banner": "Կայուն կապ մեկ կոճակով",
+    "termsAndPolicyCaution(rich)": "Շարունակելով՝ դուք համաձայնում եք ${tap(@:pages.about.termsAndConditions)} փաստաթղթին",
+    "info(rich)": "Ստեղծվել է PIXELLNET թիմի կողմից - ${tap_source(Բաց կոդ)} (${tap_license(Լիցենզիա)})"
+  },
   "pages": {
     "home": {
       "title": "Գլխավոր",
-      "server": "Սերվեր",
-      "protocol": "Արձանագրություն",
       "mode": "Ռեժիմ",
-      "vpnTun": "VPN (TUN)",
+      "channelWorking": "Աշխատում է",
+      "channelNotResponding": "Չի պատասխանում",
+      "channelChecking": "Ստուգում ենք կապը…",
       "key": "Բանալի",
       "autoConnect": "Ավտոմատ միացում գործարկման ժամանակ",
       "language": "Լեզու",
@@ -15,18 +111,949 @@
       "cancel": "Չեղարկել",
       "support": "Աջակցություն",
       "languageTitle": "Ինտերֆեյսի լեզու",
-      "copied": "Պատճենվեց",
-      "serverSoon": "Սերվերների ցանկ — շուտով",
-      "protocolSoon": "Արձանագրության ընտրություն — շուտով",
-      "modeSoon": "VPN (TUN) · Համակարգային պրոքսի — շուտով",
-      "developerSoon": "Մատյաններ, DNS, MTU, արտահանում — շուտով"
+      "copied": "Պատճենվեց"
+    },
+    "proxies": {
+      "title": "Ալիքներ",
+      "sort": "Դասավորել ալիքները",
+      "testDelay": "Ստուգել ուշացումը",
+      "empty": "Ալիքներ դեռ չկան",
+      "activeProxy": "Ընթացիկ ալիք",
+      "unknownIp": "Անհայտ IP",
+      "sortOptions": {
+        "unsorted": "Լռելյայն",
+        "name": "Այբբենական կարգով",
+        "delay": "Ըստ ուշացման",
+        "usage": "Ըստ օգտագործման"
+      },
+      "ipInfo": {
+        "address": "IP հասցե",
+        "country": "Երկիր",
+        "organization": "Կազմակերպություն"
+      },
+      "delay": {
+        "result": "Ուշացում՝ ${delay} մվ",
+        "timeout": "Ուշացման ստուգման ժամանակը սպառվեց",
+        "testing": "Ուշացում՝ ստուգվում է..."
+      }
+    },
+    "profiles": {
+      "title": "Բանալիներ",
+      "add": "Ավելացնել բանալի",
+      "update": "Թարմացնել բանալին",
+      "viewAllProfiles": "Դիտել բոլոր պրոֆիլները",
+      "activeProfileName": "Ակտիվ պրոֆիլի անունը՝ «${name}»։",
+      "nonActiveProfileName": "Ընտրել «${name}» պրոֆիլը որպես ակտիվ",
+      "freeSubNotFound": "Անվճար բաժանորդագրություն չի գտնվել",
+      "freeSubNotFoundForRegion": "«${region}» տարածաշրջանի համար անվճար բաժանորդագրություն չի գտնվել",
+      "failedToLoad": "Չհաջողվեց բեռնել",
+      "updateSubscriptions": "Թարմացնել բաժանորդագրությունները",
+      "share": {
+        "urlToClipboard": "Պատճենել URL-ը",
+        "showUrlQr": "Ցույց տալ URL-ի QR կոդը",
+        "jsonToClipboard": "Պատճենել JSON-ը"
+      },
+      "msg": {
+        "save": {
+          "success": "Պրոֆիլը պահվեց"
+        },
+        "invalidUrl": "Սխալ URL",
+        "add": {
+          "failure": "Չհաջողվեց ավելացնել պրոֆիլը"
+        },
+        "update": {
+          "success": "Պրոֆիլը թարմացվեց",
+          "successNamed": "«${name}» պրոֆիլը թարմացվեց",
+          "failure": "Չհաջողվեց թարմացնել պրոֆիլը",
+          "failureNamed": "Չհաջողվեց թարմացնել «${name}» պրոֆիլը"
+        },
+        "delete": {
+          "success": "Պրոֆիլը ջնջվեց"
+        }
+      }
+    },
+    "profileDetails": {
+      "title": "Պրոֆիլ",
+      "lastUpdate": "Վերջին թարմացում",
+      "form": {
+        "nameHint": "Պրոֆիլի անուն",
+        "emptyName": "Անունը պարտադիր է",
+        "invalidUrl": "Սխալ URL",
+        "urlHint": "Կոնֆիգուրացիայի ամբողջական URL",
+        "disableAutoUpdate": "Անջատել ավտոմատ թարմացումը",
+        "autoUpdateInterval": "Ավտոմատ թարմացման միջակայք",
+        "loading": "Պրոֆիլն ավելացվում է..."
+      }
+    },
+    "logs": {
+      "title": "Մատյան",
+      "shareCoreLogs": "Կիսվել միջուկի մատյանով",
+      "shareAppLogs": "Կիսվել հավելվածի մատյանով"
+    },
+    "about": {
+      "title": "Ծրագրի մասին",
+      "tagline": "Կայուն կապ մեկ կոճակով։ Շուտով՝ ԱԲ օգնական և ընդլայնումներ։",
+      "notAvailableMsg": "Տեղադրված է վերջին տարբերակը",
+      "checkForUpdate": "Ստուգել թարմացումները",
+      "openWorkingDir": "Բացել աշխատանքային թղթապանակը",
+      "sourceCode": "Ելակետային կոդ",
+      "telegramChannel": "Telegram ալիք",
+      "termsAndConditions": "Օգտագործման պայմաններ",
+      "privacyPolicy": "Գաղտնիության քաղաքականություն"
+    },
+    "settings": {
+      "title": "Կարգավորումներ",
+      "resetTunnel": "Վերակայել կապը",
+      "options": {
+        "import": {
+          "clipboard": "Ներմուծել կարգավորումները սեղմատախտակից",
+          "file": "Ներմուծել կարգավորումները ֆայլից"
+        },
+        "export": {
+          "anonymousToClipboard": "Պատճենել կարգավորումներն առանց անձնական տվյալների",
+          "anonymousToFile": "Պահել ֆայլում՝ առանց անձնական տվյալների",
+          "allToClipboard": "Պատճենել բոլոր կարգավորումները սեղմատախտակին",
+          "allToFile": "Արտահանել բոլոր կարգավորումները ֆայլի մեջ"
+        },
+        "reset": "Վերակայել կարգավորումները"
+      },
+      "general": {
+        "title": "Ընդհանուր",
+        "locale": "Լեզու",
+        "themeMode": "Ձևավորման թեմա",
+        "themeModes": {
+          "system": "Համակարգային",
+          "dark": "Մուգ",
+          "light": "Բաց",
+          "black": "Սև"
+        },
+        "enableAnalytics": "Հաղորդել խափանումների մասին",
+        "enableAnalyticsMsg": "Եթե ինչ-որ բան սխալ գնա, հավելվածը կկարողանա մեզ ուղարկել կարճ հաշվետվություն — այդպես մենք ավելի արագ կուղղենք ամեն ինչ։ Առանց ձեր անձնական տվյալների։ Ոչ ոքի չենք փոխանցում։",
+        "autoIpCheck": "Ավտոմատ ստուգել IP հասցեն",
+        "dynamicNotification": "Ցույց տալ արագությունը ծանուցման մեջ",
+        "hapticFeedback": "Թրթռում հպելիս",
+        "actionAtClosing": "Գործողություն փակելիս",
+        "autoStart": "Գործարկել համակարգ մուտք գործելիս",
+        "silentStart": "Գործարկել ծալված",
+        "ignoreBatteryOptimizations": "Անջատել մարտկոցի օպտիմալացումը",
+        "ignoreBatteryOptimizationsMsg": "Որպեսզի հեռախոսը չփակի PIXELLNET-ը",
+        "memoryLimit": "Հիշողության սահմանափակում",
+        "memoryLimitMsg": "Միացրեք, եթե հանդիպում եք հիշողության պակասի սխալների կամ հավելվածի հաճախակի խափանումների",
+        "debugMode": "Վրիպազերծման ռեժիմ",
+        "debugModeMsg": "Վերագործարկեք հավելվածը, որպեսզի փոփոխությունը կիրառվի",
+        "logLevel": "Մատյանի մակարդակ",
+        "connectionTestUrl": "Կապի ստուգման URL",
+        "urlTestInterval": "URL-ի ստուգման միջակայք",
+        "clashApiPort": "Clash API-ի պորտ",
+        "useXrayCoreWhenPossible": "Բանալու պահուստային ձևաչափ",
+        "useXrayCoreWhenPossibleMsg": "Միացնելու համար բանալին նորից ավելացրեք։"
+      },
+      "routing": {
+        "title": "Երթուղավորում",
+        "routeRule": {
+          "empty": "Կանոններ դեռ չկան\n\nՍեղմեք + կոճակը՝ նոր կանոն ստեղծելու կամ նախապես սահմանվածներից ընտրելու համար",
+          "delete": "Ջնջել կանոնը",
+          "create": "Ստեղծել նոր կանոն",
+          "options": {
+            "import": {
+              "clipboard": "Ներմուծել կանոնները սեղմատախտակից",
+              "file": "Ներմուծել կանոնները ֆայլից"
+            },
+            "export": {
+              "clipboard": "Պատճենել կանոնները սեղմատախտակին",
+              "file": "Պահել կանոնները ֆայլում"
+            },
+            "reset": "Վերակայել կանոնները"
+          },
+          "rule": {
+            "title": "Կանոն",
+            "onlyTunMode": "Աշխատում է միայն «Բոլոր հավելվածները» ռեժիմում",
+            "notAvailabeInThisPlatform": "Հասանելի չէ այս հարթակում",
+            "canNotBeEmpty": "Չի կարող դատարկ լինել",
+            "validUrlEx": "https://example.com",
+            "validUrl": "Ճիշտ «URL», օրինակ՝\n@:pages.settings.routing.routeRule.rule.validUrlEx",
+            "validProcessNameEx": "Chrome.exe կամ google chrome կամ chrome",
+            "validProcessName": "Ճիշտ «Գործընթացի անուն», օրինակ՝\n@:pages.settings.routing.routeRule.rule.validProcessNameEx",
+            "validProcessPathEx": "C:\\Pro...\\chrome.exe\n/App.../Google Chrome\n/usr/lib.../chrome",
+            "validProcessPath": "Ճիշտ «Գործընթացի ուղի», օրինակ՝\n@:pages.settings.routing.routeRule.rule.validProcessPathEx",
+            "validPortRangeEx": "80 կամ 1:65000",
+            "validPortRange": "Ճիշտ «Պորտ» կամ «Պորտերի միջակայք», օրինակ՝\n@:pages.settings.routing.routeRule.rule.validPortRangeEx",
+            "validIpCidrEx": "8.8.8.8 կամ 10.0.0.0/24",
+            "validIpCidr": "Ճիշտ IP CIDR, օրինակ՝\n@:pages.settings.routing.routeRule.rule.validIpCidrEx",
+            "validDomainEx": "Google.com կամ dl.google.com",
+            "validDomain": "Ճիշտ «Դոմեն», օրինակ՝\n@:pages.settings.routing.routeRule.rule.validDomainEx",
+            "validDomainSuffixEx": ".com կամ .am",
+            "validDomainSuffix": "Ճիշտ «Դոմենի վերջածանց», օրինակ՝\n@:pages.settings.routing.routeRule.rule.validDomainSuffixEx",
+            "tileTitle(map)": {
+              "name": "Անուն",
+              "outbound": "Ուղղություն համընկնելիս",
+              "rule_set": "Կանոնների հավաքածուի URL",
+              "package_name": "Փաթեթների անուններ",
+              "process_name": "Գործընթացների անուններ",
+              "process_path": "Գործընթացների ուղիներ",
+              "network": "Ցանցեր",
+              "port_range": "Նպատակային պորտեր",
+              "source_port_range": "Աղբյուրի պորտեր",
+              "protocol": "Արձանագրություն",
+              "ip_cidr": "Նպատակային IP CIDR",
+              "source_ip_cidr": "Աղբյուրի IP CIDR",
+              "domain": "Դոմեն",
+              "domain_suffixe": "Դոմենի վերջածանց",
+              "domain_keyword": "Դոմենի բանալի բառ",
+              "domain_regex": "Դոմենի կանոնավոր արտահայտություն"
+            },
+            "outbound(map)": {
+              "proxy": "PIXELLNET-ի միջոցով",
+              "direct": "Ուղղակի",
+              "direct_with_fragment": "Ուղղակի՝ մասնատմամբ",
+              "block": "Արգելել"
+            },
+            "network(map)": {
+              "all": "Բոլորը",
+              "tcp": "TCP",
+              "udp": "UDP"
+            },
+            "protocol(map)": {
+              "": "Բոլորը",
+              "tls": "TLS",
+              "http": "HTTP",
+              "quic": "QUIC",
+              "stun": "STUN",
+              "dns": "DNS",
+              "bittorrent": "BitTorrent"
+            }
+          },
+          "genericList": {
+            "addNew": "Ավելացնել նոր արժեք",
+            "update": "Թարմացնել արժեքը",
+            "clearList": "Մաքրել ցանկը",
+            "clearListMsg": "Բոլոր տարրերը ջնջված են"
+          }
+        },
+        "generalOptions": {
+          "title": "Երթուղավորման ընդհանուր պարամետրեր",
+          "region": "Տարածաշրջան",
+          "regions": {
+            "ir": "Իրան (ir)",
+            "cn": "Չինաստան (cn)",
+            "ru": "Ռուսաստան (ru)",
+            "af": "Աֆղանստան (af)",
+            "id": "Ինդոնեզիա (id)",
+            "tr": "Թուրքիա (tr)",
+            "br": "Բրազիլիա (br)",
+            "other": "Այլ"
+          },
+          "balancerStrategy": {
+            "title": "Հավասարակշռման ռազմավարություն",
+            "roundRobin": "Round robin",
+            "consistentHash": "Consistent hash",
+            "stickySession": "Sticky session"
+          },
+          "resolveDestination": "Որոշել նպատակակետի հասցեն",
+          "ipv6Route": "IPv6 երթուղի",
+          "ipv6Modes": {
+            "disable": "Անջատել",
+            "enable": "Միացնել",
+            "prefer": "Նախընտրելի",
+            "only": "Միայն"
+          },
+          "perAppProxy": {
+            "title": "Անջատել հավելվածների համար",
+            "hideSysApps": "Թաքցնել համակարգային հավելվածները",
+            "options": {
+              "import": {
+                "clipboard": "Ներմուծել ընտրությունը սեղմատախտակից",
+                "file": "Ներմուծել ընտրությունը ֆայլից",
+                "msg": "Ներմուծումը կփոխարինի ձեր ընթացիկ ընտրությունը։ Համոզվա՞ծ եք, որ ուզում եք շարունակել։"
+              },
+              "export": {
+                "clipboard": "Պատճենել ընտրությունը սեղմատախտակին",
+                "file": "Արտահանել ընտրությունը ֆայլի մեջ"
+              },
+              "shareToAll": "Կիսվել բոլորի հետ",
+              "clearAllSelections": "Մաքրել ամբողջ ընտրությունը"
+            },
+            "modes": {
+              "all": "Բոլորը",
+              "proxy": "Միայն նշվածները",
+              "bypass": "Բացի նշվածներից",
+              "allMsg": "Բոլոր հավելվածները՝ PIXELLNET-ի միջոցով",
+              "proxyMsg": "PIXELLNET-ի միջոցով՝ միայն նշվածները",
+              "bypassMsg": "Նշվածները՝ ուղղակիորեն, առանց PIXELLNET-ի"
+            },
+            "autoSelection": {
+              "title": "Ավտոընտրություն",
+              "performNow": "Կատարել հիմա",
+              "resetToDefault": "Վերակայել լռելյայն",
+              "autoUpdateInterval": "Ավտոմատ թարմացման միջակայք",
+              "toast": {
+                "success": "Հավելվածների ավտոընտրությունն ավարտվեց",
+                "failure": "Ավտոընտրության սխալ",
+                "regionNotFound": "«${region}» տարածաշրջանի համար ավտոընտրություն չի գտնվել",
+                "alreadyInAuto": "Ձեր ընտրությունն արդեն ավտոընտրության ցանկում է"
+              },
+              "dialog": {
+                "title": "Հավելվածների ավտոընտրություն",
+                "msg": "Հավելվածների ավտոընտրությունն անջատվեց՝ տարածաշրջանը փոխվեց։ Նոր տարածաշրջան՝ «${region}»"
+              }
+            }
+          }
+        },
+        "predefinedRules": {
+          "title": "Նախապես սահմանված կանոններ",
+          "ads": {
+            "name": "Հեռացնել գովազդը",
+            "description": ""
+          },
+          "bypassLan": {
+            "name": "Տնային ցանց՝ ուղղակիորեն",
+            "description": ""
+          }
+        }
+      },
+      "dns": {
+        "title": "DNS",
+        "remoteDns": "Հեռավոր DNS",
+        "remoteDnsDomainStrategy": "Հեռավոր DNS-ի դոմենի ռազմավարություն",
+        "directDns": "Ելքային սերվերի DNS (ուղղակի)",
+        "directDnsDomainStrategy": "Ելքային դոմենի ռազմավարություն",
+        "enableFakeDns": "Միացնել կեղծ DNS",
+        "domainStrategy": {
+          "auto": "Ավտո",
+          "preferIpv6": "Նախընտրել IPv6",
+          "preferIpv4": "Նախընտրել IPv4",
+          "ipv4Only": "Միայն IPv4",
+          "ipv6Only": "Միայն IPv6"
+        }
+      },
+      "inbound": {
+        "title": "Մուտքային",
+        "serviceMode": "Աշխատանքի ռեժիմ",
+        "serviceModes": {
+          "proxy": "Միայն տեղային պորտ",
+          "systemProxy": "Համակարգի կարգավորումներ",
+          "tun": "Բոլոր հավելվածները"
+        },
+        "shortServiceModes": {
+          "proxy": "Տեղային պորտ",
+          "systemProxy": "Համակարգային",
+          "tun": "Բոլոր հավելվածները"
+        },
+        "strictRoute": "Խիստ երթուղավորում",
+        "tunImplementation": "TUN-ի իրականացում",
+        "tunImplementations": {
+          "mixed": "Խառը",
+          "system": "Համակարգային",
+          "gvisor": "gVisor"
+        },
+        "mixedPort": "Խառը պորտ",
+        "tproxyPort": "Թափանցիկ ռեժիմի պորտ",
+        "directPort": "Ուղղակի կապի տեղային պորտ",
+        "redirectPort": "Վերահղման պորտ",
+        "lanSharing": "Մուտք ցանցի այլ սարքերի համար",
+        "lanSharingPasswordNotSet": "Գաղտնաբառը սահմանված չէ",
+        "lanSharingPassword": "Գաղտնաբառ այլ սարքերի համար",
+        "copyLink": "Պատճենել հղումը",
+        "qrCode": "QR կոդ",
+        "lanIPError": "Չհաջողվեց ստանալ տեղային IP հասցեն"
+      },
+      "tlsTricks": {
+        "title": "TLS հնարքներ",
+        "enable": "Միացնել մասնատումը",
+        "packets": "Մասնատման փաթեթներ",
+        "packetsTlsHello": "TLS Hello",
+        "packets1_1": "1-1",
+        "packets1_2": "1-2",
+        "packets1_3": "1-3",
+        "packets1_4": "1-4",
+        "packets1_5": "1-5",
+        "size": "Հատվածի չափ",
+        "sleep": "Դադար հատվածների միջև",
+        "mixedSniCase": {
+          "enable": "Միացնել մեծատառ-փոքրատառ խառնումը SNI-ում"
+        },
+        "padding": {
+          "enable": "Միացնել լրացումը",
+          "size": "Լրացման չափ"
+        }
+      },
+      "chain": {
+        "title": "Շղթա",
+        "subtitle": "Լրացուցիչ պաշտպանություն և պահուստային ճանապարհ",
+        "finalIp": "Վերջնական IP",
+        "levels": {
+          "app": {
+            "title": "Հավելված",
+            "msg": "Այստեղից է սկսվում ձեր հավելվածների տրաֆիկի ճանապարհը"
+          },
+          "extraSecurity": {
+            "title": "Լրացուցիչ անվտանգություն",
+            "msg": "Ավելացնում է լրացուցիչ վահան՝ ձեր տվյալները գաղտնի պահելու համար, նույնիսկ եթե ձեր հիմնական պրոֆիլը վստահելի չէ"
+          },
+          "mainProfile": {
+            "title": "Հիմնական պրոֆիլ"
+          },
+          "unblocker": {
+            "title": "Պահուստային ճանապարհ",
+            "msg": "Եթե հիմնական ալիքը չի պատասխանում, կապը կանցնի պահուստային ճանապարհով"
+          },
+          "filtering": {
+            "title": "Զտում",
+            "msg": "Վերջին քայլ՝ տրաֆիկը դուրս է գալիս ինտերնետ"
+          }
+        },
+        "warp": {
+          "missingConfig": "WARP-ի կոնֆիգուրացիան բացակայում է",
+          "licenseKey": "Լիցենզիայի բանալի",
+          "cleanIp": "Մաքուր IP",
+          "port": "Պորտ",
+          "noise": {
+            "count": "Աղմուկի քանակ",
+            "mode": "Աղմուկի ռեժիմ",
+            "size": "Աղմուկի չափ",
+            "delay": "Աղմուկի ուշացում"
+          }
+        },
+        "psiphon": {
+          "selectServerRegion": "Ընտրեք սերվերի տարածաշրջանը",
+          "regions": {
+            "auto": "@:common.auto",
+            "at": "Ավստրիա (at)",
+            "au": "Ավստրալիա (au)",
+            "be": "Բելգիա (be)",
+            "bg": "Բուլղարիա (bg)",
+            "ca": "Կանադա (ca)",
+            "ch": "Շվեյցարիա (ch)",
+            "cz": "Չեխիա (cz)",
+            "de": "Գերմանիա (de)",
+            "dk": "Դանիա (dk)",
+            "ee": "Էստոնիա (ee)",
+            "es": "Իսպանիա (es)",
+            "fi": "Ֆինլանդիա (fi)",
+            "fr": "Ֆրանսիա (fr)",
+            "gb": "Մեծ Բրիտանիա (gb)",
+            "hr": "Խորվաթիա (hr)",
+            "hu": "Հունգարիա (hu)",
+            "ie": "Իռլանդիա (ie)",
+            "in": "Հնդկաստան (in)",
+            "it": "Իտալիա (it)",
+            "jp": "Ճապոնիա (jp)",
+            "lv": "Լատվիա (lv)",
+            "nl": "Նիդեռլանդներ (nl)",
+            "no": "Նորվեգիա (no)",
+            "pl": "Լեհաստան (pl)",
+            "pt": "Պորտուգալիա (pt)",
+            "ro": "Ռումինիա (ro)",
+            "rs": "Սերբիա (rs)",
+            "se": "Շվեդիա (se)",
+            "sg": "Սինգապուր (sg)",
+            "sk": "Սլովակիա (sk)",
+            "us": "ԱՄՆ (us)"
+          }
+        },
+        "profile": {
+          "selectProfile": "Ընտրեք պրոֆիլը",
+          "conduitPairingId": "Conduit-ի զուգակցման ID"
+        }
+      }
+    }
+  },
+  "components": {
+    "stats": {
+      "connection": "Կապ",
+      "traffic": "Տրաֆիկ",
+      "trafficLive": "Ընթացիկ տրաֆիկ",
+      "trafficTotal": "Ընդհանուր տրաֆիկ",
+      "uplink": "Ուղարկում",
+      "downlink": "Ստացում",
+      "speed": "Արագություն",
+      "totalTransferred": "Ընդամենը փոխանցված"
+    },
+    "subscriptionInfo": {
+      "upload": "Ուղարկված",
+      "download": "Ստացված",
+      "total": "Ընդհանուր տրաֆիկ",
+      "expireDate": "Ավարտի ամսաթիվ",
+      "expired": "Ժամկետը լրացել է",
+      "noTraffic": "Սահմանաչափը սպառվել է",
+      "remainingTime": "Մնացած ժամանակ",
+      "remainingDuration": "մնացել է ${duration} օր",
+      "remainingDurationNew": "${duration} օր",
+      "remainingTrafficSemanticLabel": "օգտագործվել է ${consumed}՝ ընդհանուր ${total} տրաֆիկից",
+      "remainingTraffic": "Մնացած տրաֆիկ",
+      "remainingUsage": "Մնացել է",
+      "profileSite": "Մատակարար",
+      "profileSupport": "Աջակցություն"
+    }
+  },
+  "dialogs": {
+    "sortProfiles": {
+      "title": "Դասավորել ըստ",
+      "sort": {
+        "name": "Այբբենական կարգով",
+        "lastUpdate": "Վերջին թարմացման"
+      }
+    },
+    "warpLicense": {
+      "title": "Cloudflare WARP-ի համաձայնագիր",
+      "description(rich)": "Միացնելով այս կարգավորումը՝ դուք համաձայնում եք լրացուցիչ ծառայության մատակարարի ${tos(Ծառայության մատուցման պայմաններին)} և ${privacy(Գաղտնիության քաղաքականությանը)}։"
+    },
+    "psiphonLicense": {
+      "title": "Լրացուցիչ ծառայության լիցենզիա",
+      "description(rich)": "Օգտագործելով այս կարգավորումը՝ դուք համաձայնում եք լրացուցիչ ծառայության մատակարարի ${tos(Ծառայության մատուցման պայմաններին)} և հաստատում եք, որ ծանոթ եք նրա ${privacy(Գաղտնիության քաղաքականությանը)}։ Խնդրում ենք ուշադիր կարդալ դրանք՝ նախքան շարունակելը։"
+    },
+    "newVersion": {
+      "title": "Հասանելի է թարմացում",
+      "msg": "@:common.appTitle հավելվածի նոր տարբերակը հասանելի է։ Թարմացնե՞լ հիմա։",
+      "currentVersion": "Ընթացիկ տարբերակ՝ ",
+      "newVersion": "Նոր տարբերակ՝ ",
+      "updateNow": "Թարմացնել հիմա"
+    },
+    "confirmation": {
+      "settings": {
+        "import": {
+          "msg": "Սա կվերագրի կոնֆիգուրացիայի բոլոր պարամետրերը տրված արժեքներով։ Համոզվա՞ծ եք։"
+        }
+      },
+      "profile": {
+        "delete": {
+          "title": "Ջնջել պրոֆիլը",
+          "msg": "Համոզվա՞ծ եք, որ ուզում եք ընդմիշտ ջնջել այս պրոֆիլը։"
+        }
+      },
+      "perAppProxy": {
+        "shareOnGithub": {
+          "title": "Ավտոընտրության բարելավում",
+          "msg": "Կիսվելով ընտրված հավելվածներով՝ դուք օգնում եք լրացնել «ավտոընտրության» ցանկը"
+        },
+        "import": {
+          "msg": "Սա կփոխարինի հավելվածների ձեր ընթացիկ ընտրությունը։ Շարունակե՞լ։"
+        }
+      },
+      "routeRule": {
+        "delete": {
+          "title": "Ջնջել կանոնը",
+          "msg": "Համոզվա՞ծ եք, որ ուզում եք ջնջել «$rulename» կանոնը։"
+        }
+      },
+      "addProfileByDeepLinkWarning": {
+        "title": "Ավելացնե՞լ պրոֆիլը",
+        "message": "«${host}» կայքի արտաքին հղումը խնդրում է ավելացնել նոր պրոֆիլ։ Ներմուծե՞լ այն։"
+      },
+      "importRouteRuleByDeepLinkWarning": {
+        "title": "Ներմուծե՞լ երթուղավորման կանոնը",
+        "message": "Անվստահելի աղբյուրներից երթուղավորման կանոններ ներմուծելը կարող է անվտանգության ռիսկ լինել\nՇարունակեք միայն, եթե վստահում եք այս հղմանը"
+      }
+    },
+    "experimentalNotice": {
+      "title": "Օգտագործվում են փորձնական գործառույթներ",
+      "msg": "Դուք միացրել եք որոշ փորձնական գործառույթներ, որոնք կարող են ազդել կապի որակի վրա և առաջացնել անսպասելի սխալներ։ Դուք միշտ կարող եք փոխել կամ վերակայել այս պարամետրերը կարգավորումների էջում։",
+      "disable": "Այլևս ցույց չտալ"
+    },
+    "noActiveProfile": {
+      "title": "Ինչպես ավելացնել բանալի",
+      "msg": "Մուտքի բանալին հղում է կամ PXN-XXXX-XXXX տեսքի կոդ։ Տեղադրեք այն սեղմատախտակից, սկանավորեք QR կոդը կամ մուտքագրեք ձեռքով։ Բանալի չունե՞ք։ Գրեք աջակցությանը։",
+      "helpBtn": {
+        "label": "Գրել աջակցությանը",
+        "url": "https://t.me/pixellnet_bot?start=support"
+      }
+    },
+    "unknownDomainsWarning": {
+      "title": "Զգուշացում արտաքին հղման մասին",
+      "youAreAboutToVisit": "Դուք պատրաստվում եք այցելել կայք՝",
+      "thisWebsiteIsNotInOurTrustedList": "Այս կայքը մեր վստահելի ցանկում չէ։ Խնդրում ենք զգույշ լինել։"
+    },
+    "proxyInfo": {
+      "fullTag": "Լրիվ պիտակ՝",
+      "type": "Տեսակ՝",
+      "testTime": "Ստուգման ժամանակ՝",
+      "testDelay": "Ստուգման ուշացում՝",
+      "isSelected": "Ընտրված է՝",
+      "isGroup": "Սա խումբ է",
+      "isSecure": "Պաշտպանված է՝",
+      "port": "Պորտ՝",
+      "host": "Հոսթ՝",
+      "ip": "IP՝",
+      "countryCode": "Երկրի կոդ՝",
+      "region": "Տարածաշրջան՝",
+      "city": "Քաղաք՝",
+      "asn": "ASN՝",
+      "organization": "Կազմակերպություն՝",
+      "location": "Գտնվելու վայր՝",
+      "postalCode": "Փոստային ինդեքս՝",
+      "download": "Ստացված՝",
+      "upload": "Ուղարկված՝"
+    },
+    "windowClosing": {
+      "askEachTime": "Ամեն անգամ հարցնել",
+      "alertMessage": "Թաքցնե՞լ հավելվածը, թե՞ դուրս գալ։",
+      "remember": "Հիշել իմ ընտրությունը"
     }
   },
   "connection": {
+    "tapToConnect": "Հպեք միանալու համար",
     "connect": "Միացնել",
-    "connected": "Միացված է",
     "connecting": "Միացում…",
+    "connected": "Միացված է",
     "disconnect": "Անջատել",
-    "tapToConnect": "Հպեք միանալու համար"
+    "disconnecting": "Անջատվում է…",
+    "reconnect": "Վերամիացում…",
+    "reconnectMsg": "Կարգավորումները փոխվել են — թարմացնում ենք կապը…"
+  },
+  "errors": {
+    "unexpected": "Անսպասելի սխալ",
+    "connection": {
+      "unexpected": "Միացման անսպասելի սխալ",
+      "timeout": "Միացման ժամանակը սպառվեց",
+      "badResponse": "Սխալ պատասխան",
+      "connectionError": "Միացման սխալ",
+      "badCertificate": "Անվավեր վկայագիր"
+    },
+    "profiles": {
+      "unexpected": "Անսպասելի սխալ",
+      "notFound": "Պրոֆիլը չի գտնվել",
+      "invalidConfig": "Սխալ կոնֆիգուրացիա",
+      "invalidUrl": "Սխալ URL",
+      "canceledByUser": "Չեղարկվել է օգտատիրոջ կողմից"
+    },
+    "connectivity": {
+      "unexpected": "Անսպասելի խափանում",
+      "missingVpnPermission": "Անհրաժեշտ է միանալու թույլտվություն",
+      "missingNotificationPermission": "Ծանուցումների թույլտվություն չկա",
+      "core": "Միջուկի սխալ"
+    },
+    "singbox": {
+      "serviceNotRunning": "Ծառայությունը գործարկված չէ",
+      "missingPrivilege": "Բավարար իրավունքներ չկան",
+      "missingPrivilegeMsg": "Անհրաժեշտ են ադմինիստրատորի իրավունքներ։ Փակեք PIXELLNET-ը և նորից բացեք — Windows-ը թույլտվություն կխնդրի։",
+      "invalidConfigOptions": "Կոնֆիգուրացիայի սխալ պարամետրեր",
+      "invalidConfig": "Սխալ կոնֆիգուրացիա"
+    },
+    "warp": {
+      "missingLicense": "Warp-ի լիցենզիան բացակայում է",
+      "missingLicenseMsg": "Ընտրված պրոֆիլն օգտագործում է WARP գործառույթը։ Այն օգտագործելու համար պետք է ընդունել WARP-ի լիցենզիան"
+    },
+    "psiphon": {
+      "missingLicense": "Չհաջողվեց ընդունել լրացուցիչ ծառայության լիցենզիան",
+      "missingLicenseMsg": "Ընտրված պրոֆիլն օգտագործում է լրացուցիչ ծառայություն։ Դրա համար պետք է ընդունել լիցենզիան"
+    }
+  },
+  "ui": {
+    "share": {
+      "appText": "PIXELLNET — կայուն կապ մեկ կոճակով։ Շուտով՝ ԱԲ օգնական և ընդլայնումներ։\n\nՆերբեռնել Android-ի և Windows-ի համար՝\n$url",
+      "inviteText": "Օգտվում եմ PIXELLNET-ից — կայուն կապ մեկ կոճակով։ Իմ հղումով 7 օրն անվճար է՝ $link",
+      "whatToSend": "Ի՞նչ ուղարկել",
+      "chooseWhat": "Ընտրեք, թե ինչ է պետք ձեր ընկերոջը",
+      "keyForOtherApp": "Բանալի այլ հավելվածի համար",
+      "keyForOtherAppHint": "Եթե ընկերոջ մոտ արդեն տեղադրված է Happ կամ V2rayNG, ուղարկեք միայն բանալին",
+      "keyForApp": "Բանալի PIXELLNET-ի համար",
+      "keyForAppHint": "Կբացվի անմիջապես ստացողի PIXELLNET հավելվածում",
+      "inviteTitle": "Հրավիրել ընկերոջը և ստանալ բոնուս",
+      "inviteSubtitle": "Յուրաքանչյուր ընկերոջ համար՝ 7 օր անվճար ձեզ երկուսին էլ",
+      "otherAppSheetSubtitle": "Ստացողը հղումը կբացի իր հավելվածում",
+      "otherAppPreamble": "Ահա քեզ մուտքի բանալի։ Միանալու համար տեղադրիր հղումը քո հավելվածում՝",
+      "keyForAppSheetSubtitle": "Կբացվի անմիջապես PIXELLNET հավելվածում",
+      "appPreamble": "Ներբեռնեք PIXELLNET-ը (pixellnet.com) և բացեք այս հղումը — բոլոր ալիքներն ավտոմատ կմիացվեն՝",
+      "recommended": "Խորհուրդ ենք տալիս",
+      "sendViaMessenger": "Ուղարկել մեսենջերով",
+      "showQr": "Ցույց տալ QR կոդը",
+      "linkCopied": "Հղումը պատճենվեց",
+      "copyLink": "Պատճենել հղումը",
+      "linkValidUntil": "Հղումը գործում է մինչև ձեր բաժանորդագրության ավարտը",
+      "referralTitle": "Նվիրեք 7 օր — ստացեք 7 օր",
+      "referralText": "Ընկերն անցնում է ձեր հղումով և ստանում է 7 օր անվճար։ Հենց որ նա վճարի բաժանորդագրության համար, դուք նույնպես կստանաք 7 օր անվճար։",
+      "yourCode": "Ձեր կոդը՝",
+      "bonusBadge": "+$days օր",
+      "referralCounts": "Հաստատված՝ $confirmed · սպասում ենք վճարմանը՝ $pending",
+      "referralSubject": "PIXELLNET — 7 օր անվճար",
+      "sendInvite": "Ուղարկել հրավեր",
+      "inviteLinkCopied": "Հրավերի հղումը պատճենվեց"
+    },
+    "about": {
+      "collectDiagnostics": "Հավաքել ախտորոշիչ տեղեկություններ",
+      "collectDiagnosticsHint": "Պատճենում է սարքի ու ցանցի տվյալները և վերջին իրադարձությունները սեղմատախտակին",
+      "diagnosticsCopied": "Ախտորոշումը պատճենվեց ($count նիշ)",
+      "shareApp": "Կիսվել հավելվածով",
+      "shareAppHint": "Ուղարկել ներբեռնման հղումը ընկերներին"
+    },
+    "welcome": {
+      "title": "Բարի գալուստ",
+      "subtitle": "Կայուն կապ մեկ կոճակով",
+      "trialTitle": "Փորձել 7 օր անվճար",
+      "trialSubtitle": "Առանց քարտի, առանց գրանցման",
+      "haveKey": "Արդեն ունեմ բանալի",
+      "clipboardFound": "Սեղմատախտակում հղում է գտնվել",
+      "enterKeyHint": "Մուտքագրեք բանալին կամ բաժանորդագրության հղումը",
+      "questions": "Հարցեր ունե՞ք։ Գրեք "
+    },
+    "trial": {
+      "expiredTitle": "Փորձաշրջանն ավարտվեց",
+      "expiredText": "Գրեք մեզ — կերկարացնենք անվճար։ Վճարովի սակագներ դեռ չկան։",
+      "enterKey": "Մուտքագրել բանալին",
+      "renew": "Գրել աջակցությանը",
+      "errServer": "Սերվերի սխալ ($code)։ Փորձեք ավելի ուշ։",
+      "errEmpty": "Սերվերի պատասխանը դատարկ է",
+      "errImport": "Չհաջողվեց ավելացնել բանալին՝ $failure",
+      "preparing": "Պատրաստում ենք փորձաշրջանը",
+      "oneSecond": "Մեկ վայրկյան",
+      "createFailed": "Չհաջողվեց ստեղծել փորձնական մուտք",
+      "checkInternet": "Ստուգեք ինտերնետը և նորից փորձեք",
+      "retry": "Կրկնել"
+    },
+    "perApp": {
+      "offTitle": "Բոլոր հավելվածները՝ PIXELLNET-ի միջոցով",
+      "offHint": "PIXELLNET-ն աշխատում է բոլոր ծրագրերի համար։ Այլ կերպ ընտրելու համար սեղմեք էկրանի վերևում գտնվող ռեժիմի վրա։",
+      "includeTitle": "PIXELLNET-ի միջոցով՝ միայն նշվածները",
+      "includeHint": "PIXELLNET-ն աշխատում է միայն նշված ✓ հավելվածների համար։ Մնացածներն ինտերնետին միանում են ուղղակիորեն։",
+      "excludeTitle": "Բոլորը՝ PIXELLNET-ի միջոցով, բացի նշվածներից",
+      "excludeHint": "Նշված ✓ հավելվածներն ինտերնետին միանում են ուղղակիորեն՝ առանց PIXELLNET-ի։ Հարմար է բանկերի, պետական ծառայությունների և Ozon-ի համար — դրանք ուղղակիորեն ավելի լավ են աշխատում։"
+    },
+    "profile": {
+      "share": "Կիսվել…",
+      "refreshDone": "Ալիքների ցանկը թարմացվեց",
+      "refreshWithErrors": "Թարմացվեց՝ $done / $total, սխալներ՝ $errors",
+      "refreshPartial": "Թարմացվեց՝ $done / $total",
+      "channelsCount": "Ալիքներ ($count)",
+      "searching": "Փնտրում ենք ալիքներ…",
+      "connectToSee": "Միացեք՝ բոլոր ալիքները տեսնելու համար"
+    },
+    "general": {
+      "autoStartOnFailed": "Չհաջողվեց միացնել ինքնագործարկումը",
+      "autoStartOffFailed": "Չհաջողվեց անջատել ինքնագործարկումը",
+      "logSize": "Մատյանի չափը",
+      "logSizeHint": "$mb ՄԲ — հին գրառումները վերագրվում են",
+      "mb": "$mb ՄԲ",
+      "updateHow": "Ինչպես թարմացնել",
+      "modeAuto": "Ավտոմատ",
+      "modeAsk": "Հարցնել",
+      "modeManual": "Ձեռքով",
+      "updateWhen": "Երբ ստուգել",
+      "hourNight": "Գիշերը",
+      "hourMorning": "Առավոտյան",
+      "hourDay": "Ցերեկը",
+      "hourEvening": "Երեկոյան",
+      "hourAny": "Ցանկացած ժամ",
+      "checkNow": "Ստուգել հիմա",
+      "checkNowHint": "Առանց սպասելու՝ փնտրել թարմացում հենց հիմա",
+      "upToDate": "Տեղադրված է վերջին տարբերակը",
+      "newVersion": "Կա նոր տարբերակ · $version",
+      "refreshHow": "Ինչպես թարմացնել ալիքները",
+      "refreshWhen": "Երբ թարմացնել ալիքները",
+      "refreshNow": "Թարմացնել ալիքները հիմա",
+      "refreshNowHint": "Ներբեռնել ալիքների թարմ ցանկը",
+      "listCurrent": "Ցանկն արդիական է — փոփոխություններ չկան",
+      "updateModeAuto": "Կներբեռնի և կտեղադրի առանց հարցնելու",
+      "updateModeAsk": "Կհարցնենք — դուք կորոշեք",
+      "updateModeManual": "Միայն երբ ինքներդ սեղմեք",
+      "hourLabelNight": "Գիշերը (մոտ 3:00) — մինչ դուք քնած եք",
+      "hourLabelMorning": "Առավոտյան (մոտ 7:00)",
+      "hourLabelDay": "Ցերեկը (մոտ 14:00)",
+      "hourLabelEvening": "Երեկոյան (մոտ 21:00)",
+      "hourLabelAny": "Օրվա ցանկացած ժամի",
+      "hourAt": "Ժամը $hour:00-ին",
+      "refreshModeAuto": "Կթարմացնի ալիքների ցանկն առանց հարցնելու"
+    },
+    "guard": {
+      "xiaomiTitle": "Ակտիվության վերահսկում",
+      "bgTitle": "Աշխատանք ֆոնում",
+      "xiaomiHint": "Ընտրեք «Առանց սահմանափակումների»",
+      "allowHint": "Հեռախոսի պատուհանում սեղմեք «Թույլատրել»",
+      "open": "Բացել",
+      "allow": "Թույլատրել",
+      "autostartTitle": "Ինքնագործարկում",
+      "autostartHint": "Գտեք PIXELLNET-ը (կարող եք որոնման միջոցով) և միացրեք փոխանջատիչը",
+      "launchTitle": "Հավելվածների գործարկում",
+      "launchHint": "PIXELLNET-ի համար անջատեք «Ավտոմատ» տարբերակը և միացրեք բոլոր փոխանջատիչները",
+      "switchHint": "Միացրեք PIXELLNET-ի փոխանջատիչը",
+      "allowBgHint": "Թույլատրեք PIXELLNET-ին աշխատել ֆոնում",
+      "banner": "PIXELLNET-ը կարող է անջատվել գիշերը",
+      "setup": "Կարգավորել",
+      "remindTomorrow": "Հիշեցնել վաղը",
+      "sheetTitle": "Որպեսզի PIXELLNET-ը չանջատվի",
+      "sheetDone": "Պատրաստ է։ Հեռախոսն այլևս չի փակի PIXELLNET-ը՝ մարտկոցը խնայելու համար։",
+      "sheetText": "Հեռախոսը խնայում է մարտկոցը և կարող է գիշերը փակել PIXELLNET-ը — առավոտյան պաշտպանությունն անջատված կլինի։ Թույլատրեք աշխատանքը ֆոնում, դա կտևի մեկ րոպե։",
+      "done": "Պատրաստ է",
+      "close": "Փակել"
+    },
+    "dev": {
+      "reportCopied": "Հաշվետվությունը պատճենվեց — տեղադրեք այն աջակցության չաթում",
+      "error": "Սխալ՝ $error",
+      "deviceCopied": "Սարքի տվյալները պատճենվեցին",
+      "title": "Մշակողի համար",
+      "about": "Հավելվածի մասին",
+      "version": "Տարբերակ",
+      "package": "Փաթեթ",
+      "platform": "Հարթակ",
+      "diagnostics": "Ախտորոշում",
+      "connectionLog": "Կապի մատյան",
+      "collecting": "Հավաքում ենք…",
+      "copyReport": "Պատճենել հաշվետվությունը",
+      "copyReportHint": "Համակարգ, տարբերակ, պրովայդեր, վերջին իրադարձություններ",
+      "shareReport": "Կիսվել հաշվետվությամբ",
+      "copyDevice": "Պատճենել սարքի տվյալները",
+      "other": "Այլ",
+      "aboutProgram": "Ծրագրի մասին"
+    },
+    "common": {
+      "close": "Փակել",
+      "update": "Թարմացնել",
+      "cancel": "Չեղարկել",
+      "hide": "Թաքցնել",
+      "copied": "Պատճենվեց",
+      "allow": "Թույլատրել",
+      "delete": "Ջնջել",
+      "add": "Ավելացնել",
+      "notNow": "Ոչ հիմա",
+      "ms": "$ms մվ"
+    },
+    "changelog": {
+      "whatsNew": "Ինչ նոր կա $version տարբերակում",
+      "tellMain": "Կպատմենք գլխավորը",
+      "sectionNew": "Նոր",
+      "sectionFixed": "Ուղղեցինք",
+      "sectionImproved": "Ավելի լավ դարձավ",
+      "fallback": "Բազմաթիվ փոքր բարելավումներ, աշխատանքն ավելի կայուն է դարձել։"
+    },
+    "update": {
+      "available": "Հասանելի է թարմացում",
+      "version": "Տարբերակ $version",
+      "connecting": "Միանում ենք սերվերին...",
+      "downloaded": "Ներբեռնված է $percent%",
+      "openSettings": "Բացել կարգավորումները",
+      "downloading": "Ներբեռնում ենք…",
+      "again": "Կրկնել",
+      "allowInstall": "Թույլատրեք տեղադրումը → վերադարձեք → Կրկնել",
+      "permissionNeeded": "Թույլատրեք այս աղբյուրից հավելվածների տեղադրումը Android-ի կարգավորումներում",
+      "hintXiaomi": "MIUI/HyperOS-ը կցուցադրի՝ «Հավելվածը պարունակում է ռիսկեր»։ Սեղմեք «Այնուամենայնիվ տեղադրել» → «Պատրաստ է»։",
+      "hintHuawei": "EMUI-ն կխնդրի հաստատել տեղադրումը։ Բոլոր հարցումներում ընտրեք «Թույլատրել»։",
+      "hintOppo": "ColorOS/PurityScan-ը կարող է նշել այն որպես «ռիսկ»։ Սեղմեք «Այնուամենայնիվ տեղադրել»։",
+      "noCell": "Կարծես օպերատորի աշտարակը հիմա այս տարածքում ինտերնետ չի տալիս։ Խնդիրը հավելվածում չէ — փորձեք ավելի ուշ կամ միացեք Wi-Fi-ին։",
+      "noData": "Ազդանշան կա, բայց ինտերնետը չի աշխատում։ Հնարավոր է՝ օպերատորի մոտ ընդհատումներ կան — փորձեք Wi-Fi-ով։",
+      "errChecksum": "Թարմացման ֆայլը վնասված է (ստուգիչ գումարը չհամընկավ)։ Փորձեք նորից։",
+      "errSizeMismatch": "Ներբեռնվել է $actual / $total բայթ։ Ֆայլը վնասված է, փորձեք նորից։",
+      "errTooSmall": "Ներբեռնված ֆայլը չափազանց փոքր է ($size բայթ)։ Ստուգեք ինտերնետը։",
+      "errInstaller": "Չհաջողվեց բացել տեղադրիչը՝ $message",
+      "errTimeout": "Թարմացումների սերվերը երկար չի պատասխանում",
+      "errOtherFile": "Աղբյուրը տալիս է այլ ֆայլ ($length բայթ, սպասվում էր՝ $expected)",
+      "errPartial": "Ներբեռնվել է $actual / $total բայթ",
+      "errUnpack": "Չհաջողվեց ապափաթեթավորել zip արխիվը՝ $message"
+    },
+    "country": {
+      "de": "Գերմանիա",
+      "nl": "Նիդեռլանդներ",
+      "lt": "Լիտվա",
+      "fi": "Ֆինլանդիա",
+      "fr": "Ֆրանսիա",
+      "se": "Շվեդիա",
+      "us": "ԱՄՆ",
+      "gb": "Մեծ Բրիտանիա",
+      "ch": "Շվեյցարիա",
+      "at": "Ավստրիա",
+      "pl": "Լեհաստան",
+      "cz": "Չեխիա",
+      "ru": "Ռուսաստան",
+      "ua": "Ուկրաինա",
+      "by": "Բելառուս",
+      "kz": "Ղազախստան",
+      "tr": "Թուրքիա"
+    },
+    "units": {
+      "b": "$n Բ",
+      "kb": "$n ԿԲ",
+      "mb": "$n ՄԲ",
+      "gb": "$n ԳԲ",
+      "bps": "$n Բ/վ",
+      "kbps": "$n ԿԲ/վ",
+      "mbps": "$n ՄԲ/վ"
+    },
+    "home": {
+      "menu": "Ընտրացանկ",
+      "logs": "Մատյան",
+      "bgHint": "Որպեսզի հեռախոսը չփակի PIXELLNET-ը",
+      "shareHint": "Ուղարկել հղումը ընկերներին",
+      "otherVersions": "Ներբեռնել այլ տարբերակներ",
+      "otherVersionsHint": "Windows · հին տարբերակներ",
+      "refreshAskTitle": "Թարմացնե՞լ ալիքների ցանկը",
+      "refreshAskText": "Նոր ալիքներ են հայտնվել։ Թարմացնե՞լ հիմա։",
+      "auto": "Ավտո",
+      "modeTitle": "Աշխատանքի ռեժիմ",
+      "modeRecommended": "Խորհուրդ է տրվում — աշխատում է բոլոր հավելվածների հետ",
+      "modeSystemHint": "Միայն HTTP/HTTPS, Node.js-ը և Docker-ը չեն աշխատի",
+      "modeProxyHint": "Փորձառու օգտատերերի համար — SOCKS5 պորտ",
+      "serverTitle": "Ալիքի ընտրություն",
+      "refreshList": "Թարմացնել ցանկը",
+      "checkPing": "Ստուգել ալիքները",
+      "noServers": "Ալիքներ չկան — ավելացրեք բաժանորդագրության բանալի։",
+      "connectToSeeServers": "Միացեք՝ ալիքների ցանկը տեսնելու համար",
+      "loadError": "Բեռնման սխալ՝ $error",
+      "today": "Այսօր",
+      "speed": "Արագություն",
+      "expiry": "Ժամկետ",
+      "expired": "ժամկետը լրացել է",
+      "until": "մինչև $date · մնաց $days",
+      "days(plural, param=n)": {
+        "one": "$n օր",
+        "other": "$n օր"
+      },
+      "monthsShort": [
+        "հնվ",
+        "փտվ",
+        "մրտ",
+        "ապր",
+        "մյս",
+        "հնս",
+        "հլս",
+        "օգս",
+        "սեպ",
+        "հոկ",
+        "նոյ",
+        "դեկ"
+      ],
+      "keyExpired": "Բանալի $masked · ժամկետը լրացել է",
+      "keyExpiresIn": "Բանալի $masked · ժամկետը լրանում է $days հետո ($date)",
+      "renewTitle": "Բաժանորդագրության երկարացում",
+      "renew": "Երկարացնել",
+      "renewHint": "Կբացվի աջակցության չաթը՝ @pixellnet_bot",
+      "subscriptionN": "Բաժանորդագրություն $n",
+      "keys": "Բանալիներ",
+      "pasteFromClipboard": "Տեղադրել սեղմատախտակից",
+      "clipboardNoKey": "Սեղմատախտակում բանալի չկա",
+      "added": "Ավելացվեց",
+      "addSubscription": "Ավելացնել բաժանորդագրություն",
+      "activeKey": "Ակտիվ բանալի · $name",
+      "copy": "Պատճենել",
+      "share": "Կիսվել",
+      "qrCode": "QR կոդ",
+      "scanWithOther": "Սկանավորեք այլ սարքով",
+      "validUntil": "գործում է մինչև $date",
+      "deleteLast": "Ջնջելուց հետո հավելվածը նոր բանալի կպահանջի։ Ջնջե՞լ։",
+      "deleteActive": "«$name» բաժանորդագրությունը կդառնա ակտիվ։ Այս գործողությունը հնարավոր չի լինի հետարկել։",
+      "deleteTitle": "Ջնջե՞լ «$name» բաժանորդագրությունը",
+      "deleted": "Բաժանորդագրությունը ջնջվեց",
+      "undo": "Հետարկել",
+      "clipboardEmpty": "Սեղմատախտակը դատարկ է",
+      "enterManually": "Մուտքագրել ձեռքով",
+      "pasteSupportSettings": "Տեղադրել աջակցության ուղարկած կարգավորումները",
+      "pasteSupportSettingsHint": "Եթե աջակցությունը կարգավորումներն ուղարկել է տեքստով",
+      "scanQrCode": "Սկանավորել QR կոդը",
+      "scanQr": "Սկանավորել QR",
+      "flash": "Լուսաթարթիչ",
+      "switchCamera": "Փոխել տեսախցիկը",
+      "cameraDenied": "Տեսախցիկի հասանելիություն չկա։ Թույլատրեք Android-ի կարգավորումներում։",
+      "cameraUnsupported": "Տեսախցիկը չի աջակցվում այս սարքում։",
+      "cameraError": "Տեսախցիկի սխալ՝ $code",
+      "pointCamera": "Ուղղեք տեսախցիկը բաժանորդագրության QR կոդին",
+      "newSubscription": "Նոր բաժանորդագրություն",
+      "keyOrUrl": "Բանալի կամ բաժանորդագրության հղում",
+      "activate": "Ակտիվացնել",
+      "supportSettingsTitle": "Կարգավորումներ աջակցությունից",
+      "supportSettingsText": "Տեղադրեք կարգավորումների ամբողջ տեքստը, որն ուղարկել է աջակցությունը։",
+      "hideFor3Days": "Թաքցնել 3 օրով",
+      "updatedTo": "Թարմացվել է մինչև $version տարբերակը",
+      "whatsNew": "Ինչ նոր կա →",
+      "permRequesting": "Խնդրում ենք միանալու թույլտվություն...",
+      "permNeeded": "Անհրաժեշտ է միանալու թույլտվություն",
+      "permTap": "Սեղմեք՝ թույլատրելու և վերամիանալու համար"
+    }
   }
 }
