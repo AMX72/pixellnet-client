@@ -51,7 +51,7 @@
     "sort": "Sırala",
     "dashboard": "Gösterge Paneli",
     "disable": "Devre dışı bırak",
-    "psiphon": "Psiphon",
+    "psiphon": "Ek hizmet 2",
     "profile": "Profil",
     "configuration": "Yapılandırma",
     "file": "Dosya",
@@ -93,21 +93,34 @@
     }
   },
   "intro": {
-    "banner": "Sınırsız bir internet için ihtiyacınız olan her şey",
+    "banner": "Tek tuşla istikrarlı bağlantı",
     "termsAndPolicyCaution(rich)": "Devam ederek ${tap(@:pages.about.termsAndConditions)} kabul etmiş olursunuz",
     "info(rich)": "Hiddify tarafından ❤️ ile yapıldı - ${tap_source(Açık Kaynak)} (${tap_license(Licence)})"
   },
   "pages": {
     "home": {
       "title": "Ana Sayfa",
-      "quickSettings": "Hızlı ayar seçenekleri"
+      "mode": "Mod",
+      "channelWorking": "Çalışıyor",
+      "channelNotResponding": "Yanıt vermiyor",
+      "channelChecking": "Bağlantı kontrol ediliyor…",
+      "key": "Anahtar",
+      "autoConnect": "Açılışta otomatik bağlan",
+      "language": "Dil",
+      "developer": "Geliştirici seçenekleri",
+      "notConnected": "Bağlı değil",
+      "establishing": "Bağlantı kuruluyor",
+      "cancel": "İptal",
+      "support": "Destek",
+      "languageTitle": "Arayüz dili",
+      "copied": "Kopyalandı"
     },
     "proxies": {
-      "title": "Proxy'ler",
-      "sort": "Proxy'leri sırala",
+      "title": "Kanallar",
+      "sort": "Kanalları sırala",
       "testDelay": "Gecikmeyi test et",
-      "empty": "Kullanılabilir proxy yok",
-      "activeProxy": "Aktif proxy",
+      "empty": "Henüz kanal yok",
+      "activeProxy": "Şu anki kanal",
       "unknownIp": "Bilinmeyen IP",
       "sortOptions": {
         "unsorted": "Varsayılan",
@@ -181,6 +194,7 @@
     },
     "about": {
       "title": "Hakkında",
+      "tagline": "Tek tuşla istikrarlı bağlantı. Yakında: yapay zekâ asistanı ve eklentiler.",
       "notAvailableMsg": "Zaten en son sürümü kullanıyorsunuz",
       "checkForUpdate": "Güncellemeleri kontrol et",
       "openWorkingDir": "Çalışma dizinini aç",
@@ -191,15 +205,15 @@
     },
     "settings": {
       "title": "Ayarlar",
-      "resetTunnel": "VPN profilini sıfırla",
+      "resetTunnel": "Bağlantıyı sıfırla",
       "options": {
         "import": {
           "clipboard": "Seçenekleri panodan içe aktar",
           "file": "Seçenekleri dosyadan içe aktar"
         },
         "export": {
-          "anonymousToClipboard": "Anonim seçenekleri panoya kopyala",
-          "anonymousToFile": "Anonim seçenekleri dosyaya aktar",
+          "anonymousToClipboard": "Ayarları kişisel veri olmadan kopyala",
+          "anonymousToFile": "Kişisel veri olmadan dosyaya kaydet",
           "allToClipboard": "Tüm seçenekleri panoya kopyala",
           "allToFile": "Tüm seçenekleri dosyaya aktar"
         },
@@ -224,7 +238,7 @@
         "autoStart": "Oturum açılışında başlat",
         "silentStart": "Simge durumunda başlat",
         "ignoreBatteryOptimizations": "Pil optimizasyonunu devre dışı bırak",
-        "ignoreBatteryOptimizationsMsg": "Optimum VPN performansı için kısıtlamaları kaldırın",
+        "ignoreBatteryOptimizationsMsg": "Telefonun PIXELLNET'i kapatmaması için",
         "memoryLimit": "Memory limit",
         "memoryLimitMsg": "Bellek yetersizliği hataları veya sık uygulama çökmeleri yaşıyorsanız etkinleştirin",
         "debugMode": "Hata ayıklama modu",
@@ -233,8 +247,8 @@
         "connectionTestUrl": "Bağlantı testi URL'si",
         "urlTestInterval": "URL testi aralığı",
         "clashApiPort": "Clash API portu",
-        "useXrayCoreWhenPossible": "Mümkün olduğunda xray-core kullan",
-        "useXrayCoreWhenPossibleMsg": "Abonelik bağlantılarını ayrıştırırken xray-core kullanın. Bu seçeneği etkinleştirmek için bağlantıyı yeniden içe aktarmanız gerekir."
+        "useXrayCoreWhenPossible": "Yedek anahtar biçimi",
+        "useXrayCoreWhenPossibleMsg": "Açmak için anahtarı yeniden ekleyin."
       },
       "routing": {
         "title": "Yönlendirme",
@@ -255,7 +269,7 @@
           },
           "rule": {
             "title": "Kural",
-            "onlyTunMode": "Yalnızca TUN modunda kullanılabilir",
+            "onlyTunMode": "Yalnızca \"Tüm uygulamalar\" modunda çalışır",
             "notAvailabeInThisPlatform": "Bu platformda mevcut değil",
             "canNotBeEmpty": "Boş olamaz",
             "validUrlEx": "https://example.com",
@@ -291,7 +305,7 @@
               "domain_regex": "Alan adı regex"
             },
             "outbound(map)": {
-              "proxy": "Proxy",
+              "proxy": "PIXELLNET üzerinden",
               "direct": "Doğrudan",
               "direct_with_fragment": "Doğrudan (fragment ile)",
               "block": "Engelle"
@@ -346,7 +360,7 @@
             "only": "Özel"
           },
           "perAppProxy": {
-            "title": "Uygulama bazlı proxy",
+            "title": "Uygulamaları hariç tut",
             "hideSysApps": "Sistem uygulamalarını gizle",
             "options": {
               "import": {
@@ -363,11 +377,11 @@
             },
             "modes": {
               "all": "Tümü",
-              "proxy": "Proxy",
-              "bypass": "Bypass",
-              "allMsg": "Tüm uygulamaları proxy'le",
-              "proxyMsg": "Yalnızca seçili uygulamaları proxy'le",
-              "bypassMsg": "Seçili uygulamaları proxy'leme"
+              "proxy": "Yalnızca işaretliler",
+              "bypass": "İşaretliler hariç",
+              "allMsg": "Tüm uygulamalar PIXELLNET üzerinden",
+              "proxyMsg": "PIXELLNET üzerinden — yalnızca işaretliler",
+              "bypassMsg": "İşaretliler — doğrudan, PIXELLNET olmadan"
             },
             "autoSelection": {
               "title": "Otomatik seçim",
@@ -382,7 +396,7 @@
               },
               "dialog": {
                 "title": "Otomatik uygulama seçimi",
-                "msg": "Uygulama bazlı proxy için otomatik seçim özelliği, bölge \"${region}\" olarak değiştirildiği için devre dışı bırakıldı"
+                "msg": "Otomatik uygulama seçimi kapatıldı: bölge \"${region}\" olarak değişti"
               }
             }
           }
@@ -394,7 +408,7 @@
             "description": ""
           },
           "bypassLan": {
-            "name": "LAN'ı atla",
+            "name": "Ev ağı — doğrudan",
             "description": ""
           }
         }
@@ -416,16 +430,16 @@
       },
       "inbound": {
         "title": "Gelen",
-        "serviceMode": "Servis modu",
+        "serviceMode": "Çalışma modu",
         "serviceModes": {
-          "proxy": "Yalnızca proxy servisi",
-          "systemProxy": "Sistem proxy'sini ayarla",
-          "tun": "VPN"
+          "proxy": "Yalnızca yerel port",
+          "systemProxy": "Sistem ayarları",
+          "tun": "Tüm uygulamalar"
         },
         "shortServiceModes": {
-          "proxy": "Proxy",
-          "systemProxy": "Sistem proxy'si",
-          "tun": "VPN"
+          "proxy": "Yerel port",
+          "systemProxy": "Sistem",
+          "tun": "Tüm uygulamalar"
         },
         "strictRoute": "Katı yönlendirme",
         "tunImplementation": "TUN uygulaması",
@@ -435,12 +449,12 @@
           "gvisor": "gVisor"
         },
         "mixedPort": "Karışık port",
-        "tproxyPort": "Şeffaf proxy portu",
+        "tproxyPort": "Şeffaf mod portu",
         "directPort": "Direct portu",
         "redirectPort": "Yönlendirme portu",
-        "lanSharing": "VPN paylaşımı",
+        "lanSharing": "Ağdaki diğer cihazlar için erişim",
         "lanSharingPasswordNotSet": "Şifre ayarlanmamış",
-        "lanSharingPassword": "VPN paylaşım şifresi",
+        "lanSharingPassword": "Diğer cihazlar için şifre",
         "copyLink": "Bağlantıyı kopyala",
         "qrCode": "QR Kod",
         "lanIPError": "Yerel IP adresi alınamadı"
@@ -467,12 +481,12 @@
       },
       "chain": {
         "title": "Zincir",
-        "subtitle": "Ekstra güvenlik ve Engel kaldırıcı",
+        "subtitle": "Ek koruma ve yedek yol",
         "finalIp": "Nihai IP",
         "levels": {
           "app": {
             "title": "Uygulama",
-            "msg": "Başlangıç noktası: Uygulama trafiğiniz burada zincire girer ve son bypass'a hazırlanmak için sonraki katmanlardan geçer"
+            "msg": "Uygulamalarınızın trafiği buradan yola çıkar"
           },
           "extraSecurity": {
             "title": "Ekstra güvenlik",
@@ -482,12 +496,12 @@
             "title": "Ana profil"
           },
           "unblocker": {
-            "title": "Engel kaldırıcı",
-            "msg": "Ağ kısıtlamalarını aşmaya yardımcı olur. Yardımcı bağlanırsa, ana profiliniz şu anda engellenmiş olsa bile çalışmaya devam edebilir"
+            "title": "Yedek yol",
+            "msg": "Ana kanal yanıt vermezse bağlantı yedek yoldan devam eder"
           },
           "filtering": {
             "title": "Filtreleme",
-            "msg": "Son çıkış: Aktif katmanlardan (Ekstra güvenlik, Ana profil veya Engel kaldırıcı) geçtikten ve etkilerini uyguladıktan sonra, trafiğiniz nihayet yerel ağ filtrelemesini aşacak şekilde yönlendirilir"
+            "msg": "Son adım: trafik internete çıkar"
           }
         },
         "warp": {
@@ -584,11 +598,11 @@
     },
     "warpLicense": {
       "title": "Cloudflare WARP onayı",
-      "description(rich)": "Cloudflare WARP ücretsiz bir WireGuard VPN sağlayıcısıdır. Bu seçeneği etkinleştirerek Cloudflare WARP'ın ${tos(Hizmet Şartları)}'nı ve ${privacy(Gizlilik Politikası)}'nı kabul etmiş olursunuz."
+      "description(rich)": "Bu seçeneği açarak ek hizmet sağlayıcısının ${tos(Hizmet Şartlarını)} ve ${privacy(Gizlilik Politikasını)} kabul etmiş olursunuz."
     },
     "psiphonLicense": {
-      "title": "Psiphon Lisans Sözleşmesi",
-      "description(rich)": "Psiphon'u kullanarak, ${tos(Hizmet Şartları)}'nı kabul etmiş olursunuz ve ${privacy(Gizlilik Politikası)}'nı onaylamış olursunuz. Lütfen devam etmeden önce bunları dikkatle okuyun."
+      "title": "Ek hizmet lisansı",
+      "description(rich)": "Bu seçeneği kullanarak ek hizmet sağlayıcısının ${tos(Hizmet Şartlarını)} kabul etmiş ve ${privacy(Gizlilik Politikasını)} onaylamış olursunuz. Lütfen devam etmeden önce bunları dikkatlice okuyun."
     },
     "newVersion": {
       "title": "Güncelleme mevcut",
@@ -615,7 +629,7 @@
           "msg": "Seçili uygulamaları paylaşarak \"otomatik seçim\" listesini tamamlamaya yardımcı olursunuz"
         },
         "import": {
-          "msg": "Bu işlem mevcut tüm uygulama bazlı proxy seçimlerinizi değiştirecektir. Devam etmek istediğinizden emin misiniz?"
+          "msg": "Bu işlem mevcut uygulama seçiminizin yerini alacak. Devam etmek istiyor musunuz?"
         }
       },
       "routeRule": {
@@ -639,11 +653,11 @@
       "disable": "Tekrar gösterme"
     },
     "noActiveProfile": {
-      "title": "Bir profil seçin",
-      "msg": "VPN bağlantı ayrıntılarınızı içeren bir bağlantı profili ekleyerek başlayalım.\n\nHenüz bir VPN sunucunuz yok mu? Endişelenmeyin, hızlı ve ücretsiz bir şekilde kurmak için aşağıdaki eğitimi takip edin.",
+      "title": "Anahtar nasıl eklenir",
+      "msg": "Erişim anahtarı bir bağlantı ya da PXN-XXXX-XXXX biçiminde bir koddur. Panodan yapıştırın, QR kodunu tarayın veya el ile girin. Anahtarınız yoksa desteğe yazın.",
       "helpBtn": {
-        "label": "Nasıl yapıldığını göster",
-        "url": "https://hiddify.com/manager/"
+        "label": "Desteğe yaz",
+        "url": "https://t.me/pixellnet_bot?start=support"
       }
     },
     "unknownDomainsWarning": {
@@ -706,14 +720,14 @@
     },
     "connectivity": {
       "unexpected": "Beklenmeyen hata",
-      "missingVpnPermission": "VPN izni eksik",
+      "missingVpnPermission": "Bağlantı izni gerekiyor",
       "missingNotificationPermission": "Bildirim izni eksik",
       "core": "Çekirdek hatası"
     },
     "singbox": {
       "serviceNotRunning": "Servis çalışmıyor",
       "missingPrivilege": "Eksik yetki",
-      "missingPrivilegeMsg": "VPN modu yönetici yetkisi gerektirir. Lütfen uygulamayı yönetici olarak yeniden başlatın veya servis modunu değiştirin.",
+      "missingPrivilegeMsg": "Yönetici hakları gerekiyor. PIXELLNET'i kapatıp yeniden açın — Windows izin isteyecek.",
       "invalidConfigOptions": "Geçersiz yapılandırma seçenekleri",
       "invalidConfig": "Geçersiz yapılandırma"
     },
@@ -722,8 +736,326 @@
       "missingLicenseMsg": "Seçili profil WARP özelliğini kullanıyor. Bu özelliği kullanmak için WARP lisansını kabul etmeniz gerekir"
     },
     "psiphon": {
-      "missingLicense": "Psiphon lisansı gerekli",
-      "missingLicenseMsg": "Seçili profil Psiphon özelliğini kullanıyor; bu özelliği kullanmak için Psiphon lisansı kabul edilmelidir"
+      "missingLicense": "Ek hizmet lisansı kabul edilemedi",
+      "missingLicenseMsg": "Seçili profil ek bir hizmet kullanıyor; önce bu hizmetin lisansını kabul etmeniz gerekiyor"
+    }
+  },
+  "ui": {
+    "share": {
+      "appText": "PIXELLNET — tek tuşla istikrarlı bağlantı. Yakında: yapay zekâ asistanı ve eklentiler.\n\nAndroid ve Windows için indirin:\n$url",
+      "inviteText": "PIXELLNET kullanıyorum — tek tuşla istikrarlı bağlantı. Davetimle 7 gün ücretsiz: $link",
+      "whatToSend": "Ne göndermek istersiniz?",
+      "chooseWhat": "Arkadaşınızın neye ihtiyacı olduğunu seçin",
+      "keyForOtherApp": "Başka bir uygulama için anahtar",
+      "keyForOtherAppHint": "Arkadaşınızda Happ veya V2rayNG zaten yüklüyse yalnızca anahtarı gönderin",
+      "keyForApp": "PIXELLNET için anahtar",
+      "keyForAppHint": "Alıcının PIXELLNET uygulamasında doğrudan açılır",
+      "inviteTitle": "Arkadaşınızı davet edin, bonus kazanın",
+      "inviteSubtitle": "Davet ettiğiniz her arkadaş için ikinize de 7 gün ücretsiz",
+      "otherAppSheetSubtitle": "Alıcı bağlantıyı kendi uygulamasında açar",
+      "otherAppPreamble": "İşte erişim anahtarı. Bağlanmak için aşağıdaki bağlantıyı kendi uygulamanıza yapıştırın:",
+      "keyForAppSheetSubtitle": "Doğrudan PIXELLNET uygulamasında açılır",
+      "appPreamble": "PIXELLNET'i indirin (pixellnet.com) ve bu bağlantıyı açın — tüm kanallar otomatik olarak eklenir:",
+      "recommended": "Önerilen",
+      "sendViaMessenger": "Mesajlaşma uygulamasıyla gönder",
+      "showQr": "QR kodunu göster",
+      "linkCopied": "Bağlantı kopyalandı",
+      "copyLink": "Bağlantıyı kopyala",
+      "linkValidUntil": "Bağlantı, aboneliğiniz bitene kadar geçerlidir",
+      "referralTitle": "7 gün hediye edin — 7 gün kazanın",
+      "referralText": "Arkadaşınız bağlantınızı açar ve 7 gün ücretsiz kullanır. Abonelik ücretini ödediği anda siz de 7 gün ücretsiz kazanırsınız.",
+      "yourCode": "Kodunuz:",
+      "bonusBadge": "+$days gün",
+      "referralCounts": "Onaylanan: $confirmed · ödeme bekleniyor: $pending",
+      "referralSubject": "PIXELLNET — 7 gün ücretsiz",
+      "sendInvite": "Davet gönder",
+      "inviteLinkCopied": "Davet bağlantısı kopyalandı"
+    },
+    "about": {
+      "collectDiagnostics": "Tanılama bilgilerini topla",
+      "collectDiagnosticsHint": "Cihaz ve ağ bilgilerini, ayrıca son olayları panoya kopyalar",
+      "diagnosticsCopied": "Tanılama bilgileri panoda ($count karakter)",
+      "shareApp": "Uygulamayı paylaş",
+      "shareAppHint": "Arkadaşlarınıza indirme bağlantısı gönderin"
+    },
+    "welcome": {
+      "title": "Hoş geldiniz",
+      "subtitle": "Tek tuşla istikrarlı bağlantı",
+      "trialTitle": "7 gün ücretsiz dene",
+      "trialSubtitle": "Kart ve kayıt gerekmez",
+      "haveKey": "Zaten bir anahtarım var",
+      "clipboardFound": "Panoda bir bağlantı bulundu",
+      "enterKeyHint": "Anahtarı veya abonelik bağlantısını girin",
+      "questions": "Sorunuz mu var? Yazın: "
+    },
+    "trial": {
+      "expiredTitle": "Deneme süreniz sona erdi",
+      "expiredText": "Bize yazın, süreyi ücretsiz uzatalım. Henüz ücretli tarife yok.",
+      "enterKey": "Anahtar gir",
+      "renew": "Desteğe yaz",
+      "errServer": "Sunucu hatası ($code). Lütfen daha sonra tekrar deneyin.",
+      "errEmpty": "Sunucudan boş yanıt geldi",
+      "errImport": "Anahtar eklenemedi: $failure",
+      "preparing": "Deneme süreniz hazırlanıyor",
+      "oneSecond": "Bir saniye",
+      "createFailed": "Deneme erişimi oluşturulamadı",
+      "checkInternet": "İnternet bağlantınızı kontrol edip tekrar deneyin",
+      "retry": "Tekrar dene"
+    },
+    "perApp": {
+      "offTitle": "Tüm uygulamalar PIXELLNET üzerinden",
+      "offHint": "PIXELLNET tüm uygulamalar için çalışır. Değiştirmek için ekranın üst kısmındaki moda dokunun.",
+      "includeTitle": "PIXELLNET üzerinden — yalnızca işaretliler",
+      "includeHint": "PIXELLNET yalnızca işaretli ✓ uygulamalar için çalışır. Diğerleri internete doğrudan bağlanır.",
+      "excludeTitle": "İşaretliler hariç tümü PIXELLNET üzerinden",
+      "excludeHint": "İşaretli ✓ uygulamalar internete PIXELLNET olmadan, doğrudan bağlanır. Banka, devlet hizmetleri ve alışveriş uygulamaları için kullanışlıdır — bunlar doğrudan daha iyi çalışır."
+    },
+    "profile": {
+      "share": "Paylaş…",
+      "refreshDone": "Kanal listesi güncellendi",
+      "refreshWithErrors": "Güncellenen: $done / $total, hata: $errors",
+      "refreshPartial": "Güncellenen: $done / $total",
+      "channelsCount": "Kanallar ($count)",
+      "searching": "Kanallar aranıyor…",
+      "connectToSee": "Tüm kanalları görmek için bağlanın"
+    },
+    "general": {
+      "autoStartOnFailed": "Otomatik başlatma açılamadı",
+      "autoStartOffFailed": "Otomatik başlatma kapatılamadı",
+      "logSize": "Kayıt dosyası boyutu",
+      "logSizeHint": "$mb MB — eski kayıtların üzerine yazılır",
+      "mb": "$mb MB",
+      "updateHow": "Güncelleme şekli",
+      "modeAuto": "Otomatik",
+      "modeAsk": "Önce sor",
+      "modeManual": "El ile",
+      "updateWhen": "Ne zaman kontrol edilsin",
+      "hourNight": "Gece",
+      "hourMorning": "Sabah",
+      "hourDay": "Gündüz",
+      "hourEvening": "Akşam",
+      "hourAny": "Herhangi bir saat",
+      "checkNow": "Şimdi kontrol et",
+      "checkNowHint": "Beklemeden hemen güncelleme arar",
+      "upToDate": "En son sürümü kullanıyorsunuz",
+      "newVersion": "Yeni sürüm var · $version",
+      "refreshHow": "Kanal güncelleme şekli",
+      "refreshWhen": "Kanallar ne zaman güncellensin",
+      "refreshNow": "Kanalları şimdi güncelle",
+      "refreshNowHint": "Güncel kanal listesini indir",
+      "listCurrent": "Liste güncel — değişiklik yok",
+      "updateModeAuto": "Sormadan indirir ve yükler",
+      "updateModeAsk": "Size sorarız — siz karar verirsiniz",
+      "updateModeManual": "Yalnızca siz başlattığınızda",
+      "hourLabelNight": "Gece (saat 3:00 civarı) — siz uyurken",
+      "hourLabelMorning": "Sabah (saat 7:00 civarı)",
+      "hourLabelDay": "Gündüz (saat 14:00 civarı)",
+      "hourLabelEvening": "Akşam (saat 21:00 civarı)",
+      "hourLabelAny": "Günün herhangi bir saatinde",
+      "hourAt": "Saat $hour:00",
+      "refreshModeAuto": "Kanal listesini sormadan günceller"
+    },
+    "guard": {
+      "xiaomiTitle": "Pil tasarrufu",
+      "bgTitle": "Arka planda çalışma",
+      "xiaomiHint": "\"Kısıtlama yok\" seçeneğini seçin",
+      "allowHint": "Telefon sorduğunda \"İzin ver\" düğmesine dokunun",
+      "open": "Aç",
+      "allow": "İzin ver",
+      "autostartTitle": "Otomatik başlatma",
+      "autostartHint": "PIXELLNET'i bulun (arama kullanabilirsiniz) ve düğmesini açın",
+      "launchTitle": "Uygulama başlatma",
+      "launchHint": "PIXELLNET için otomatik yönetimi kapatın ve tüm düğmeleri açın",
+      "switchHint": "PIXELLNET'in yanındaki düğmeyi açın",
+      "allowBgHint": "PIXELLNET'in arka planda çalışmasına izin verin",
+      "banner": "PIXELLNET gece kapanabilir",
+      "setup": "Ayarla",
+      "remindTomorrow": "Yarın hatırlat",
+      "sheetTitle": "PIXELLNET'in kapanmaması için",
+      "sheetDone": "Ayarlandı. Telefon artık pil tasarrufu için PIXELLNET'i kapatmayacak.",
+      "sheetText": "Telefon pil tasarrufu için PIXELLNET'i gece kapatabilir — sabah koruma kapalı olur. Arka planda çalışmaya izin verin, bir dakika sürer.",
+      "done": "Bitti",
+      "close": "Kapat"
+    },
+    "dev": {
+      "reportCopied": "Rapor kopyalandı — destek sohbetine yapıştırın",
+      "error": "Hata: $error",
+      "deviceCopied": "Cihaz bilgileri kopyalandı",
+      "title": "Geliştirici seçenekleri",
+      "about": "Uygulama hakkında",
+      "version": "Sürüm",
+      "package": "Paket",
+      "platform": "Platform",
+      "diagnostics": "Tanılama",
+      "connectionLog": "Bağlantı kayıtları",
+      "collecting": "Toplanıyor…",
+      "copyReport": "Raporu kopyala",
+      "copyReportHint": "İşletim sistemi, uygulama sürümü, internet sağlayıcısı, son olaylar",
+      "shareReport": "Raporu paylaş",
+      "copyDevice": "Cihaz bilgilerini kopyala",
+      "other": "Diğer",
+      "aboutProgram": "Hakkında"
+    },
+    "common": {
+      "close": "Kapat",
+      "update": "Güncelle",
+      "cancel": "İptal",
+      "hide": "Gizle",
+      "copied": "Kopyalandı",
+      "allow": "İzin ver",
+      "delete": "Sil",
+      "add": "Ekle",
+      "notNow": "Şimdi değil",
+      "ms": "$ms ms"
+    },
+    "changelog": {
+      "whatsNew": "$version sürümündeki yenilikler",
+      "tellMain": "İşte öne çıkanlar",
+      "sectionNew": "Yeni",
+      "sectionFixed": "Düzeltmeler",
+      "sectionImproved": "İyileştirmeler",
+      "fallback": "Birçok küçük iyileştirme; uygulama artık daha istikrarlı çalışıyor."
+    },
+    "update": {
+      "available": "Güncelleme mevcut",
+      "version": "Sürüm $version",
+      "connecting": "Sunucuya bağlanılıyor...",
+      "downloaded": "%$percent indirildi",
+      "openSettings": "Ayarları aç",
+      "downloading": "İndiriliyor…",
+      "again": "Tekrar dene",
+      "allowInstall": "Yüklemeye izin verin → geri dönün → Tekrar dene",
+      "permissionNeeded": "Android ayarlarında bu kaynaktan uygulama yüklenmesine izin verin",
+      "hintXiaomi": "MIUI/HyperOS \"Bu uygulama riskler içeriyor\" uyarısı gösterecek. \"Yine de yükle\" → \"Bitti\" düğmelerine dokunun.",
+      "hintHuawei": "EMUI kurulum için onay isteyecek. Her soruda \"İzin ver\" seçeneğini seçin.",
+      "hintOppo": "ColorOS/PurityScan uygulamayı \"riskli\" olarak işaretleyebilir. \"Yine de yükle\" düğmesine dokunun.",
+      "noCell": "Görünüşe göre mobil şebekeniz şu anda bu bölgede internet vermiyor. Sorun uygulamada değil — daha sonra tekrar deneyin veya bir Wi-Fi ağına bağlanın.",
+      "noData": "Sinyal var ama internet yok. Operatörünüzde bir kesinti olabilir — Wi-Fi ile deneyin.",
+      "errChecksum": "Güncelleme dosyası bozuk (sağlama toplamı eşleşmedi). Lütfen tekrar deneyin.",
+      "errSizeMismatch": "İndirilen: $actual / $total bayt. Dosya bozuk, lütfen tekrar deneyin.",
+      "errTooSmall": "İndirilen dosya çok küçük ($size bayt). İnternet bağlantınızı kontrol edin.",
+      "errInstaller": "Yükleyici açılamadı: $message",
+      "errTimeout": "Güncelleme sunucusu uzun süredir yanıt vermiyor",
+      "errOtherFile": "Kaynak farklı bir dosya veriyor ($expected yerine $length bayt)",
+      "errPartial": "İndirilen: $actual / $total bayt",
+      "errUnpack": "Zip arşivi açılamadı: $message"
+    },
+    "country": {
+      "de": "Almanya",
+      "nl": "Hollanda",
+      "lt": "Litvanya",
+      "fi": "Finlandiya",
+      "fr": "Fransa",
+      "se": "İsveç",
+      "us": "ABD",
+      "gb": "Birleşik Krallık",
+      "ch": "İsviçre",
+      "at": "Avusturya",
+      "pl": "Polonya",
+      "cz": "Çekya",
+      "ru": "Rusya",
+      "ua": "Ukrayna",
+      "by": "Belarus",
+      "kz": "Kazakistan",
+      "tr": "Türkiye"
+    },
+    "units": {
+      "b": "$n B",
+      "kb": "$n KB",
+      "mb": "$n MB",
+      "gb": "$n GB",
+      "bps": "$n B/sn",
+      "kbps": "$n KB/sn",
+      "mbps": "$n MB/sn"
+    },
+    "home": {
+      "menu": "Menü",
+      "logs": "Kayıtlar",
+      "bgHint": "Telefonun PIXELLNET'i kapatmaması için",
+      "shareHint": "Arkadaşlarınıza bağlantı gönderin",
+      "otherVersions": "Diğer sürümleri indir",
+      "otherVersionsHint": "Windows · eski sürümler",
+      "refreshAskTitle": "Kanal listesi güncellensin mi?",
+      "refreshAskText": "Yeni kanallar var. Şimdi güncellensin mi?",
+      "auto": "Otomatik",
+      "modeTitle": "Çalışma modu",
+      "modeRecommended": "Önerilen — tüm uygulamalarla çalışır",
+      "modeSystemHint": "Yalnızca HTTP/HTTPS; Node.js ve Docker çalışmaz",
+      "modeProxyHint": "İleri düzey kullanıcılar için — SOCKS5 portu",
+      "serverTitle": "Kanal seçimi",
+      "refreshList": "Listeyi güncelle",
+      "checkPing": "Kanalları kontrol et",
+      "noServers": "Kanal yok — bir abonelik anahtarı ekleyin.",
+      "connectToSeeServers": "Kanal listesini görmek için bağlanın",
+      "loadError": "Yükleme hatası: $error",
+      "today": "Bugün",
+      "speed": "Hız",
+      "expiry": "Erişim",
+      "expired": "süresi doldu",
+      "until": "$date tarihine kadar · $days kaldı",
+      "days(plural, param=n)": {
+        "one": "$n gün",
+        "other": "$n gün"
+      },
+      "monthsShort": [
+        "Oca",
+        "Şub",
+        "Mar",
+        "Nis",
+        "May",
+        "Haz",
+        "Tem",
+        "Ağu",
+        "Eyl",
+        "Eki",
+        "Kas",
+        "Ara"
+      ],
+      "keyExpired": "Anahtar $masked · süresi doldu",
+      "keyExpiresIn": "Anahtar $masked · süresi $days sonra doluyor ($date)",
+      "renewTitle": "Abonelik uzatma",
+      "renew": "Uzat",
+      "renewHint": "@pixellnet_bot destek sohbeti açılacak",
+      "subscriptionN": "Abonelik $n",
+      "keys": "Anahtarlar",
+      "pasteFromClipboard": "Panodan yapıştır",
+      "clipboardNoKey": "Panoda anahtar yok",
+      "added": "Eklendi",
+      "addSubscription": "Abonelik ekle",
+      "activeKey": "Etkin anahtar · $name",
+      "copy": "Kopyala",
+      "share": "Paylaş",
+      "qrCode": "QR kodu",
+      "scanWithOther": "Başka bir cihazla tarayın",
+      "validUntil": "$date tarihine kadar geçerli",
+      "deleteLast": "Silindikten sonra uygulama yeni bir anahtar isteyecek. Silinsin mi?",
+      "deleteActive": "Etkin anahtar \"$name\" olacak. Bu işlem geri alınamaz.",
+      "deleteTitle": "\"$name\" silinsin mi?",
+      "deleted": "Abonelik silindi",
+      "undo": "Geri al",
+      "clipboardEmpty": "Pano boş",
+      "enterManually": "El ile gir",
+      "pasteSupportSettings": "Destekten gelen ayarları yapıştır",
+      "pasteSupportSettingsHint": "Destek size ayarları metin olarak gönderdiyse",
+      "scanQrCode": "QR kodunu tara",
+      "scanQr": "QR tara",
+      "flash": "Flaş",
+      "switchCamera": "Kamerayı değiştir",
+      "cameraDenied": "Kameraya erişim yok. Android ayarlarından izin verin.",
+      "cameraUnsupported": "Bu cihazda kamera desteklenmiyor.",
+      "cameraError": "Kamera hatası: $code",
+      "pointCamera": "Kamerayı abonelik QR koduna doğrultun",
+      "newSubscription": "Yeni abonelik",
+      "keyOrUrl": "Anahtar veya abonelik bağlantısı",
+      "activate": "Etkinleştir",
+      "supportSettingsTitle": "Destekten gelen ayarlar",
+      "supportSettingsText": "Desteğin gönderdiği ayar metninin tamamını yapıştırın.",
+      "hideFor3Days": "3 gün gizle",
+      "updatedTo": "$version sürümüne güncellendi",
+      "whatsNew": "Yenilikler →",
+      "permRequesting": "Bağlantı izni isteniyor...",
+      "permNeeded": "Bağlantı izni gerekiyor",
+      "permTap": "İzin vermek ve yeniden bağlanmak için dokunun"
     }
   }
 }
