@@ -87,6 +87,11 @@ jobs:
       - name: Generate freezed/drift/riverpod/mappable code
         run: dart run build_runner build --delete-conflicting-outputs
 
+      # T-026, шаг 7: 12 языков (Р-22) — у каждого все ключи en, без пустых строк и с теми же подстановками;
+      # список языков, запасной английский, множественное число. Падает — сборки нет.
+      - name: Translation tests (12 languages)
+        run: flutter test test/core/localization
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
