@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/notification/in_app_notification_controller.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
 import 'package:hiddify/features/diagnostics/diagnostics_service.dart';
@@ -198,21 +199,23 @@ class AutoProfileRefreshNotifier extends Notifier<AutoProfileRefreshState> {
       DiagnosticsService.instance.event('auto_profile_refresh.done',
           {'refreshed': refreshed, 'errors': errors});
 
+      final t = await ref.read(translationsProvider.future);
       state = state.copyWith(
         isRefreshing: false,
         lastRefreshedAt: now,
         newChannelsCount: refreshed,
-        lastError: errors > 0 ? 'Обновлено $refreshed из ${remoteProfiles.length}' : null,
+        // «Настройки → Общие» показывает этот текст в сообщении, поэтому он уже на языке приложения.
+        lastError: errors > 0 ? t.ui.profile.refreshPartial(done: refreshed, total: remoteProfiles.length) : null,
       );
 
       // Показываем non-intrusive уведомление
       if (!silent || refreshed > 0) {
         final notif = ref.read(inAppNotificationControllerProvider);
         if (errors == 0) {
-          notif.showSuccessToast('Список каналов обновлён');
+          notif.showSuccessToast(t.ui.profile.refreshDone);
         } else {
           notif.showErrorToast(
-              'Обновлено $refreshed из ${remoteProfiles.length}, ошибок: $errors');
+              t.ui.profile.refreshWithErrors(done: refreshed, total: remoteProfiles.length, errors: errors));
         }
       }
     } catch (e) {

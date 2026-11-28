@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
-import 'package:hiddify/core/localization/locale_extensions.dart';
-import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/failures.dart';
 import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
@@ -88,6 +86,7 @@ class _ChannelsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
     final proxies = ref.watch(proxiesOverviewNotifierProvider);
 
     return proxies.when(
@@ -109,7 +108,7 @@ class _ChannelsSection extends ConsumerWidget {
                     Icon(Icons.public_outlined,
                         color: PixellnetBrand.mocha, size: 18),
                     const Gap(8),
-                    Text('Каналы (${group.items.length})',
+                    Text(t.ui.profile.channelsCount(count: group.items.length),
                         style: theme.textTheme.titleSmall
                             ?.copyWith(fontWeight: FontWeight.w600)),
                   ],
@@ -137,7 +136,7 @@ class _ChannelsSection extends ConsumerWidget {
             children: [
               const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5)),
               const Gap(12),
-              Text('Ищем каналы…',
+              Text(t.ui.profile.searching,
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: PixellnetBrand.textSecondary)),
             ],
@@ -147,9 +146,7 @@ class _ChannelsSection extends ConsumerWidget {
       error: (_, __) => Padding(
         padding: const EdgeInsets.all(16),
         child: Text(
-          ref.watch(localePreferencesProvider).isRussian
-              ? 'Подключитесь, чтобы увидеть все каналы'
-              : 'Connect to see all channels',
+          t.ui.profile.connectToSee,
           textAlign: TextAlign.center,
           style: theme.textTheme.bodySmall?.copyWith(color: PixellnetBrand.textSecondary),
         ),
@@ -176,8 +173,8 @@ class _ChannelTile extends ConsumerWidget {
     final delay = item.urlTestDelay;
     // Подпись канала — «Работает / Не отвечает / Проверяем связь…» (вариант «В», владелец 28.11).
     final quality = channelStatusLabel(t, delay);
-    final delayText = delay > 0 && delay < 65000 ? '$delay мс' : '—';
-    final country = _countryName(item.ipinfo.countryCode);
+    final delayText = delay > 0 && delay < 65000 ? t.ui.common.ms(ms: delay) : '—';
+    final country = countryName(t, item.ipinfo.countryCode);
     final name = item.tagDisplay.isNotEmpty ? item.tagDisplay : item.tag;
     final title = country.isNotEmpty ? '$country · $name' : name;
 
@@ -224,16 +221,5 @@ class _ChannelTile extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  static String _countryName(String code) {
-    const map = {
-      'DE': 'Германия', 'NL': 'Нидерланды', 'LT': 'Литва', 'FI': 'Финляндия',
-      'FR': 'Франция', 'SE': 'Швеция', 'US': 'США', 'GB': 'Великобритания',
-      'CH': 'Швейцария', 'AT': 'Австрия', 'PL': 'Польша', 'CZ': 'Чехия',
-      'RU': 'Россия', 'UA': 'Украина', 'BY': 'Беларусь', 'KZ': 'Казахстан',
-      'TR': 'Турция',
-    };
-    return map[code.toUpperCase()] ?? '';
   }
 }

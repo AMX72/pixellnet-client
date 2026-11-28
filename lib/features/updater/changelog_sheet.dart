@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
+import 'package:hiddify/core/localization/translations.dart';
 
 /// v0.1.28: bottom-sheet с changelog по категориям.
 ///
@@ -27,6 +28,7 @@ class ChangelogSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final t = context.t;
     final parsed = _parseChangelog(rawChangelog);
 
     return SafeArea(
@@ -48,26 +50,26 @@ class ChangelogSheet extends StatelessWidget {
                 ),
               ),
             ),
-            Text('Что нового в $version',
+            Text(t.ui.changelog.whatsNew(version: version),
                 style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
             const Gap(4),
-            Text('Расскажем главное',
+            Text(t.ui.changelog.tellMain,
                 style: theme.textTheme.bodySmall?.copyWith(color: PixellnetBrand.textSecondary)),
             const Gap(20),
 
             if (parsed.isEmpty)
-              _fallbackText(theme, rawChangelog)
+              _fallbackText(theme, t, rawChangelog)
             else ...[
               if (parsed['new']?.isNotEmpty ?? false) ...[
-                _section(theme, 'Новое', Icons.auto_awesome_outlined, PixellnetBrand.mocha, parsed['new']!),
+                _section(theme, t.ui.changelog.sectionNew, Icons.auto_awesome_outlined, PixellnetBrand.mocha, parsed['new']!),
                 const Gap(16),
               ],
               if (parsed['fixed']?.isNotEmpty ?? false) ...[
-                _section(theme, 'Починили', Icons.build_outlined, PixellnetBrand.olive, parsed['fixed']!),
+                _section(theme, t.ui.changelog.sectionFixed, Icons.build_outlined, PixellnetBrand.olive, parsed['fixed']!),
                 const Gap(16),
               ],
               if (parsed['improved']?.isNotEmpty ?? false) ...[
-                _section(theme, 'Стало лучше', Icons.trending_up_outlined, PixellnetBrand.blue, parsed['improved']!),
+                _section(theme, t.ui.changelog.sectionImproved, Icons.trending_up_outlined, PixellnetBrand.blue, parsed['improved']!),
                 const Gap(16),
               ],
             ],
@@ -76,13 +78,13 @@ class ChangelogSheet extends StatelessWidget {
             if (showUpdateButton && onUpdatePressed != null)
               FilledButton.icon(
                 icon: const Icon(Icons.system_update_outlined, size: 18),
-                label: const Text('Обновить'),
+                label: Text(t.ui.common.update),
                 onPressed: onUpdatePressed,
               )
             else
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Закрыть'),
+                child: Text(t.ui.common.close),
               ),
           ],
         ),
@@ -139,7 +141,7 @@ class ChangelogSheet extends StatelessWidget {
     );
   }
 
-  Widget _fallbackText(ThemeData theme, String raw) {
+  Widget _fallbackText(ThemeData theme, Translations t, String raw) {
     // v0.1.32: markdown в GH release body — фильтруем ** обёртку
     // и не показываем «Full Changelog: ...» (юзеру ссылка не нужна).
     final seen = <String>{};
@@ -153,7 +155,7 @@ class ChangelogSheet extends StatelessWidget {
         .take(8)
         .join('\n');
     return Text(
-      cleaned.isEmpty ? 'Много мелких улучшений и стабильность.' : cleaned,
+      cleaned.isEmpty ? t.ui.changelog.fallback : cleaned,
       style: theme.textTheme.bodyMedium,
     );
   }

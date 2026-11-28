@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
+import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -12,6 +13,7 @@ class TrialExpiredPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
     return Container(
       color: PixellnetBrand.bgScaffold,
       alignment: Alignment.center,
@@ -39,7 +41,7 @@ class TrialExpiredPage extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'Пробный период уже\nбыл использован',
+            t.ui.trial.expiredTitle,
             textAlign: TextAlign.center,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
@@ -49,7 +51,7 @@ class TrialExpiredPage extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'На это устройство мы уже выдавали 7 дней.\nЧтобы продолжить — введите платный ключ.',
+            t.ui.trial.expiredText,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: PixellnetBrand.textSecondary,
@@ -67,9 +69,9 @@ class TrialExpiredPage extends ConsumerWidget {
             onPressed: () {
               ref.read(bottomSheetsNotifierProvider.notifier).showAddProfile();
             },
-            child: const Text(
-              'Ввести ключ',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            child: Text(
+              t.ui.trial.enterKey,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ),
           const SizedBox(height: 10),
@@ -84,9 +86,9 @@ class TrialExpiredPage extends ConsumerWidget {
               Uri.parse('https://t.me/pixellnet_bot?start=renew'),
               mode: LaunchMode.externalApplication,
             ),
-            child: const Text(
-              'Продлить доступ',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            child: Text(
+              t.ui.trial.renew,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
           ),
           const SizedBox(height: 20),
@@ -98,11 +100,11 @@ class TrialExpiredPage extends ConsumerWidget {
               ),
               child: RichText(
                 textAlign: TextAlign.center,
-                text: const TextSpan(
-                  style: TextStyle(color: PixellnetBrand.textMuted, fontSize: 13),
+                text: TextSpan(
+                  style: const TextStyle(color: PixellnetBrand.textMuted, fontSize: 13),
                   children: [
-                    TextSpan(text: 'Нет ключа? Напишите '),
-                    TextSpan(
+                    TextSpan(text: t.ui.trial.noKey),
+                    const TextSpan(
                       text: '@pixellnet_bot',
                       style: TextStyle(
                         color: PixellnetBrand.accent,

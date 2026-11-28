@@ -36,7 +36,7 @@ final autoTrialProvider = FutureProvider<TrialInfo?>((ref) async {
   result.fold(
     (failure) {
       DiagnosticsService.instance.event('auto_trial.import_failed', {'error': failure.toString()});
-      throw TrialException('Не удалось добавить профиль: $failure');
+      throw TrialException('profile import failed', kind: TrialFailure.importFailed, detail: failure.toString());
     },
     (_) {
       DiagnosticsService.instance.event('auto_trial.imported');

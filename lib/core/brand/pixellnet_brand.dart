@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hiddify/gen/translations.g.dart';
 
 /// PIXELLNET brand tokens — Material 3 Dark (AI Studio aesthetic) v5, 2026-11-11.
 ///
@@ -14,17 +15,13 @@ abstract class PixellnetBrand {
 
   /// Текст «Поделиться приложением» (0.1.105, Р0.1). Единый для главного экрана и «О программе».
   /// Пока есть только связь, поэтому про ИИ-помощника и расширения — «скоро».
-  static String shareText({required bool ru}) => ru
-      ? 'PIXELLNET — стабильная связь одной кнопкой. Скоро — ИИ-помощник и расширения.\n\n'
-            'Скачать для Android и Windows:\n$downloadUrl'
-      : 'PIXELLNET — stable connectivity in one tap. Coming soon: an AI assistant and extensions.\n\n'
-            'Download for Android and Windows:\n$downloadUrl';
+  /// Тексты лежат в переводах (`ui.share.appText`), поэтому на каждом языке свой.
+  static String shareText(Translations t) => t.ui.share.appText(url: downloadUrl);
 
   /// Текст приглашения друга по реферальной ссылке (0.1.105, Р0.1).
-  /// Основной текст приходит с сервера (`invite_text`); это запасной вариант без сети.
-  static String inviteText(String link, {required bool ru}) => ru
-      ? 'Пользуюсь PIXELLNET — стабильная связь одной кнопкой. По моей ссылке — 7 дней бесплатно: $link'
-      : 'I use PIXELLNET — stable connectivity in one tap. Get 7 days free with my link: $link';
+  /// Основной текст приходит с сервера (`invite_text`, по-русски); это текст на языке приложения —
+  /// запасной без сети и основной на всех языках, кроме русского.
+  static String inviteText(Translations t, String link) => t.ui.share.inviteText(link: link);
 
   // ─── Dark palette (primary) ───
   static const Color bgScaffold = Color(0xFF131314);

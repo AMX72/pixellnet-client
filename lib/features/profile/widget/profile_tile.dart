@@ -253,7 +253,7 @@ class ProfileActionsMenu extends HookConsumerWidget {
       // v0.1.44 — единая точка входа Share (bottom sheet с 3 плитками)
       if (profile case RemoteProfileEntity(:final url, :final name))
         AdaptiveMenuItem(
-          title: 'Поделиться…',
+          title: t.ui.profile.share,
           leadingIcon: Icon(AdaptiveIcon(context).share),
           onTap: () async {
             final link = LinkParser.generateSubShareLink(url, name);

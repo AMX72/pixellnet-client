@@ -14,7 +14,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
-import 'package:hiddify/core/localization/locale_extensions.dart';
 import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/gen/translations.g.dart' show AppLocale, Translations;
@@ -50,6 +49,23 @@ import 'package:hiddify/features/trial/widget/trial_expired_page.dart';
 import 'package:hiddify/gen/assets.gen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+/// Текст для людей по причине сбоя пробного периода (на языке приложения).
+String _trialErrorText(Translations t, Object? error) {
+  if (error is TrialException) {
+    switch (error.kind) {
+      case TrialFailure.server:
+        return t.ui.trial.errServer(code: error.detail ?? '');
+      case TrialFailure.emptyResponse:
+        return t.ui.trial.errEmpty;
+      case TrialFailure.importFailed:
+        return t.ui.trial.errImport(failure: error.detail ?? '');
+      case null:
+        break;
+    }
+  }
+  return t.ui.trial.checkInternet;
+}
+
 class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
 
@@ -84,7 +100,7 @@ class HomePage extends HookConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.more_vert_outlined),
-            tooltip: 'Меню',
+            tooltip: t.ui.home.menu,
             onPressed: () => _showOverflowSheet(context, ref),
           ),
           const Gap(4),
@@ -124,10 +140,10 @@ class HomePage extends HookConsumerWidget {
                 children: [
                   const SizedBox(width: 44, height: 44, child: CircularProgressIndicator(strokeWidth: 2.5)),
                   const Gap(20),
-                  Text('Готовим пробный период',
+                  Text(t.ui.trial.preparing,
                       style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
                   const Gap(6),
-                  Text('Одна секунда',
+                  Text(t.ui.trial.oneSecond,
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
@@ -146,13 +162,11 @@ class HomePage extends HookConsumerWidget {
                   children: [
                     Icon(Icons.wifi_off_outlined, size: 44, color: theme.colorScheme.error),
                     const Gap(16),
-                    Text('Не получилось создать пробный доступ',
+                    Text(t.ui.trial.createFailed,
                         style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
                     const Gap(6),
                     Text(
-                      autoTrial.error is TrialException
-                          ? (autoTrial.error as TrialException).message
-                          : 'Проверьте интернет и попробуйте снова',
+                      _trialErrorText(t, autoTrial.error),
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                       textAlign: TextAlign.center,
@@ -160,7 +174,7 @@ class HomePage extends HookConsumerWidget {
                     const Gap(20),
                     OutlinedButton(
                       onPressed: () => ref.invalidate(autoTrialProvider),
-                      child: const Text('Повторить'),
+                      child: Text(t.ui.trial.retry),
                     ),
                   ],
                 ),
@@ -178,6 +192,7 @@ class HomePage extends HookConsumerWidget {
   }
 
   static void _showOverflowSheet(BuildContext context, WidgetRef ref) {
+    final t = ref.read(translationsProvider).requireValue;
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
@@ -191,7 +206,7 @@ class HomePage extends HookConsumerWidget {
             children: [
               ListTile(
                 leading: const Icon(Icons.show_chart_outlined, size: 20),
-                title: const Text('Диагностика'),
+                title: Text(t.ui.dev.diagnostics),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   context.pushNamed('developer');
@@ -199,7 +214,7 @@ class HomePage extends HookConsumerWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.description_outlined, size: 20),
-                title: const Text('Логи'),
+                title: Text(t.ui.home.logs),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   context.pushNamed('logs');
@@ -208,9 +223,9 @@ class HomePage extends HookConsumerWidget {
               if (Platform.isAndroid)
                 ListTile(
                   leading: const Icon(Icons.battery_charging_full_outlined, size: 20),
-                  title: const Text('Работа в фоне'),
-                  subtitle: const Text('Чтобы телефон не закрывал PIXELLNET',
-                      style: TextStyle(fontSize: 12)),
+                  title: Text(t.ui.guard.bgTitle),
+                  subtitle: Text(t.ui.home.bgHint,
+                      style: const TextStyle(fontSize: 12)),
                   onTap: () {
                     Navigator.of(ctx).pop();
                     showBackgroundGuardSheet(context);
@@ -218,22 +233,22 @@ class HomePage extends HookConsumerWidget {
                 ),
               ListTile(
                 leading: const Icon(Icons.ios_share_outlined, size: 20),
-                title: const Text('Поделиться приложением'),
-                subtitle: const Text('Отправить ссылку друзьям',
-                    style: TextStyle(fontSize: 12)),
+                title: Text(t.ui.about.shareApp),
+                subtitle: Text(t.ui.home.shareHint,
+                    style: const TextStyle(fontSize: 12)),
                 onTap: () async {
                   Navigator.of(ctx).pop();
                   await Share.share(
-                    PixellnetBrand.shareText(ru: ref.read(localePreferencesProvider).isRussian),
+                    PixellnetBrand.shareText(t),
                     subject: PixellnetBrand.appName,
                   );
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.cloud_download_outlined, size: 20),
-                title: const Text('Скачать другие версии'),
-                subtitle: const Text('Windows · старые версии',
-                    style: TextStyle(fontSize: 12)),
+                title: Text(t.ui.home.otherVersions),
+                subtitle: Text(t.ui.home.otherVersionsHint,
+                    style: const TextStyle(fontSize: 12)),
                 onTap: () async {
                   Navigator.of(ctx).pop();
                   await launchUrl(
@@ -244,7 +259,7 @@ class HomePage extends HookConsumerWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.info_outline, size: 20),
-                title: const Text('О программе'),
+                title: Text(t.ui.dev.aboutProgram),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   context.pushNamed('about');
@@ -261,6 +276,7 @@ class HomePage extends HookConsumerWidget {
   /// v0.1.38: bottom sheet «Обновить прокси-каналы?» для mode=ask.
   static void _showProfileRefreshAskSheet(
       BuildContext context, WidgetRef ref) {
+    final t = ref.read(translationsProvider).requireValue;
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -274,16 +290,16 @@ class HomePage extends HookConsumerWidget {
           children: [
             const Icon(Icons.cloud_sync_outlined, size: 36),
             const SizedBox(height: 12),
-            const Text(
-              'Обновить список каналов?',
+            Text(
+              t.ui.home.refreshAskTitle,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Появились новые каналы. Обновить сейчас?',
+            Text(
+              t.ui.home.refreshAskText,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 20),
             FilledButton(
@@ -293,7 +309,7 @@ class HomePage extends HookConsumerWidget {
                     .read(autoProfileRefreshProvider.notifier)
                     .confirmRefresh();
               },
-              child: const Text('Обновить'),
+              child: Text(t.ui.common.update),
             ),
             const SizedBox(height: 8),
             TextButton(
@@ -301,7 +317,7 @@ class HomePage extends HookConsumerWidget {
                 Navigator.of(ctx).pop();
                 ref.read(autoProfileRefreshProvider.notifier).dismissAsk();
               },
-              child: const Text('Не сейчас'),
+              child: Text(t.ui.common.notNow),
             ),
           ],
         ),
@@ -625,7 +641,7 @@ class _StatusHero extends ConsumerWidget {
           ? active!.tagDisplay
           : (active?.tag ?? '—');
       final delay = active?.urlTestDelay ?? 0;
-      final delayPart = delay > 0 && delay < 65000 ? ' · $delay мс' : '';
+      final delayPart = delay > 0 && delay < 65000 ? ' · ${t.ui.common.ms(ms: delay)}' : '';
       subtitle = '$name$delayPart';
       buttonLabel = t.connection.disconnect;
       buttonFilled = false;
@@ -647,9 +663,9 @@ class _StatusHero extends ConsumerWidget {
     // Данные для inline-ссылок Сервер/Ключ.
     final serverName = active?.tagDisplay.isNotEmpty == true
         ? active!.tagDisplay
-        : (active?.tag.isNotEmpty == true ? active!.tag : 'Авто');
+        : (active?.tag.isNotEmpty == true ? active!.tag : t.ui.home.auto);
     final delay = active?.urlTestDelay ?? 0;
-    final delayPart = delay > 0 && delay < 65000 ? ' · $delay мс' : '';
+    final delayPart = delay > 0 && delay < 65000 ? ' · ${t.ui.common.ms(ms: delay)}' : '';
     final activeProfile = ref.watch(activeProfileProvider).valueOrNull;
     final all = ref.watch(profilesNotifierProvider).valueOrNull ?? const [];
     final extraCount = (all.length - 1).clamp(0, 99);
@@ -817,7 +833,7 @@ void _showModeSheet(BuildContext context, WidgetRef ref) {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
               child: Text(
-                'Режим работы',
+                t.ui.home.modeTitle,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -846,13 +862,13 @@ void _showModeSheet(BuildContext context, WidgetRef ref) {
                               style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
                             ),
                             if (m == ServiceMode.tun)
-                              Text('Рекомендуется — работает со всеми приложениями',
+                              Text(t.ui.home.modeRecommended,
                                   style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                             if (m == ServiceMode.systemProxy)
-                              Text('Только HTTP/HTTPS, ломает Node.js и Docker',
+                              Text(t.ui.home.modeSystemHint,
                                   style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                             if (m == ServiceMode.proxy)
-                              Text('Для продвинутых — SOCKS5 порт',
+                              Text(t.ui.home.modeProxyHint,
                                   style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                           ],
                         ),
@@ -894,6 +910,7 @@ class _ServerPickerBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
     final proxies = ref.watch(proxiesOverviewNotifierProvider);
 
     return SafeArea(
@@ -907,7 +924,7 @@ class _ServerPickerBody extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Выбор сервера',
+                    t.ui.home.serverTitle,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -917,7 +934,7 @@ class _ServerPickerBody extends ConsumerWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.refresh_outlined, size: 20),
-                  tooltip: 'Обновить список',
+                  tooltip: t.ui.home.refreshList,
                   color: theme.colorScheme.onSurfaceVariant,
                   visualDensity: VisualDensity.compact,
                   padding: const EdgeInsets.all(6),
@@ -934,7 +951,7 @@ class _ServerPickerBody extends ConsumerWidget {
                 if (proxies.valueOrNull != null)
                   IconButton(
                     icon: const Icon(Icons.speed_outlined, size: 20),
-                    tooltip: 'Проверить пинг',
+                    tooltip: t.ui.home.checkPing,
                     color: theme.colorScheme.onSurfaceVariant,
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.all(6),
@@ -953,11 +970,11 @@ class _ServerPickerBody extends ConsumerWidget {
           Flexible(
             child: switch (proxies) {
               AsyncData(value: final group?) => _ServerList(group: group),
-              AsyncData() => _ServerEmpty(msg: 'Нет серверов — добавьте ключ подписки.'),
+              AsyncData() => _ServerEmpty(msg: t.ui.home.noServers),
               AsyncError(:final error) => _ServerEmpty(
                   msg: error.toString().contains('ServiceNotRunning')
-                      ? 'Подключитесь, чтобы увидеть список серверов'
-                      : 'Ошибка загрузки: $error',
+                      ? t.ui.home.connectToSeeServers
+                      : t.ui.home.loadError(error: error),
                 ),
               _ => const Padding(
                   padding: EdgeInsets.all(32),
@@ -1033,7 +1050,7 @@ class _ServerList extends ConsumerWidget {
                     ),
                     Text(
                       item.urlTestDelay > 0 && item.urlTestDelay < 65000
-                          ? '${item.urlTestDelay} мс'
+                          ? t.ui.common.ms(ms: item.urlTestDelay)
                           : '—',
                       style: TextStyle(
                         fontSize: 13,
@@ -1072,6 +1089,7 @@ class _TrafficSection extends ConsumerWidget {
     final conn = ref.watch(connectionNotifierProvider).valueOrNull;
     if (conn is! Connected) return const SizedBox.shrink();
 
+    final t = ref.watch(translationsProvider).requireValue;
     final stats = ref.watch(statsNotifierProvider).valueOrNull;
     final upSpeed = (stats?.uplink.toInt() ?? 0).toDouble();
     final downSpeed = (stats?.downlink.toInt() ?? 0).toDouble();
@@ -1083,30 +1101,30 @@ class _TrafficSection extends ConsumerWidget {
       children: [
         const SizedBox(height: 10),
         _Row(
-          label: 'Сегодня',
-          value: '↓ ${_bytesCompact(totalDown)}   ↑ ${_bytesCompact(totalUp)}',
+          label: t.ui.home.today,
+          value: '↓ ${_bytesCompact(t, totalDown)}   ↑ ${_bytesCompact(t, totalUp)}',
           mono: true,
         ),
         _Row(
-          label: 'Скорость',
-          value: '↓ ${_speedCompact(downSpeed)}   ↑ ${_speedCompact(upSpeed)}',
+          label: t.ui.home.speed,
+          value: '↓ ${_speedCompact(t, downSpeed)}   ↑ ${_speedCompact(t, upSpeed)}',
           mono: true,
         ),
       ],
     );
   }
 
-  static String _bytesCompact(int b) {
-    if (b < 1024) return '${b} Б';
-    if (b < 1024 * 1024) return '${(b / 1024).toStringAsFixed(1)} КБ';
-    if (b < 1024 * 1024 * 1024) return '${(b / (1024 * 1024)).toStringAsFixed(1)} МБ';
-    return '${(b / (1024 * 1024 * 1024)).toStringAsFixed(2)} ГБ';
+  static String _bytesCompact(Translations t, int b) {
+    if (b < 1024) return t.ui.units.b(n: b);
+    if (b < 1024 * 1024) return t.ui.units.kb(n: (b / 1024).toStringAsFixed(1));
+    if (b < 1024 * 1024 * 1024) return t.ui.units.mb(n: (b / (1024 * 1024)).toStringAsFixed(1));
+    return t.ui.units.gb(n: (b / (1024 * 1024 * 1024)).toStringAsFixed(2));
   }
 
-  static String _speedCompact(double bps) {
-    if (bps < 1024) return '${bps.toInt()} Б/с';
-    if (bps < 1024 * 1024) return '${(bps / 1024).toStringAsFixed(0)} КБ/с';
-    return '${(bps / (1024 * 1024)).toStringAsFixed(1)} МБ/с';
+  static String _speedCompact(Translations t, double bps) {
+    if (bps < 1024) return t.ui.units.bps(n: bps.toInt());
+    if (bps < 1024 * 1024) return t.ui.units.kbps(n: (bps / 1024).toStringAsFixed(0));
+    return t.ui.units.mbps(n: (bps / (1024 * 1024)).toStringAsFixed(1));
   }
 }
 
@@ -1171,6 +1189,7 @@ class _ExpirySection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
     final activeProfile = ref.watch(activeProfileProvider).valueOrNull;
     if (activeProfile is! RemoteProfileEntity) return const SizedBox.shrink();
     final sub = activeProfile.subInfo;
@@ -1178,10 +1197,10 @@ class _ExpirySection extends ConsumerWidget {
 
     final now = DateTime.now();
     final daysLeft = sub.expire.difference(now).inDays;
-    final (color, valueText) = _expiryStyle(sub.expire, daysLeft, theme);
+    final (color, valueText) = _expiryStyle(t, sub.expire, daysLeft, theme);
 
     return InkWell(
-      onTap: () => _showRenewSheet(context, activeProfile, sub, isRu: ref.read(localePreferencesProvider).isRussian),
+      onTap: () => _showRenewSheet(context, activeProfile, sub, t),
       child: Container(
         constraints: const BoxConstraints(minHeight: 36),
         padding: const EdgeInsets.symmetric(horizontal: _kRowPadH, vertical: 7),
@@ -1189,7 +1208,7 @@ class _ExpirySection extends ConsumerWidget {
           children: [
             Expanded(
               child: Text(
-                'Срок',
+                t.ui.home.expiry,
                 style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
               ),
             ),
@@ -1208,28 +1227,19 @@ class _ExpirySection extends ConsumerWidget {
     );
   }
 
-  (Color, String) _expiryStyle(DateTime expire, int daysLeft, ThemeData theme) {
-    final dateText = _ProfileRow._fmtDate(expire);
+  (Color, String) _expiryStyle(Translations t, DateTime expire, int daysLeft, ThemeData theme) {
+    final dateText = _ProfileRow._fmtDate(t, expire);
     if (daysLeft <= 0) {
-      return (PixellnetBrand.error, 'срок истёк');
+      return (PixellnetBrand.error, t.ui.home.expired);
     }
-    final suffix = _daysWord(daysLeft);
-    final text = 'до $dateText · $daysLeft $suffix';
+    final text = t.ui.home.until(date: dateText, days: t.ui.home.days(n: daysLeft));
     // Highlight only when running out (<7 days). Otherwise neutral muted.
     if (daysLeft < 7) return (PixellnetBrand.warning, text);
     return (theme.colorScheme.onSurfaceVariant, text);
   }
-
-  static String _daysWord(int n) {
-    final mod10 = n % 10;
-    final mod100 = n % 100;
-    if (mod10 == 1 && mod100 != 11) return 'день';
-    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'дня';
-    return 'дней';
-  }
 }
 
-void _showRenewSheet(BuildContext context, RemoteProfileEntity profile, SubscriptionInfo sub, {required bool isRu}) {
+void _showRenewSheet(BuildContext context, RemoteProfileEntity profile, SubscriptionInfo sub, Translations t) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -1241,10 +1251,10 @@ void _showRenewSheet(BuildContext context, RemoteProfileEntity profile, Subscrip
       final theme = Theme.of(ctx);
       final daysLeft = sub.expire.difference(DateTime.now()).inDays;
       final masked = _maskProfile(profile.name);
-      final dateStr = _ProfileRow._fmtDate(sub.expire);
+      final dateStr = _ProfileRow._fmtDate(t, sub.expire);
       final subtitleText = daysLeft <= 0
-          ? 'Ключ $masked · срок истёк'
-          : 'Ключ $masked истекает через $daysLeft ${_ExpirySection._daysWord(daysLeft)} ($dateStr)';
+          ? t.ui.home.keyExpired(masked: masked)
+          : t.ui.home.keyExpiresIn(masked: masked, days: t.ui.home.days(n: daysLeft), date: dateStr);
 
       return SafeArea(
         child: Padding(
@@ -1254,7 +1264,7 @@ void _showRenewSheet(BuildContext context, RemoteProfileEntity profile, Subscrip
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Продление подписки',
+                t.ui.home.renewTitle,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface),
               ),
               const Gap(8),
@@ -1267,7 +1277,7 @@ void _showRenewSheet(BuildContext context, RemoteProfileEntity profile, Subscrip
                 height: 48,
                 child: FilledButton.icon(
                   icon: const Icon(Icons.autorenew_outlined, size: 18),
-                  label: Text(isRu ? 'Продлить' : 'Renew'),
+                  label: Text(t.ui.home.renew),
                   onPressed: () async {
                     Navigator.of(ctx).pop();
                     final uri = Uri.parse('https://t.me/pixellnet_bot?start=renew');
@@ -1277,14 +1287,14 @@ void _showRenewSheet(BuildContext context, RemoteProfileEntity profile, Subscrip
               ),
               const Gap(10),
               Text(
-                isRu ? 'Откроется чат поддержки @pixellnet_bot' : 'Opens the support chat @pixellnet_bot',
+                t.ui.home.renewHint,
                 style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
               const Gap(8),
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Отмена'),
+                child: Text(t.ui.common.cancel),
               ),
             ],
           ),
@@ -1322,9 +1332,9 @@ String _maskProfile(String name) {
   return '•••• ${name.substring(name.length - 4)}';
 }
 
-String _profileDisplayName(ProfileEntity p, int index) {
+String _profileDisplayName(Translations t, ProfileEntity p, int index) {
   if (p.name.trim().isNotEmpty && !p.name.startsWith('http')) return p.name;
-  return 'Подписка ${index + 1}';
+  return t.ui.home.subscriptionN(n: index + 1);
 }
 
 void _showSubscriptionSheet(BuildContext context, WidgetRef ref) {
@@ -1348,6 +1358,7 @@ class _SubscriptionSheetBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
     final profiles = ref.watch(profilesNotifierProvider).valueOrNull ?? const [];
     // Active first, rest by order (upstream sorts by lastUpdate).
     final sorted = [...profiles]..sort((a, b) {
@@ -1355,7 +1366,7 @@ class _SubscriptionSheetBody extends ConsumerWidget {
       if (!a.active && b.active) return 1;
       return 0;
     });
-    final title = profiles.length > 1 ? 'Ключи' : 'Ключ';
+    final title = profiles.length > 1 ? t.ui.home.keys : t.pages.home.key;
     final activeList = sorted.where((p) => p.active).toList();
     final active = activeList.isEmpty ? null : activeList.first;
     final activeIndex = active == null ? 0 : sorted.indexOf(active);
@@ -1381,7 +1392,7 @@ class _SubscriptionSheetBody extends ConsumerWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.content_paste_outlined, size: 20),
-                  tooltip: 'Вставить из буфера',
+                  tooltip: t.ui.home.pasteFromClipboard,
                   color: theme.colorScheme.onSurfaceVariant,
                   visualDensity: VisualDensity.compact,
                   padding: const EdgeInsets.all(6),
@@ -1392,14 +1403,14 @@ class _SubscriptionSheetBody extends ConsumerWidget {
                     if (text == null || text.isEmpty) {
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('В буфере нет ключа')),
+                        SnackBar(content: Text(t.ui.home.clipboardNoKey)),
                       );
                       return;
                     }
                     await ref.read(addProfileNotifierProvider.notifier).addClipboard(text);
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Добавлено')),
+                      SnackBar(content: Text(t.ui.home.added)),
                     );
                   },
                 ),
@@ -1407,7 +1418,7 @@ class _SubscriptionSheetBody extends ConsumerWidget {
             ),
           ),
           if (active != null)
-            _ActiveKeyHero(profile: active, displayName: _profileDisplayName(active, activeIndex)),
+            _ActiveKeyHero(profile: active, displayName: _profileDisplayName(t, active, activeIndex)),
           Flexible(
             child: SingleChildScrollView(
               child: Column(
@@ -1427,7 +1438,7 @@ class _SubscriptionSheetBody extends ConsumerWidget {
                   Icon(Icons.add_outlined, size: 20, color: theme.colorScheme.primary),
                   const Gap(12),
                   Text(
-                    'Добавить подписку',
+                    t.ui.home.addSubscription,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -1460,6 +1471,7 @@ class _ActiveKeyHeroState extends State<_ActiveKeyHero> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final t = context.t;
     final keyOrUrl = widget.profile is RemoteProfileEntity
         ? (widget.profile as RemoteProfileEntity).url
         : widget.profile.name;
@@ -1469,7 +1481,7 @@ class _ActiveKeyHeroState extends State<_ActiveKeyHero> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Активный ключ · ${widget.displayName}',
+            t.ui.home.activeKey(name: widget.displayName),
             style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
           ),
           const Gap(6),
@@ -1501,12 +1513,12 @@ class _ActiveKeyHeroState extends State<_ActiveKeyHero> {
               Expanded(
                 child: _HeroAction(
                   icon: Icons.copy_outlined,
-                  label: 'Копировать',
+                  label: t.ui.home.copy,
                   onTap: () async {
                     await Clipboard.setData(ClipboardData(text: keyOrUrl));
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Скопировано'), duration: Duration(seconds: 2)),
+                      SnackBar(content: Text(t.ui.common.copied), duration: const Duration(seconds: 2)),
                     );
                   },
                 ),
@@ -1514,7 +1526,7 @@ class _ActiveKeyHeroState extends State<_ActiveKeyHero> {
               Expanded(
                 child: _HeroAction(
                   icon: Icons.ios_share_outlined,
-                  label: 'Поделиться',
+                  label: t.ui.home.share,
                   onTap: () async {
                     await Share.share(keyOrUrl, subject: 'PIXELLNET · ${widget.displayName}');
                   },
@@ -1523,7 +1535,7 @@ class _ActiveKeyHeroState extends State<_ActiveKeyHero> {
               Expanded(
                 child: _HeroAction(
                   icon: Icons.qr_code_outlined,
-                  label: 'QR-код',
+                  label: t.ui.home.qrCode,
                   onTap: () => _showQrSheet(context, keyOrUrl, widget.displayName),
                 ),
               ),
@@ -1578,6 +1590,7 @@ void _showQrSheet(BuildContext context, String data, String displayName) {
     barrierColor: Colors.black87,
     builder: (ctx) {
       final theme = Theme.of(ctx);
+      final t = context.t;
       return Dialog(
         insetPadding: const EdgeInsets.all(24),
         backgroundColor: Colors.transparent,
@@ -1603,15 +1616,15 @@ void _showQrSheet(BuildContext context, String data, String displayName) {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),
             ),
             const Gap(6),
-            const Text(
-              'Сканируйте другим устройством',
-              style: TextStyle(fontSize: 13, color: Colors.white70),
+            Text(
+              t.ui.home.scanWithOther,
+              style: const TextStyle(fontSize: 13, color: Colors.white70),
             ),
             const Gap(16),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
               style: TextButton.styleFrom(foregroundColor: theme.colorScheme.primary),
-              child: const Text('Закрыть'),
+              child: Text(t.ui.common.close),
             ),
           ],
         ),
@@ -1628,7 +1641,8 @@ class _ProfileRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final displayName = _profileDisplayName(profile, index);
+    final t = ref.watch(translationsProvider).requireValue;
+    final displayName = _profileDisplayName(t, profile, index);
     final masked = _maskProfile(profile.name);
     String? subLine;
     if (profile is RemoteProfileEntity) {
@@ -1637,9 +1651,9 @@ class _ProfileRow extends ConsumerWidget {
       if (sub != null) {
         final days = sub.expire.difference(DateTime.now()).inDays;
         if (days > 0) {
-          subLine = 'действует до ${_fmtDate(sub.expire)}';
+          subLine = t.ui.home.validUntil(date: _fmtDate(t, sub.expire));
         } else if (days < 0) {
-          subLine = 'срок истёк';
+          subLine = t.ui.home.expired;
         }
       }
       subLine ??= Uri.tryParse(rp.url)?.host;
@@ -1702,10 +1716,10 @@ class _ProfileRow extends ConsumerWidget {
               onSelected: (value) => _onAction(context, ref, value),
               itemBuilder: (ctx) => [
                 if (profile is RemoteProfileEntity)
-                  const PopupMenuItem(value: 'refresh', child: Text('Обновить')),
+                  PopupMenuItem(value: 'refresh', child: Text(t.ui.common.update)),
                 PopupMenuItem(
                   value: 'delete',
-                  child: Text('Удалить',
+                  child: Text(t.ui.common.delete,
                       style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
                 ),
               ],
@@ -1731,13 +1745,13 @@ class _ProfileRow extends ConsumerWidget {
     }
   }
 
-  static String _fmtDate(DateTime d) {
-    const months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
-    return '${d.day} ${months[d.month - 1]}';
+  static String _fmtDate(Translations t, DateTime d) {
+    return '${d.day} ${t.ui.home.monthsShort[d.month - 1]}';
   }
 }
 
 Future<void> _confirmAndDelete(BuildContext context, WidgetRef ref, ProfileEntity profile) async {
+  final t = ref.read(translationsProvider).requireValue;
   final all = ref.read(profilesNotifierProvider).valueOrNull ?? const [];
   final isLast = all.length <= 1;
   final isActive = profile.active;
@@ -1745,19 +1759,19 @@ Future<void> _confirmAndDelete(BuildContext context, WidgetRef ref, ProfileEntit
 
   if (isLast || isActive) {
     final msg = isLast
-        ? 'После удаления приложение потребует новый ключ. Удалить?'
-        : 'Активной станет "${_profileDisplayName(others.first, 0)}". Это действие нельзя отменить.';
+        ? t.ui.home.deleteLast
+        : t.ui.home.deleteActive(name: _profileDisplayName(t, others.first, 0));
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Удалить "${_profileDisplayName(profile, 0)}"?'),
+        title: Text(t.ui.home.deleteTitle(name: _profileDisplayName(t, profile, 0))),
         content: Text(msg),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Отмена')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(t.ui.common.cancel)),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: Theme.of(ctx).colorScheme.error),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Удалить'),
+            child: Text(t.ui.common.delete),
           ),
         ],
       ),
@@ -1770,13 +1784,13 @@ Future<void> _confirmAndDelete(BuildContext context, WidgetRef ref, ProfileEntit
   if (!isLast && !isActive) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Подписка удалена'),
+        content: Text(t.ui.home.deleted),
         duration: const Duration(seconds: 4),
         // Flutter 3.38: SnackBar с action по умолчанию persist = true и не исчезает
         // по duration — плашка висела и закрывала «Добавить подписку». Явно гасим через 4 с.
         persist: false,
         action: SnackBarAction(
-          label: 'Отменить',
+          label: t.ui.home.undo,
           onPressed: () async {
             if (profile is RemoteProfileEntity) {
               await ref.read(addProfileNotifierProvider.notifier).addClipboard(profile.url);
@@ -1789,6 +1803,7 @@ Future<void> _confirmAndDelete(BuildContext context, WidgetRef ref, ProfileEntit
 }
 
 void _showAddSubscriptionSheet(BuildContext context, WidgetRef ref) {
+  final t = ref.read(translationsProvider).requireValue;
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -1806,7 +1821,7 @@ void _showAddSubscriptionSheet(BuildContext context, WidgetRef ref) {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
               child: Text(
-                'Добавить подписку',
+                t.ui.home.addSubscription,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -1816,7 +1831,7 @@ void _showAddSubscriptionSheet(BuildContext context, WidgetRef ref) {
             ),
             ListTile(
               leading: const Icon(Icons.content_paste_outlined, size: 20),
-              title: const Text('Вставить из буфера', style: TextStyle(fontSize: 14)),
+              title: Text(t.ui.home.pasteFromClipboard, style: const TextStyle(fontSize: 14)),
               onTap: () async {
                 final data = await Clipboard.getData('text/plain');
                 final text = data?.text?.trim();
@@ -1824,7 +1839,7 @@ void _showAddSubscriptionSheet(BuildContext context, WidgetRef ref) {
                   if (!ctx.mounted) return;
                   Navigator.of(ctx).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Буфер пуст')),
+                    SnackBar(content: Text(t.ui.home.clipboardEmpty)),
                   );
                   return;
                 }
@@ -1835,7 +1850,7 @@ void _showAddSubscriptionSheet(BuildContext context, WidgetRef ref) {
             ),
             ListTile(
               leading: const Icon(Icons.edit_outlined, size: 20),
-              title: const Text('Ввести вручную', style: TextStyle(fontSize: 14)),
+              title: Text(t.ui.home.enterManually, style: const TextStyle(fontSize: 14)),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _showManualEntryDialog(context, ref);
@@ -1844,15 +1859,11 @@ void _showAddSubscriptionSheet(BuildContext context, WidgetRef ref) {
             ListTile(
               leading: const Icon(Icons.data_object_outlined, size: 20),
               title: Text(
-                ref.read(localePreferencesProvider).isRussian
-                    ? 'Вставить настройки от поддержки'
-                    : 'Paste settings from support',
+                t.ui.home.pasteSupportSettings,
                 style: const TextStyle(fontSize: 14),
               ),
               subtitle: Text(
-                ref.read(localePreferencesProvider).isRussian
-                    ? 'Если поддержка прислала настройки текстом'
-                    : 'If support sent you settings as text',
+                t.ui.home.pasteSupportSettingsHint,
                 style: const TextStyle(fontSize: 12),
               ),
               onTap: () {
@@ -1862,7 +1873,7 @@ void _showAddSubscriptionSheet(BuildContext context, WidgetRef ref) {
             ),
             ListTile(
               leading: const Icon(Icons.qr_code_scanner_outlined, size: 20),
-              title: const Text('Сканировать QR-код', style: TextStyle(fontSize: 14)),
+              title: Text(t.ui.home.scanQrCode, style: const TextStyle(fontSize: 14)),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _openQrScanner(context, ref);
@@ -1922,21 +1933,22 @@ class _QrScanPageState extends State<_QrScanPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.black38,
         foregroundColor: Colors.white,
-        title: const Text('Сканировать QR'),
+        title: Text(t.ui.home.scanQr),
         actions: [
           IconButton(
-            tooltip: 'Вспышка',
+            tooltip: t.ui.home.flash,
             icon: const Icon(Icons.flash_on_outlined),
             onPressed: () => _controller.toggleTorch(),
           ),
           IconButton(
-            tooltip: 'Сменить камеру',
+            tooltip: t.ui.home.switchCamera,
             icon: const Icon(Icons.flip_camera_android_outlined),
             onPressed: () => _controller.switchCamera(),
           ),
@@ -1949,11 +1961,9 @@ class _QrScanPageState extends State<_QrScanPage> {
             onDetect: _onDetect,
             errorBuilder: (ctx, err) {
               final msg = switch (err.errorCode) {
-                MobileScannerErrorCode.permissionDenied =>
-                    'Нет доступа к камере. Разрешите в настройках Android.',
-                MobileScannerErrorCode.unsupported =>
-                    'Камера не поддерживается на этом устройстве.',
-                _ => 'Ошибка камеры: ${err.errorCode}',
+                MobileScannerErrorCode.permissionDenied => t.ui.home.cameraDenied,
+                MobileScannerErrorCode.unsupported => t.ui.home.cameraUnsupported,
+                _ => t.ui.home.cameraError(code: err.errorCode),
               };
               return Center(
                 child: Padding(
@@ -1982,7 +1992,7 @@ class _QrScanPageState extends State<_QrScanPage> {
             left: 24,
             right: 24,
             child: Text(
-              'Наведите камеру на QR-код подписки',
+              t.ui.home.pointCamera,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14),
             ),
@@ -1994,26 +2004,27 @@ class _QrScanPageState extends State<_QrScanPage> {
 }
 
 Future<void> _showManualEntryDialog(BuildContext context, WidgetRef ref) async {
+  final t = ref.read(translationsProvider).requireValue;
   final controller = TextEditingController();
   final result = await showDialog<String>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Новая подписка'),
+      title: Text(t.ui.home.newSubscription),
       content: TextField(
         controller: controller,
         autofocus: true,
-        decoration: const InputDecoration(
-          hintText: 'Ключ или URL подписки',
-          border: OutlineInputBorder(),
+        decoration: InputDecoration(
+          hintText: t.ui.home.keyOrUrl,
+          border: const OutlineInputBorder(),
         ),
         maxLines: 2,
         minLines: 1,
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Отмена')),
+        TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(t.ui.common.cancel)),
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-          child: const Text('Активировать'),
+          child: Text(t.ui.home.activate),
         ),
       ],
     ),
@@ -2024,11 +2035,12 @@ Future<void> _showManualEntryDialog(BuildContext context, WidgetRef ref) async {
 }
 
 Future<void> _showJsonEntryDialog(BuildContext context, WidgetRef ref) async {
+  final t = ref.read(translationsProvider).requireValue;
   final controller = TextEditingController();
   final result = await showDialog<String>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: Text(ref.read(localePreferencesProvider).isRussian ? 'Настройки от поддержки' : 'Settings from support'),
+      title: Text(t.ui.home.supportSettingsTitle),
       content: SizedBox(
         width: 400,
         child: Column(
@@ -2036,9 +2048,7 @@ Future<void> _showJsonEntryDialog(BuildContext context, WidgetRef ref) async {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              ref.read(localePreferencesProvider).isRussian
-                  ? 'Вставьте целиком текст настроек, который прислала поддержка.'
-                  : 'Paste the full settings text that support sent you.',
+              t.ui.home.supportSettingsText,
               style: const TextStyle(fontSize: 12),
             ),
             const SizedBox(height: 10),
@@ -2059,7 +2069,7 @@ Future<void> _showJsonEntryDialog(BuildContext context, WidgetRef ref) async {
             const SizedBox(height: 8),
             TextButton.icon(
               icon: const Icon(Icons.content_paste_outlined, size: 16),
-              label: const Text('Вставить из буфера', style: TextStyle(fontSize: 12)),
+              label: Text(t.ui.home.pasteFromClipboard, style: const TextStyle(fontSize: 12)),
               onPressed: () async {
                 final data = await Clipboard.getData('text/plain');
                 final text = data?.text?.trim();
@@ -2072,10 +2082,10 @@ Future<void> _showJsonEntryDialog(BuildContext context, WidgetRef ref) async {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Отмена')),
+        TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(t.ui.common.cancel)),
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-          child: const Text('Добавить'),
+          child: Text(t.ui.common.add),
         ),
       ],
     ),
@@ -2111,7 +2121,7 @@ class _SettingsSection extends ConsumerWidget {
                 }
               } catch (_) {
                 if (context.mounted) {
-                  CustomToast.error(v ? 'Не удалось включить автозапуск' : 'Не удалось выключить автозапуск').show(context);
+                  CustomToast.error(v ? t.ui.general.autoStartOnFailed : t.ui.general.autoStartOffFailed).show(context);
                 }
               }
             },
@@ -2341,6 +2351,7 @@ class _UpdateAvailableBanner extends ConsumerWidget {
     if (!state.shouldShowBanner) return const SizedBox.shrink();
     final info = state.available!;
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
@@ -2365,21 +2376,21 @@ class _UpdateAvailableBanner extends ConsumerWidget {
                 const Gap(10),
                 Expanded(
                   child: Text(
-                    'Есть свежая версия · ${info.version}',
+                    t.ui.general.newVersion(version: info.version),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: PixellnetBrand.mochaOnDark,
                     ),
                   ),
                 ),
-                Text('Обновить',
+                Text(t.ui.common.update,
                     style: theme.textTheme.bodyMedium?.copyWith(
                         color: PixellnetBrand.mochaOnDark,
                         fontWeight: FontWeight.w700)),
                 IconButton(
                   icon: const Icon(Icons.close_outlined, size: 18),
                   color: PixellnetBrand.textSecondary,
-                  tooltip: 'Скрыть на 3 дня',
+                  tooltip: t.ui.home.hideFor3Days,
                   onPressed: () =>
                       ref.read(autoUpdateStateProvider.notifier).dismissBanner(),
                 ),
@@ -2410,6 +2421,7 @@ class _PostUpdateBanner extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
@@ -2438,21 +2450,21 @@ class _PostUpdateBanner extends ConsumerWidget {
                 const Gap(10),
                 Expanded(
                   child: Text(
-                    'Обновлено до $version',
+                    t.ui.home.updatedTo(version: version),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: PixellnetBrand.olive,
                     ),
                   ),
                 ),
-                Text('Что нового →',
+                Text(t.ui.home.whatsNew,
                     style: theme.textTheme.bodySmall?.copyWith(
                         color: PixellnetBrand.olive, fontWeight: FontWeight.w700)),
                 const Gap(4),
                 IconButton(
                   icon: const Icon(Icons.close_outlined, size: 18),
                   color: PixellnetBrand.textSecondary,
-                  tooltip: 'Скрыть',
+                  tooltip: t.ui.common.hide,
                   onPressed: () async {
                     await ref.read(Preferences.lastInstalledAt.notifier).update(0);
                   },
@@ -2484,6 +2496,7 @@ class _VpnPermissionBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
 
     if (state == VpnPermissionState.requesting) {
       return Material(
@@ -2504,7 +2517,7 @@ class _VpnPermissionBanner extends ConsumerWidget {
               const Gap(12),
               Expanded(
                 child: Text(
-                  'Запрашиваем разрешение на соединение...',
+                  t.ui.home.permRequesting,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onErrorContainer,
                     fontWeight: FontWeight.w600,
@@ -2540,14 +2553,14 @@ class _VpnPermissionBanner extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Нужно разрешение на соединение',
+                      t.ui.home.permNeeded,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onErrorContainer,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     Text(
-                      'Нажмите чтобы разрешить и переподключиться',
+                      t.ui.home.permTap,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.8),
                       ),
@@ -2566,13 +2579,13 @@ class _VpnPermissionBanner extends ConsumerWidget {
                 ),
                 onPressed: () =>
                     ref.read(vpnPermissionRecoveryProvider.notifier).retryPermission(),
-                child: const Text('Разрешить'),
+                child: Text(t.ui.common.allow),
               ),
               const Gap(4),
               IconButton(
                 icon: const Icon(Icons.close_outlined, size: 18),
                 color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.7),
-                tooltip: 'Скрыть',
+                tooltip: t.ui.common.hide,
                 onPressed: () =>
                     ref.read(vpnPermissionRecoveryProvider.notifier).dismiss(),
               ),

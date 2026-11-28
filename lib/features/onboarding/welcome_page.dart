@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
+import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/router/bottom_sheets/bottom_sheets_notifier.dart';
 import 'package:hiddify/features/trial/auto_trial_provider.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -80,6 +81,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final isCompact = size.height < 700;
+    final t = ref.watch(translationsProvider).requireValue;
 
     return Scaffold(
       backgroundColor: PixellnetBrand.bgScaffold,
@@ -104,7 +106,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
               ),
               const SizedBox(height: 20),
               Text(
-                'Добро пожаловать',
+                t.ui.welcome.title,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w600,
@@ -113,7 +115,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Стабильный доступ к зарубежным сервисам',
+                t.ui.welcome.subtitle,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: PixellnetBrand.textSecondary,
@@ -124,18 +126,18 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
 
               _WelcomeRow(
                 icon: Icons.bolt_outlined,
-                title: 'Попробовать 7 дней бесплатно',
-                subtitle: 'Без карты, без регистрации',
+                title: t.ui.welcome.trialTitle,
+                subtitle: t.ui.welcome.trialSubtitle,
                 onTap: _startTrial,
                 primary: true,
               ),
               const SizedBox(height: 12),
               _WelcomeRow(
                 icon: Icons.vpn_key_outlined,
-                title: 'У меня уже есть ключ',
+                title: t.ui.welcome.haveKey,
                 subtitle: _clipboardHint != null
-                    ? 'В буфере обмена найдена ссылка'
-                    : 'Введите ключ или ссылку подписки',
+                    ? t.ui.welcome.clipboardFound
+                    : t.ui.welcome.enterKeyHint,
                 onTap: () => _enterKey(prefilledUrl: _clipboardHint),
                 primary: false,
               ),
@@ -148,9 +150,9 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: PixellnetBrand.textMuted,
                     ),
-                    children: const [
-                      TextSpan(text: 'Есть вопросы? Напишите '),
-                      TextSpan(
+                    children: [
+                      TextSpan(text: t.ui.welcome.questions),
+                      const TextSpan(
                         text: '@pixellnet_bot',
                         style: TextStyle(color: PixellnetBrand.accent, fontWeight: FontWeight.w500),
                       ),

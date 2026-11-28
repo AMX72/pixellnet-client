@@ -2,6 +2,7 @@ import 'package:hiddify/core/preferences/preferences_provider.dart';
 import 'package:hiddify/gen/translations.g.dart';
 import 'package:hiddify/utils/custom_loggers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'locale_preferences.g.dart';
 
@@ -20,6 +21,10 @@ AppLocale resolveAppLocale(String? persisted) {
   }
   return AppLocale.en;
 }
+
+/// Тексты языка, сохранённого в настройках, — для кода без `ref` и без `BuildContext` (службы).
+Future<Translations> translationsFromPrefs(SharedPreferences prefs) =>
+    resolveAppLocale(prefs.getString("locale")).build();
 
 @Riverpod(keepAlive: true)
 class LocalePreferences extends _$LocalePreferences with AppLogger {

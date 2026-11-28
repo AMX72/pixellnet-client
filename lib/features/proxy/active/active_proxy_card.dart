@@ -82,7 +82,7 @@ class ActiveProxyFooter extends ConsumerWidget with InfraLogger {
                   Semantics(
                     label: t.pages.proxies.activeProxy,
                     child: Text(
-                      _titleFor(activeProxy),
+                      _titleFor(t, activeProxy),
                       style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -120,8 +120,8 @@ String getRealOutboundTag(OutboundInfo group) {
 }
 
 /// v0.1.22: title сервер-карточки — «Германия · Matrix» (без «lowest→»).
-String _titleFor(OutboundInfo p) {
-  final country = _countryName(p.ipinfo.countryCode);
+String _titleFor(Translations t, OutboundInfo p) {
+  final country = countryName(t, p.ipinfo.countryCode);
   final name = p.groupSelectedTagDisplay.isNotEmpty ? p.groupSelectedTagDisplay : p.tagDisplay;
   if (country.isEmpty) return name;
   return '$country · $name';
@@ -133,30 +133,7 @@ String _subtitleFor(Translations t, OutboundInfo p) {
   final delay = p.urlTestDelay;
   final status = channelStatusLabel(t, delay);
   if (delay <= 0 || delay >= 65000) return status;
-  return '$status · $delay мс';
-}
-
-String _countryName(String code) {
-  const map = {
-    'DE': 'Германия',
-    'NL': 'Нидерланды',
-    'LT': 'Литва',
-    'FI': 'Финляндия',
-    'FR': 'Франция',
-    'SE': 'Швеция',
-    'US': 'США',
-    'GB': 'Великобритания',
-    'CH': 'Швейцария',
-    'AT': 'Австрия',
-    'PL': 'Польша',
-    'CZ': 'Чехия',
-    'RU': 'Россия',
-    'UA': 'Украина',
-    'BY': 'Беларусь',
-    'KZ': 'Казахстан',
-    'TR': 'Турция',
-  };
-  return map[code.toUpperCase()] ?? '';
+  return '$status · ${t.ui.common.ms(ms: delay)}';
 }
 
 // class _StatsColumn extends HookConsumerWidget {

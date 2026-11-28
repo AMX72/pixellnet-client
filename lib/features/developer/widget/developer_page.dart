@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
+import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/features/diagnostics/diagnostics_service.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -21,6 +22,8 @@ class DeveloperPage extends ConsumerStatefulWidget {
 class _DeveloperPageState extends ConsumerState<DeveloperPage> {
   bool _collectingDiag = false;
 
+  Translations get _t => ref.read(translationsProvider).requireValue;
+
   Future<void> _copyDiagnostics() async {
     setState(() => _collectingDiag = true);
     try {
@@ -28,10 +31,10 @@ class _DeveloperPageState extends ConsumerState<DeveloperPage> {
       final md = DiagnosticsService.instance.formatAsMarkdown(snapshot);
       await Clipboard.setData(ClipboardData(text: md));
       if (!mounted) return;
-      _toast('Отчёт скопирован — вставьте в чат поддержки');
+      _toast(_t.ui.dev.reportCopied);
     } catch (e) {
       if (!mounted) return;
-      _toast('Ошибка: $e');
+      _toast(_t.ui.dev.error(error: e));
     } finally {
       if (mounted) setState(() => _collectingDiag = false);
     }
@@ -45,7 +48,7 @@ class _DeveloperPageState extends ConsumerState<DeveloperPage> {
       await Share.share(md, subject: 'PIXELLNET diagnostics');
     } catch (e) {
       if (!mounted) return;
-      _toast('Ошибка: $e');
+      _toast(_t.ui.dev.error(error: e));
     } finally {
       if (mounted) setState(() => _collectingDiag = false);
     }
@@ -59,7 +62,7 @@ class _DeveloperPageState extends ConsumerState<DeveloperPage> {
           '${device['os_version'] ?? device['release'] ?? ''}';
       await Clipboard.setData(ClipboardData(text: id.trim()));
       if (!mounted) return;
-      _toast('Устройство скопировано');
+      _toast(_t.ui.dev.deviceCopied);
     } catch (_) {}
   }
 
@@ -74,13 +77,14 @@ class _DeveloperPageState extends ConsumerState<DeveloperPage> {
   Widget build(BuildContext context) {
     final appInfo = ref.watch(appInfoProvider).valueOrNull;
     final version = appInfo?.presentVersion ?? '—';
+    final t = ref.watch(translationsProvider).requireValue;
 
     return Scaffold(
       backgroundColor: PixellnetBrand.bgScaffold,
       appBar: AppBar(
         backgroundColor: PixellnetBrand.bgScaffold,
         elevation: 0,
-        title: const Text('Для разработчика', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+        title: Text(t.ui.dev.title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_outlined),
           onPressed: () => context.pop(),
@@ -89,40 +93,40 @@ class _DeveloperPageState extends ConsumerState<DeveloperPage> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         children: [
-          _Section('О приложении'),
-          _InfoRow('Версия', version),
-          _InfoRow('Пакет', 'pixellnet.net'),
-          _InfoRow('Платформа', _platformLabel()),
+          _Section(t.ui.dev.about),
+          _InfoRow(t.ui.dev.version, version),
+          _InfoRow(t.ui.dev.package, 'pixellnet.net'),
+          _InfoRow(t.ui.dev.platform, _platformLabel()),
 
           const SizedBox(height: 16),
-          _Section('Диагностика'),
+          _Section(t.ui.dev.diagnostics),
           _ActionRow(
             icon: Icons.article_outlined,
-            label: 'Журнал соединения',
+            label: t.ui.dev.connectionLog,
             onTap: () => context.pushNamed('logs'),
           ),
           _ActionRow(
             icon: Icons.content_copy_outlined,
-            label: _collectingDiag ? 'Собираем…' : 'Скопировать отчёт',
-            subtitle: 'OS, версия, провайдер, последние события',
+            label: _collectingDiag ? t.ui.dev.collecting : t.ui.dev.copyReport,
+            subtitle: t.ui.dev.copyReportHint,
             onTap: _collectingDiag ? null : _copyDiagnostics,
           ),
           _ActionRow(
             icon: Icons.share_outlined,
-            label: 'Поделиться отчётом',
+            label: t.ui.dev.shareReport,
             onTap: _collectingDiag ? null : _shareDiagnostics,
           ),
           _ActionRow(
             icon: Icons.phone_android_outlined,
-            label: 'Скопировать устройство',
+            label: t.ui.dev.copyDevice,
             onTap: _copyDeviceId,
           ),
 
           const SizedBox(height: 16),
-          _Section('Прочее'),
+          _Section(t.ui.dev.other),
           _ActionRow(
             icon: Icons.info_outline,
-            label: 'О программе',
+            label: t.ui.dev.aboutProgram,
             onTap: () => context.pushNamed('about'),
           ),
         ],

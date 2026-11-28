@@ -6,8 +6,6 @@ import 'package:gap/gap.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/core/directories/directories_provider.dart';
-import 'package:hiddify/core/localization/locale_extensions.dart';
-import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/core/model/failures.dart';
@@ -88,15 +86,15 @@ class AboutPage extends HookConsumerWidget {
           },
         ),
       ListTile(
-        title: const Text('Собрать диагностику'),
-        subtitle: const Text('Инфа о ПК/интернете + последние события — в буфер обмена'),
+        title: Text(t.ui.about.collectDiagnostics),
+        subtitle: Text(t.ui.about.collectDiagnosticsHint),
         leading: const Icon(Icons.medical_services_outlined),
         onTap: () async {
           final snap = await DiagnosticsService.instance.collect();
           final md = DiagnosticsService.instance.formatAsMarkdown(snap);
           await Clipboard.setData(ClipboardData(text: md));
           if (!context.mounted) return;
-          CustomToast.success('Диагностика в буфере (${md.length} симв.)').show(context);
+          CustomToast.success(t.ui.about.diagnosticsCopied(count: md.length)).show(context);
         },
       ),
       if (PlatformUtils.isDesktop)
@@ -169,12 +167,12 @@ class AboutPage extends HookConsumerWidget {
               ...conditionalTiles,
               if (conditionalTiles.isNotEmpty) const Divider(),
               ListTile(
-                title: const Text('Поделиться приложением'),
-                subtitle: const Text('Отправить ссылку на скачивание друзьям'),
+                title: Text(t.ui.about.shareApp),
+                subtitle: Text(t.ui.about.shareAppHint),
                 leading: const Icon(Icons.share_outlined),
                 onTap: () async {
                   await Share.share(
-                    PixellnetBrand.shareText(ru: ref.read(localePreferencesProvider).isRussian),
+                    PixellnetBrand.shareText(t),
                     subject: PixellnetBrand.appName,
                   );
                 },

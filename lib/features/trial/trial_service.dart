@@ -182,11 +182,11 @@ class TrialService {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('pixellnet.trial.expired', true);
         throw const TrialException(
-          'Пробный период уже был использован на этом устройстве',
+          'trial already used on this device',
           isExpired: true,
         );
       }
-      throw TrialException('Сервер вернул ${resp.statusCode}. Попробуй позже.');
+      throw TrialException('server returned ${resp.statusCode}', kind: TrialFailure.server, detail: '${resp.statusCode}');
     }
 
     final data = jsonDecode(resp.body) as Map<String, dynamic>;
@@ -194,7 +194,7 @@ class TrialService {
     final expires = data['expires_at'] as String?;
     final tid = data['trial_id']?.toString() ?? '';
     if (url == null || expires == null) {
-      throw TrialException('Пустой ответ сервера');
+      throw const TrialException('empty server response', kind: TrialFailure.emptyResponse);
     }
 
     final info = TrialInfo(
@@ -263,9 +263,18 @@ class TrialStatus {
   final DateTime? expiresAt;
 }
 
+/// Причина сбоя пробного периода: по ней экран выбирает текст на языке приложения.
+enum TrialFailure { server, emptyResponse, importFailed }
+
 class TrialException implements Exception {
-  const TrialException(this.message, {this.isExpired = false});
+  const TrialException(this.message, {this.isExpired = false, this.kind, this.detail});
+
+  /// Служебное сообщение для журнала; людям не показывается (для них — текст по `kind`).
   final String message;
+  final TrialFailure? kind;
+
+  /// Код ответа сервера или текст ошибки — подставляется в текст для людей.
+  final String? detail;
   /// true когда сервер вернул 410 Gone — trial уже использован на этом устройстве.
   /// UI должен показать TrialExpiredPage вместо generic error.
   final bool isExpired;

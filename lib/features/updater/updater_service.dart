@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:hiddify/gen/translations.g.dart' show Translations;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:open_file/open_file.dart';
@@ -19,8 +20,36 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// UI catches this specifically to show «Открыть настройки» button.
 class InstallPermissionDeniedException implements Exception {
   @override
-  String toString() =>
-      'Разрешите установку приложений из этого источника в настройках Android';
+  String toString() => 'install permission denied (REQUEST_INSTALL_PACKAGES)';
+}
+
+/// Причина сбоя обновления. Экран выбирает по ней текст на языке приложения (`UpdateException.present`).
+enum UpdateFailure { checksum, sizeMismatch, tooSmall, installerFailed, timeout, otherFile, partial, unpackFailed }
+
+class UpdateException implements Exception {
+  const UpdateException(this.kind, {this.a, this.b, this.detail});
+  final UpdateFailure kind;
+
+  /// Числа для текста: скачано / всего, размер файла и т. п.
+  final int? a;
+  final int? b;
+
+  /// Сообщение системы или программы (установщик, распаковка).
+  final String? detail;
+
+  String present(Translations t) => switch (kind) {
+        UpdateFailure.checksum => t.ui.update.errChecksum,
+        UpdateFailure.sizeMismatch => t.ui.update.errSizeMismatch(actual: a ?? 0, total: b ?? 0),
+        UpdateFailure.tooSmall => t.ui.update.errTooSmall(size: a ?? 0),
+        UpdateFailure.installerFailed => t.ui.update.errInstaller(message: detail ?? ''),
+        UpdateFailure.timeout => t.ui.update.errTimeout,
+        UpdateFailure.otherFile => t.ui.update.errOtherFile(length: a ?? 0, expected: b ?? 0),
+        UpdateFailure.partial => t.ui.update.errPartial(actual: a ?? 0, total: b ?? 0),
+        UpdateFailure.unpackFailed => t.ui.update.errUnpack(message: detail ?? ''),
+      };
+
+  @override
+  String toString() => 'UpdateException($kind, a: $a, b: $b, detail: $detail)';
 }
 
 const _platformChannel = MethodChannel('com.hiddify.app/platform');
@@ -417,7 +446,7 @@ class UpdaterService {
     );
     if (actual != expected) {
       await file.delete();
-      throw Exception('Файл обновления повреждён (контрольная сумма не совпала). Попробуй снова.');
+      throw const UpdateException(UpdateFailure.checksum);
     }
   }
 
@@ -580,12 +609,12 @@ class UpdaterService {
     final actualSize = await file.length();
     if (totalSize > 0 && actualSize != totalSize) {
       await file.delete();
-      throw Exception('Скачано $actualSize байт из $totalSize. Файл повреждён, попробуй снова.');
+      throw UpdateException(UpdateFailure.sizeMismatch, a: actualSize, b: totalSize);
     }
     if (actualSize < 10 * 1024 * 1024) {
       // < 10 МБ = точно не наш APK (~120 МБ)
       await file.delete();
-      throw Exception('Скачанный файл слишком мал ($actualSize байт). Проверь интернет.');
+      throw UpdateException(UpdateFailure.tooSmall, a: actualSize);
     }
     await _verifySha256(file, info.sha256);
 
@@ -598,7 +627,7 @@ class UpdaterService {
 
     final result = await OpenFile.open(file.path, type: 'application/vnd.android.package-archive');
     if (result.type != ResultType.done) {
-      throw Exception('Не удалось открыть установщик: ${result.message}');
+      throw UpdateException(UpdateFailure.installerFailed, detail: result.message);
     }
   }
 
@@ -638,8 +667,7 @@ class UpdaterService {
         // на следующий mirror при ТСПУ throttle.
         final response = await client.send(request).timeout(
               const Duration(seconds: 15),
-              onTimeout: () =>
-                  throw Exception('Таймаут подключения к серверу обновлений'),
+              onTimeout: () => throw const UpdateException(UpdateFailure.timeout),
             );
 
         if (received == 0) {
@@ -648,7 +676,7 @@ class UpdaterService {
           }
           final length = response.contentLength ?? 0;
           if (expectedTotal > 0 && length > 0 && length != expectedTotal) {
-            throw Exception('Источник отдаёт другой файл ($length байт вместо $expectedTotal)');
+            throw UpdateException(UpdateFailure.otherFile, a: length, b: expectedTotal);
           }
           if (length > 0) totalSize = length;
         } else {
@@ -745,7 +773,7 @@ class UpdaterService {
     // все попытки ушли на докачку и файл всё ещё неполный → пусть caller берёт следующий источник
     final actual = await file.exists() ? await file.length() : 0;
     if (totalSize > 0 && actual < totalSize) {
-      throw Exception('Скачано $actual байт из $totalSize');
+      throw UpdateException(UpdateFailure.partial, a: actual, b: totalSize);
     }
     return totalSize;
   }
@@ -800,7 +828,7 @@ class UpdaterService {
 
     final actualSize = await zipFile.length();
     if (actualSize < 5 * 1024 * 1024) {
-      throw Exception('Скачанный файл слишком мал ($actualSize байт). Проверь интернет.');
+      throw UpdateException(UpdateFailure.tooSmall, a: actualSize);
     }
     await _verifySha256(zipFile, info.sha256);
 
@@ -814,7 +842,7 @@ class UpdaterService {
       runInShell: false,
     );
     if (expand.exitCode != 0) {
-      throw Exception('Не удалось распаковать zip: ${expand.stderr}');
+      throw UpdateException(UpdateFailure.unpackFailed, detail: '${expand.stderr}');
     }
 
     // Определить директорию установки (где лежит текущий .exe)

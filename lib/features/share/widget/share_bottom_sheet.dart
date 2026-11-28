@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
+import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/features/share/widget/share_action_sheet.dart';
 import 'package:hiddify/features/share/widget/share_referral_sheet.dart';
 import 'package:hiddify/utils/link_parsers.dart';
@@ -35,6 +36,7 @@ class ShareBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final t = context.t;
     return SafeArea(
       top: false,
       child: Padding(
@@ -44,12 +46,12 @@ class ShareBottomSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Center(
-              child: Text('Что отправить?', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+              child: Text(t.ui.share.whatToSend, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 4),
             Center(
               child: Text(
-                'Выберите, что нужно другу',
+                t.ui.share.chooseWhat,
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ),
@@ -58,8 +60,8 @@ class ShareBottomSheet extends StatelessWidget {
               icon: Icons.vpn_key_outlined,
               iconColor: PixellnetBrand.mochaOnDark,
               iconBg: PixellnetBrand.mocha.withOpacity(0.12),
-              title: 'Ключ для другого приложения',
-              subtitle: 'Если у друга уже стоит Happ, V2rayNG — отправьте только ключ',
+              title: t.ui.share.keyForOtherApp,
+              subtitle: t.ui.share.keyForOtherAppHint,
               onTap: () {
                 Navigator.of(context).pop();
                 _openShareForExternal(context);
@@ -70,8 +72,8 @@ class ShareBottomSheet extends StatelessWidget {
               icon: Icons.shield_moon_outlined,
               iconColor: PixellnetBrand.mocha,
               iconBg: PixellnetBrand.mocha.withOpacity(0.16),
-              title: 'Ключ для PIXELLNET',
-              subtitle: 'Откроется прямо в приложении PIXELLNET у получателя',
+              title: t.ui.share.keyForApp,
+              subtitle: t.ui.share.keyForAppHint,
               trailingBadge: const _RecommendedBadge(),
               onTap: () {
                 Navigator.of(context).pop();
@@ -83,8 +85,8 @@ class ShareBottomSheet extends StatelessWidget {
               icon: Icons.card_giftcard_outlined,
               iconColor: PixellnetBrand.olive,
               iconBg: PixellnetBrand.olive.withOpacity(0.14),
-              title: 'Пригласить друга и получить бонус',
-              subtitle: 'За каждого друга — 7 дней бесплатно вам обоим',
+              title: t.ui.share.inviteTitle,
+              subtitle: t.ui.share.inviteSubtitle,
               onTap: () {
                 Navigator.of(context).pop();
                 ShareReferralSheet.show(context, profileName: profileName);
@@ -97,29 +99,30 @@ class ShareBottomSheet extends StatelessWidget {
   }
 
   void _openShareForExternal(BuildContext context) {
+    final t = context.t;
     // Плитка 1: универсальная ссылка (HTTPS). Приложение друга само находит её в буфере.
     ShareActionSheet.show(
       context,
-      title: 'Ключ для другого приложения',
-      subtitle: 'Получатель откроет ссылку в своём приложении',
+      title: t.ui.share.keyForOtherApp,
+      subtitle: t.ui.share.otherAppSheetSubtitle,
       primaryLink: subUrl,
       qrPayload: subUrl,
-      messengerPreamble: 'Держи ключ доступа. Вставь ссылку в своё приложение для подключения:',
+      messengerPreamble: t.ui.share.otherAppPreamble,
       profileName: profileName,
     );
   }
 
   void _openShareForPixellnet(BuildContext context) {
+    final t = context.t;
     // Плитка 2: deep-link pixellnet://import?url=...
     final deepLink = LinkParser.generatePixellnetDeepLink(subUrl, profileName);
     ShareActionSheet.show(
       context,
-      title: 'Ключ для PIXELLNET',
-      subtitle: 'Откроется прямо в приложении PIXELLNET',
+      title: t.ui.share.keyForApp,
+      subtitle: t.ui.share.keyForAppSheetSubtitle,
       primaryLink: deepLink,
       qrPayload: deepLink,
-      messengerPreamble:
-          'Скачайте PIXELLNET (pixellnet.com) и откройте эту ссылку — все каналы подключатся автоматически:',
+      messengerPreamble: t.ui.share.appPreamble,
       profileName: profileName,
     );
   }
@@ -219,7 +222,7 @@ class _RecommendedBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        'Советуем',
+        context.t.ui.share.recommended,
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w600,

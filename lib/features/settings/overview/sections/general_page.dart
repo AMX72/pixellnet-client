@@ -62,7 +62,7 @@ class GeneralPage extends HookConsumerWidget {
                       : await ref.read(autoStartNotifierProvider.notifier).disable();
                 } catch (_) {
                   if (context.mounted) {
-                    CustomToast.error(value ? 'Не удалось включить автозапуск' : 'Не удалось выключить автозапуск')
+                    CustomToast.error(value ? t.ui.general.autoStartOnFailed : t.ui.general.autoStartOffFailed)
                         .show(context);
                   }
                 }
@@ -85,13 +85,13 @@ class GeneralPage extends HookConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.description_outlined),
-            title: const Text('Размер журнала'),
-            subtitle: Text('${ref.watch(Preferences.logMaxSizeMb)} МБ — старые записи затираются'),
+            title: Text(t.ui.general.logSize),
+            subtitle: Text(t.ui.general.logSizeHint(mb: ref.watch(Preferences.logMaxSizeMb))),
             trailing: DropdownButton<int>(
               value: ref.watch(Preferences.logMaxSizeMb),
               underline: const SizedBox.shrink(),
               items: const [5, 20, 50, 100, 500]
-                  .map((mb) => DropdownMenuItem(value: mb, child: Text('$mb МБ')))
+                  .map((mb) => DropdownMenuItem(value: mb, child: Text(t.ui.general.mb(mb: mb))))
                   .toList(),
               onChanged: (v) async {
                 if (v != null) await ref.read(Preferences.logMaxSizeMb.notifier).update(v);
@@ -101,15 +101,15 @@ class GeneralPage extends HookConsumerWidget {
           // v0.1.26: раздел обновлений — 3-режимный dropdown + час проверки.
           ListTile(
             leading: const Icon(Icons.system_update_outlined),
-            title: const Text('Как обновлять'),
-            subtitle: Text(_updateModeLabel(ref.watch(Preferences.updateMode))),
+            title: Text(t.ui.general.updateHow),
+            subtitle: Text(_updateModeLabel(t, ref.watch(Preferences.updateMode))),
             trailing: DropdownButton<int>(
               value: ref.watch(Preferences.updateMode),
               underline: const SizedBox.shrink(),
-              items: const [
-                DropdownMenuItem(value: 0, child: Text('Само')),
-                DropdownMenuItem(value: 1, child: Text('Спросить')),
-                DropdownMenuItem(value: 2, child: Text('Руками')),
+              items: [
+                DropdownMenuItem(value: 0, child: Text(t.ui.general.modeAuto)),
+                DropdownMenuItem(value: 1, child: Text(t.ui.general.modeAsk)),
+                DropdownMenuItem(value: 2, child: Text(t.ui.general.modeManual)),
               ],
               onChanged: (v) async {
                 if (v != null) await ref.read(Preferences.updateMode.notifier).update(v);
@@ -119,17 +119,17 @@ class GeneralPage extends HookConsumerWidget {
           if (ref.watch(Preferences.updateMode) == 0)
             ListTile(
               leading: const Icon(Icons.schedule_outlined),
-              title: const Text('Когда проверять'),
-              subtitle: Text(_updateHourLabel(ref.watch(Preferences.updateCheckHour))),
+              title: Text(t.ui.general.updateWhen),
+              subtitle: Text(_updateHourLabel(t, ref.watch(Preferences.updateCheckHour))),
               trailing: DropdownButton<int>(
                 value: ref.watch(Preferences.updateCheckHour),
                 underline: const SizedBox.shrink(),
-                items: const [
-                  DropdownMenuItem(value: 3, child: Text('Ночью')),
-                  DropdownMenuItem(value: 7, child: Text('Утром')),
-                  DropdownMenuItem(value: 14, child: Text('Днём')),
-                  DropdownMenuItem(value: 21, child: Text('Вечером')),
-                  DropdownMenuItem(value: 24, child: Text('В любое')),
+                items: [
+                  DropdownMenuItem(value: 3, child: Text(t.ui.general.hourNight)),
+                  DropdownMenuItem(value: 7, child: Text(t.ui.general.hourMorning)),
+                  DropdownMenuItem(value: 14, child: Text(t.ui.general.hourDay)),
+                  DropdownMenuItem(value: 21, child: Text(t.ui.general.hourEvening)),
+                  DropdownMenuItem(value: 24, child: Text(t.ui.general.hourAny)),
                 ],
                 onChanged: (v) async {
                   if (v != null) await ref.read(Preferences.updateCheckHour.notifier).update(v);
@@ -139,8 +139,8 @@ class GeneralPage extends HookConsumerWidget {
           // v0.1.29: ручная кнопка «Проверить сейчас» — доступна во всех режимах
           ListTile(
             leading: const Icon(Icons.refresh_outlined),
-            title: const Text('Проверить сейчас'),
-            subtitle: const Text('Не ждём — ищем обновление прямо сейчас'),
+            title: Text(t.ui.general.checkNow),
+            subtitle: Text(t.ui.general.checkNowHint),
             trailing: const Icon(Icons.chevron_right_outlined),
             onTap: () async {
               await ref.read(autoUpdateStateProvider.notifier).forceCheck();
@@ -149,8 +149,8 @@ class GeneralPage extends HookConsumerWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(available == null
-                      ? 'Уже свежак — новее пока нет'
-                      : 'Есть свежая версия · ${available.version}'),
+                      ? t.ui.general.upToDate
+                      : t.ui.general.newVersion(version: available.version)),
                 ),
               );
             },
@@ -158,15 +158,15 @@ class GeneralPage extends HookConsumerWidget {
           // v0.1.38: раздел обновления прокси-каналов (Marzban subscription)
           ListTile(
             leading: const Icon(Icons.swap_horiz_outlined),
-            title: const Text('Как обновлять каналы'),
-            subtitle: Text(_profileRefreshModeLabel(ref.watch(Preferences.profileRefreshMode))),
+            title: Text(t.ui.general.refreshHow),
+            subtitle: Text(_profileRefreshModeLabel(t, ref.watch(Preferences.profileRefreshMode))),
             trailing: DropdownButton<int>(
               value: ref.watch(Preferences.profileRefreshMode),
               underline: const SizedBox.shrink(),
-              items: const [
-                DropdownMenuItem(value: 0, child: Text('Само')),
-                DropdownMenuItem(value: 1, child: Text('Спросить')),
-                DropdownMenuItem(value: 2, child: Text('Руками')),
+              items: [
+                DropdownMenuItem(value: 0, child: Text(t.ui.general.modeAuto)),
+                DropdownMenuItem(value: 1, child: Text(t.ui.general.modeAsk)),
+                DropdownMenuItem(value: 2, child: Text(t.ui.general.modeManual)),
               ],
               onChanged: (v) async {
                 if (v != null) {
@@ -178,17 +178,17 @@ class GeneralPage extends HookConsumerWidget {
           if (ref.watch(Preferences.profileRefreshMode) == 0)
             ListTile(
               leading: const Icon(Icons.schedule_outlined),
-              title: const Text('Когда обновлять каналы'),
-              subtitle: Text(_profileRefreshHourLabel(ref.watch(Preferences.profileRefreshHour))),
+              title: Text(t.ui.general.refreshWhen),
+              subtitle: Text(_profileRefreshHourLabel(t, ref.watch(Preferences.profileRefreshHour))),
               trailing: DropdownButton<int>(
                 value: ref.watch(Preferences.profileRefreshHour),
                 underline: const SizedBox.shrink(),
-                items: const [
-                  DropdownMenuItem(value: 3, child: Text('Ночью')),
-                  DropdownMenuItem(value: 7, child: Text('Утром')),
-                  DropdownMenuItem(value: 14, child: Text('Днём')),
-                  DropdownMenuItem(value: 21, child: Text('Вечером')),
-                  DropdownMenuItem(value: 24, child: Text('В любое')),
+                items: [
+                  DropdownMenuItem(value: 3, child: Text(t.ui.general.hourNight)),
+                  DropdownMenuItem(value: 7, child: Text(t.ui.general.hourMorning)),
+                  DropdownMenuItem(value: 14, child: Text(t.ui.general.hourDay)),
+                  DropdownMenuItem(value: 21, child: Text(t.ui.general.hourEvening)),
+                  DropdownMenuItem(value: 24, child: Text(t.ui.general.hourAny)),
                 ],
                 onChanged: (v) async {
                   if (v != null) {
@@ -205,8 +205,8 @@ class GeneralPage extends HookConsumerWidget {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.cloud_download_outlined),
-            title: const Text('Обновить каналы сейчас'),
-            subtitle: const Text('Скачать свежий список серверов'),
+            title: Text(t.ui.general.refreshNow),
+            subtitle: Text(t.ui.general.refreshNowHint),
             trailing: const Icon(Icons.chevron_right_outlined),
             enabled: !ref.watch(autoProfileRefreshProvider).isRefreshing,
             onTap: () async {
@@ -219,8 +219,8 @@ class GeneralPage extends HookConsumerWidget {
                     st.lastError != null
                         ? st.lastError!
                         : st.newChannelsCount > 0
-                            ? 'Список каналов обновлён'
-                            : 'Список актуален — изменений нет',
+                            ? t.ui.profile.refreshDone
+                            : t.ui.general.listCurrent,
                   ),
                 ),
               );
@@ -295,35 +295,28 @@ class GeneralPage extends HookConsumerWidget {
     );
   }
 
-  static String _updateModeLabel(int mode) => switch (mode) {
-        0 => 'Скачает и поставит без вопросов',
-        1 => 'Спросим — ты решишь',
-        2 => 'Только когда сам нажмёшь',
+  static String _updateModeLabel(Translations t, int mode) => switch (mode) {
+        0 => t.ui.general.updateModeAuto,
+        1 => t.ui.general.updateModeAsk,
+        2 => t.ui.general.updateModeManual,
         _ => '',
       };
 
-  static String _updateHourLabel(int hour) => switch (hour) {
-        3 => 'Ночью (около 3:00) — пока ты спишь',
-        7 => 'Утром (около 7:00)',
-        14 => 'Днём (около 14:00)',
-        21 => 'Вечером (около 21:00)',
-        24 => 'В любое время дня',
-        _ => 'В $hour:00',
+  static String _updateHourLabel(Translations t, int hour) => switch (hour) {
+        3 => t.ui.general.hourLabelNight,
+        7 => t.ui.general.hourLabelMorning,
+        14 => t.ui.general.hourLabelDay,
+        21 => t.ui.general.hourLabelEvening,
+        24 => t.ui.general.hourLabelAny,
+        _ => t.ui.general.hourAt(hour: hour),
       };
 
-  static String _profileRefreshModeLabel(int mode) => switch (mode) {
-        0 => 'Обновит список серверов без вопросов',
-        1 => 'Спросим — ты решишь',
-        2 => 'Только когда сам нажмёшь',
+  static String _profileRefreshModeLabel(Translations t, int mode) => switch (mode) {
+        0 => t.ui.general.refreshModeAuto,
+        1 => t.ui.general.updateModeAsk,
+        2 => t.ui.general.updateModeManual,
         _ => '',
       };
 
-  static String _profileRefreshHourLabel(int hour) => switch (hour) {
-        3 => 'Ночью (около 3:00) — пока ты спишь',
-        7 => 'Утром (около 7:00)',
-        14 => 'Днём (около 14:00)',
-        21 => 'Вечером (около 21:00)',
-        24 => 'В любое время дня',
-        _ => 'В $hour:00',
-      };
+  static String _profileRefreshHourLabel(Translations t, int hour) => _updateHourLabel(t, hour);
 }

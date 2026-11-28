@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
+import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/utils/preferences_utils.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
@@ -79,49 +80,49 @@ class _Step {
   final _Action action;
 }
 
-List<_Step> _stepsFor(BackgroundStatus s, {required bool openedAutostart, required bool openedBattery}) {
+List<_Step> _stepsFor(Translations t, BackgroundStatus s, {required bool openedAutostart, required bool openedBattery}) {
   // Xiaomi (MIUI/HyperOS): системный запрос «работа в фоне» открывает экран MIUI
   // «Контроль фоновой активности» (проверено на POCO M3 Pro, MIUI 14, 2026-11-21).
   // Автозапуск читается через AppOps 10008.
   final xiaomi = s.oem == 'xiaomi';
   return [
     _Step(
-      title: xiaomi ? 'Контроль активности' : 'Работа в фоне',
-      hint: xiaomi ? 'Выберите «Нет ограничений»' : 'В окне телефона нажмите «Разрешить»',
+      title: xiaomi ? t.ui.guard.xiaomiTitle : t.ui.guard.bgTitle,
+      hint: xiaomi ? t.ui.guard.xiaomiHint : t.ui.guard.allowHint,
       done: s.batteryOk || (xiaomi && openedBattery),
-      button: xiaomi ? 'Открыть' : 'Разрешить',
+      button: xiaomi ? t.ui.guard.open : t.ui.guard.allow,
       action: _Action.requestBattery,
     ),
     if (xiaomi)
       _Step(
-        title: 'Автозапуск',
-        hint: 'Найдите PIXELLNET (можно через поиск) и включите переключатель',
+        title: t.ui.guard.autostartTitle,
+        hint: t.ui.guard.autostartHint,
         done: s.autostart == 'allowed' || (s.autostart == 'unknown' && openedAutostart),
-        button: 'Открыть',
+        button: t.ui.guard.open,
         action: _Action.openAutostart,
       ),
     if (s.oem == 'huawei' || s.oem == 'honor')
       _Step(
-        title: 'Запуск приложений',
-        hint: 'У PIXELLNET выключите «Автоматически» и включите все переключатели',
+        title: t.ui.guard.launchTitle,
+        hint: t.ui.guard.launchHint,
         done: openedAutostart,
-        button: 'Открыть',
+        button: t.ui.guard.open,
         action: _Action.openAutostart,
       ),
     if (s.oem == 'oppo')
       _Step(
-        title: 'Автозапуск',
-        hint: 'Включите переключатель у PIXELLNET',
+        title: t.ui.guard.autostartTitle,
+        hint: t.ui.guard.switchHint,
         done: openedAutostart,
-        button: 'Открыть',
+        button: t.ui.guard.open,
         action: _Action.openAutostart,
       ),
     if (s.oem == 'vivo')
       _Step(
-        title: 'Работа в фоне',
-        hint: 'Разрешите PIXELLNET работать в фоне',
+        title: t.ui.guard.bgTitle,
+        hint: t.ui.guard.allowBgHint,
         done: openedAutostart,
-        button: 'Открыть',
+        button: t.ui.guard.open,
         action: _Action.openAutostart,
       ),
   ];
@@ -130,8 +131,10 @@ List<_Step> _stepsFor(BackgroundStatus s, {required bool openedAutostart, requir
 /// true — остались невыполненные шаги.
 final backgroundGuardNeedsSetupProvider = Provider.autoDispose<bool>((ref) {
   final s = ref.watch(backgroundStatusProvider).valueOrNull;
-  if (s == null) return false;
+  final t = ref.watch(translationsProvider).valueOrNull;
+  if (s == null || t == null) return false;
   final steps = _stepsFor(
+    t,
     s,
     openedAutostart: ref.watch(bgGuardOpenedAutostart),
     openedBattery: ref.watch(bgGuardOpenedBattery),
@@ -223,6 +226,7 @@ class _BackgroundGuardBannerState extends ConsumerState<BackgroundGuardBanner> w
     }
 
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
       child: Material(
@@ -239,15 +243,15 @@ class _BackgroundGuardBannerState extends ConsumerState<BackgroundGuardBanner> w
                 const Gap(10),
                 Expanded(
                   child: Text(
-                    'PIXELLNET может отключаться ночью',
+                    t.ui.guard.banner,
                     style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                   ),
                 ),
-                Text('Настроить', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+                Text(t.ui.guard.setup, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
                 IconButton(
                   icon: const Icon(Icons.close_outlined, size: 18),
                   color: theme.colorScheme.onSurfaceVariant,
-                  tooltip: 'Напомнить завтра',
+                  tooltip: t.ui.guard.remindTomorrow,
                   onPressed: () => ref
                       .read(bgGuardSnoozeUntil.notifier)
                       .update(DateTime.now().add(const Duration(days: 1)).millisecondsSinceEpoch),
@@ -312,10 +316,12 @@ class _BackgroundGuardSheetState extends ConsumerState<_BackgroundGuardSheet> wi
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
     final status = ref.watch(backgroundStatusProvider).valueOrNull;
     final steps = status == null
         ? const <_Step>[]
         : _stepsFor(
+            t,
             status,
             openedAutostart: ref.watch(bgGuardOpenedAutostart),
             openedBattery: ref.watch(bgGuardOpenedBattery),
@@ -329,13 +335,12 @@ class _BackgroundGuardSheetState extends ConsumerState<_BackgroundGuardSheet> wi
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Чтобы PIXELLNET не отключался', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+            Text(t.ui.guard.sheetTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
             const Gap(6),
             Text(
               allDone
-                  ? 'Готово. Телефон больше не будет закрывать PIXELLNET ради экономии батареи.'
-                  : 'Телефон экономит батарею и может закрыть PIXELLNET ночью — утром защита окажется выключенной. '
-                      'Разрешите работу в фоне, это займёт минуту.',
+                  ? t.ui.guard.sheetDone
+                  : t.ui.guard.sheetText,
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             const Gap(16),
@@ -346,7 +351,7 @@ class _BackgroundGuardSheetState extends ConsumerState<_BackgroundGuardSheet> wi
             const Gap(20),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(allDone ? 'Готово' : 'Закрыть'),
+              child: Text(allDone ? t.ui.guard.done : t.ui.guard.close),
             ),
           ],
         ),
@@ -383,7 +388,7 @@ class _StepRow extends StatelessWidget {
             children: [
               Text(step.title, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
               Text(
-                step.done ? 'Готово' : step.hint,
+                step.done ? context.t.ui.guard.done : step.hint,
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ],

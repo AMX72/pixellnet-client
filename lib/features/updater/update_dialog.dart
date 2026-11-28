@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/features/updater/updater_service.dart';
 
 class UpdateDialog extends StatefulWidget {
@@ -15,6 +16,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
   String? _error;
   OemFamily _oem = OemFamily.other;
 
+  /// Нет разрешения на установку приложений: вместо «Обновить» — кнопка «Открыть настройки».
+  bool _needsPermission = false;
+
   @override
   void initState() {
     super.initState();
@@ -28,14 +32,11 @@ class _UpdateDialogState extends State<UpdateDialog> {
   String? get _oemHint {
     switch (_oem) {
       case OemFamily.xiaomi:
-        return 'MIUI/HyperOS покажет: «Приложение содержит риски». '
-            'Нажмите «Установить всё равно» → «Готово».';
+        return context.t.ui.update.hintXiaomi;
       case OemFamily.huawei:
-        return 'EMUI запросит подтверждение установки. '
-            'Выбирайте «Разрешить» на всех запросах.';
+        return context.t.ui.update.hintHuawei;
       case OemFamily.oppo:
-        return 'ColorOS/PurityScan может пометить как «риск». '
-            'Нажмите «Установить всё равно».';
+        return context.t.ui.update.hintOppo;
       case OemFamily.vivo:
       case OemFamily.samsung:
       case OemFamily.other:
@@ -45,6 +46,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     // Обрезаем changelog до первых 200 символов + без markdown-мусора.
     final changelog = widget.info.changelog
         .split('\n')
@@ -53,12 +55,12 @@ class _UpdateDialogState extends State<UpdateDialog> {
         .join('\n');
 
     return AlertDialog(
-      title: const Text('Доступно обновление'),
+      title: Text(t.ui.update.available),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Версия ${widget.info.version}',
+          Text(t.ui.update.version(version: widget.info.version),
               style: const TextStyle(fontWeight: FontWeight.w600)),
           if (changelog.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -74,8 +76,8 @@ class _UpdateDialogState extends State<UpdateDialog> {
             const SizedBox(height: 6),
             Text(
               _progress == null
-                  ? 'Подключаемся к серверу...'
-                  : 'Скачано ${(_progress! * 100).toInt()}%',
+                  ? t.ui.update.connecting
+                  : t.ui.update.downloaded(percent: (_progress! * 100).toInt()),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -117,34 +119,31 @@ class _UpdateDialogState extends State<UpdateDialog> {
       actions: [
         TextButton(
           onPressed: _installing ? null : () => Navigator.pop(context),
-          child: Text(_error != null ? 'Закрыть' : 'Не сейчас'),
+          child: Text(_error != null ? t.ui.common.close : t.ui.common.notNow),
         ),
         if (_needsPermission)
           FilledButton(
             onPressed: _installing ? null : _openSettings,
-            child: const Text('Открыть настройки'),
+            child: Text(t.ui.update.openSettings),
           )
         else
           FilledButton(
             onPressed: _installing ? null : _startInstall,
             child: Text(_installing
                 ? (_progress == null
-                    ? 'Скачиваем…'
+                    ? t.ui.update.downloading
                     : '${(_progress! * 100).toInt()}%')
-                : (_error != null ? 'Ещё раз' : 'Обновить')),
+                : (_error != null ? t.ui.update.again : t.ui.common.update)),
           ),
       ],
     );
   }
 
-  bool get _needsPermission =>
-      _error != null && _error!.contains('Разрешите установку');
-
   Future<void> _openSettings() async {
     await openInstallUnknownAppsSettings();
     if (mounted) {
       setState(() {
-        _error = 'Разрешите установку → вернитесь → Повторить';
+        _error = context.t.ui.update.allowInstall;
       });
     }
   }
@@ -153,6 +152,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
     setState(() {
       _installing = true;
       _error = null;
+      _needsPermission = false;
       _progress = null;
     });
     try {
@@ -171,6 +171,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
       if (mounted) {
         setState(() {
           _installing = false;
+          _needsPermission = e is InstallPermissionDeniedException;
           _error = _errorText(e, diag);
         });
       }
@@ -178,15 +179,15 @@ class _UpdateDialogState extends State<UpdateDialog> {
   }
 
   String _errorText(Object e, NetworkDiagnostics diag) {
-    final raw = e.toString().replaceFirst('Exception: ', '');
+    final t = context.t;
     if (diag.state == NetworkState.noCellSignal) {
-      return 'Похоже, вышка оператора сейчас не раздаёт интернет в этом районе. '
-          'Дело не в приложении — попробуйте позже или подключитесь к Wi-Fi.';
+      return t.ui.update.noCell;
     }
     if (diag.state == NetworkState.cellSignalButNoData) {
-      return 'Сигнал есть, но интернет не идёт. '
-          'Возможно, у оператора перебои — попробуйте через Wi-Fi.';
+      return t.ui.update.noData;
     }
-    return raw;
+    if (e is InstallPermissionDeniedException) return t.ui.update.permissionNeeded;
+    if (e is UpdateException) return e.present(t);
+    return e.toString().replaceFirst('Exception: ', '');
   }
 }

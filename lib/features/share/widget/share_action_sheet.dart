@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
+import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/features/common/qr_code_dialog.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -117,7 +118,7 @@ class ShareActionSheet extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               icon: const Icon(Icons.send_outlined, size: 20),
-              label: const Text('Отправить через мессенджер', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+              label: Text(context.t.ui.share.sendViaMessenger, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 10),
 
@@ -135,7 +136,7 @@ class ShareActionSheet extends StatelessWidget {
                 side: BorderSide(color: theme.colorScheme.outline),
               ),
               icon: const Icon(Icons.qr_code_2_rounded, size: 20),
-              label: const Text('Показать QR-код', style: TextStyle(fontSize: 15)),
+              label: Text(context.t.ui.share.showQr, style: const TextStyle(fontSize: 15)),
             ),
             const SizedBox(height: 4),
 
@@ -146,21 +147,21 @@ class ShareActionSheet extends StatelessWidget {
                 if (context.mounted) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Ссылка скопирована'),
-                      duration: Duration(seconds: 2),
+                    SnackBar(
+                      content: Text(context.t.ui.share.linkCopied),
+                      duration: const Duration(seconds: 2),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
                 }
               },
               icon: const Icon(Icons.copy_outlined, size: 18),
-              label: const Text('Скопировать ссылку'),
+              label: Text(context.t.ui.share.copyLink),
             ),
             const SizedBox(height: 6),
             Center(
               child: Text(
-                'Ссылка действует до окончания вашей подписки',
+                context.t.ui.share.linkValidUntil,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
                   fontSize: 11,

@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hiddify/core/localization/locale_extensions.dart';
-import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/region.dart';
 import 'package:hiddify/core/preferences/general_preferences.dart';
@@ -434,11 +432,7 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
           controller: scrollController,
           itemBuilder: (context, index) {
             if (index == 0) {
-              return _buildExplanation(
-                context,
-                ref.watch(Preferences.perAppProxyMode),
-                ref.watch(localePreferencesProvider).isRussian,
-              );
+              return _buildExplanation(context, ref.watch(Preferences.perAppProxyMode), t);
             }
             final package = packages[index - 1];
             final flag = selectedApps.requireValue[package.packageName];
@@ -488,39 +482,12 @@ class PerAppProxyPage extends HookConsumerWidget with PresLogger {
     );
   }
 
-  Widget _buildExplanation(BuildContext context, PerAppProxyMode mode, bool isRu) {
+  Widget _buildExplanation(BuildContext context, PerAppProxyMode mode, Translations t) {
     final theme = Theme.of(context);
     final (title, hint) = switch (mode) {
-      PerAppProxyMode.off =>
-        isRu
-            ? (
-                'Все приложения через PIXELLNET',
-                'PIXELLNET работает для всех программ. Чтобы выбрать иначе, нажмите на режим вверху экрана.',
-              )
-            : (
-                'All apps go through PIXELLNET',
-                'PIXELLNET works for all apps. To change this, tap the mode at the top of the screen.',
-              ),
-      PerAppProxyMode.include =>
-        isRu
-            ? (
-                'Через PIXELLNET — только отмеченные',
-                'PIXELLNET работает только для отмеченных ✓ приложений. Остальные выходят в интернет напрямую.',
-              )
-            : (
-                'Only checked apps go through PIXELLNET',
-                'PIXELLNET works only for checked ✓ apps. Other apps connect to the internet directly.',
-              ),
-      PerAppProxyMode.exclude =>
-        isRu
-            ? (
-                'Все через PIXELLNET, кроме отмеченных',
-                'Отмеченные ✓ приложения выходят в интернет напрямую, без PIXELLNET. Удобно для банков, Госуслуг и Ozon — они лучше работают напрямую.',
-              )
-            : (
-                'All apps go through PIXELLNET except checked ones',
-                'Checked ✓ apps connect to the internet directly, without PIXELLNET. Handy for banking and shopping apps that work better directly.',
-              ),
+      PerAppProxyMode.off => (t.ui.perApp.offTitle, t.ui.perApp.offHint),
+      PerAppProxyMode.include => (t.ui.perApp.includeTitle, t.ui.perApp.includeHint),
+      PerAppProxyMode.exclude => (t.ui.perApp.excludeTitle, t.ui.perApp.excludeHint),
     };
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),

@@ -44,12 +44,6 @@ class ReferralApiService {
   static const _kPrefRefCode = 'pixellnet.referral.ref_code';
   static const _kPrefRefCachedAt = 'pixellnet.referral.cached_at';
 
-  /// Язык интерфейса русский? Для текстов, которые собираются без `ref` (приглашение).
-  static Future<bool> isRussianUi() async {
-    final prefs = await SharedPreferences.getInstance();
-    return resolveAppLocale(prefs.getString('locale')) == AppLocale.ru;
-  }
-
   /// Fetch referral profile — по sub_url из prefs.
   /// Returns null если trial ещё не создан или API недоступен.
   Future<ReferralProfile?> fetchMyProfile({bool useCache = true}) async {
@@ -64,7 +58,7 @@ class ReferralApiService {
       if (cachedCode != null && cachedCode.isNotEmpty) {
         final ageMs = DateTime.now().millisecondsSinceEpoch - cachedAt;
         if (ageMs < 6 * 3600 * 1000) {
-          return _profileFromCache(prefs, cachedCode);
+          return await _profileFromCache(prefs, cachedCode);
         }
       }
     }
@@ -77,7 +71,20 @@ class ReferralApiService {
           .timeout(const Duration(seconds: 10));
       if (resp.statusCode != 200) return null;
       final data = jsonDecode(resp.body) as Map<String, dynamic>;
-      final profile = ReferralProfile.fromJson(data);
+      var profile = ReferralProfile.fromJson(data);
+      // Сервер отдаёт текст приглашения только по-русски: на других языках (и если текста нет) — свой текст на языке приложения.
+      final isRu = resolveAppLocale(prefs.getString('locale')) == AppLocale.ru;
+      if (!isRu || profile.inviteText.isEmpty) {
+        final t = await translationsFromPrefs(prefs);
+        profile = ReferralProfile(
+          refCode: profile.refCode,
+          refLink: profile.refLink,
+          inviteText: PixellnetBrand.inviteText(t, profile.refLink),
+          referralsConfirmed: profile.referralsConfirmed,
+          referralsPending: profile.referralsPending,
+          bonusDaysEarned: profile.bonusDaysEarned,
+        );
+      }
 
       // Cache для offline / rapid re-opens
       await prefs.setString(_kPrefRefCode, profile.refCode);
@@ -91,12 +98,13 @@ class ReferralApiService {
     }
   }
 
-  ReferralProfile _profileFromCache(SharedPreferences prefs, String code) {
+  Future<ReferralProfile> _profileFromCache(SharedPreferences prefs, String code) async {
     final link = 'https://pixellnet.com/i/$code';
+    final t = await translationsFromPrefs(prefs);
     return ReferralProfile(
       refCode: code,
       refLink: link,
-      inviteText: PixellnetBrand.inviteText(link, ru: resolveAppLocale(prefs.getString('locale')) == AppLocale.ru),
+      inviteText: PixellnetBrand.inviteText(t, link),
       referralsConfirmed: prefs.getInt('pixellnet.referral.confirmed') ?? 0,
       referralsPending: prefs.getInt('pixellnet.referral.pending') ?? 0,
       bonusDaysEarned: prefs.getInt('pixellnet.referral.bonus_days') ?? 0,

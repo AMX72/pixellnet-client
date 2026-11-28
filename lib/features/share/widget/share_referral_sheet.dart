@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
+import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/features/common/qr_code_dialog.dart';
 import 'package:hiddify/features/share/data/referral_api_service.dart';
 import 'package:share_plus/share_plus.dart';
@@ -46,15 +47,15 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
 
   Future<void> _fetch() async {
     final p = await ReferralApiService.instance.fetchMyProfile();
-    final isRu = await ReferralApiService.isRussianUi();
     if (!mounted) return;
+    final t = context.t;
     setState(() {
-      _profile = p ?? _fallbackProfile(widget.profileName, isRu);
+      _profile = p ?? _fallbackProfile(widget.profileName, t);
       _loading = false;
     });
   }
 
-  ReferralProfile _fallbackProfile(String name, bool isRu) {
+  ReferralProfile _fallbackProfile(String name, Translations t) {
     // Fallback код — 5 симв из hash имени. Не для реального attribution,
     // только чтобы UI не показывал пусто когда API недоступен.
     final base = name.isNotEmpty ? name : 'PIXELLNET';
@@ -71,7 +72,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
     return ReferralProfile(
       refCode: code,
       refLink: link,
-      inviteText: PixellnetBrand.inviteText(link, ru: isRu),
+      inviteText: PixellnetBrand.inviteText(t, link),
       referralsConfirmed: 0,
       referralsPending: 0,
       bonusDaysEarned: 0,
@@ -90,6 +91,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
     }
 
     final profile = _profile!;
+    final t = context.t;
     final hasBonus = profile.bonusDaysEarned > 0 || profile.referralsConfirmed > 0;
 
     return SafeArea(
@@ -116,7 +118,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
             const SizedBox(height: 16),
             Center(
               child: Text(
-                'Дарите 7 дней — получайте 7 дней',
+                t.ui.share.referralTitle,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
@@ -124,8 +126,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
             const SizedBox(height: 8),
             Center(
               child: Text(
-                'Друг переходит по вашей ссылке и получает 7 дней бесплатно. '
-                'Как только он оплатит подписку — вы тоже получаете 7 дней бесплатно.',
+                t.ui.share.referralText,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -148,7 +149,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
                   Row(
                     children: [
                       Text(
-                        'Ваш код:',
+                        t.ui.share.yourCode,
                         style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(width: 8),
@@ -170,7 +171,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            '+${profile.bonusDaysEarned} дн',
+                            t.ui.share.bonusBadge(days: profile.bonusDaysEarned),
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -194,7 +195,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
                   if (profile.referralsConfirmed > 0 || profile.referralsPending > 0) ...[
                     const SizedBox(height: 8),
                     Text(
-                      'Подтверждено: ${profile.referralsConfirmed} · ждём оплату: ${profile.referralsPending}',
+                      t.ui.share.referralCounts(confirmed: profile.referralsConfirmed, pending: profile.referralsPending),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                         fontSize: 11,
@@ -210,14 +211,14 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
             FilledButton.icon(
               onPressed: () async {
                 Navigator.of(context).pop();
-                await Share.share(profile.inviteText, subject: 'PIXELLNET — 7 дней бесплатно');
+                await Share.share(profile.inviteText, subject: t.ui.share.referralSubject);
               },
               style: FilledButton.styleFrom(
                 backgroundColor: PixellnetBrand.olive,
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               icon: const Icon(Icons.send_outlined, size: 20),
-              label: const Text('Отправить приглашение', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+              label: Text(t.ui.share.sendInvite, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 10),
 
@@ -235,7 +236,7 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
                 side: BorderSide(color: theme.colorScheme.outline),
               ),
               icon: const Icon(Icons.qr_code_2_rounded, size: 20),
-              label: const Text('Показать QR-код', style: TextStyle(fontSize: 15)),
+              label: Text(t.ui.share.showQr, style: const TextStyle(fontSize: 15)),
             ),
             const SizedBox(height: 4),
 
@@ -246,16 +247,16 @@ class _ShareReferralSheetState extends State<ShareReferralSheet> {
                 if (context.mounted) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Ссылка приглашения скопирована'),
-                      duration: Duration(seconds: 2),
+                    SnackBar(
+                      content: Text(t.ui.share.inviteLinkCopied),
+                      duration: const Duration(seconds: 2),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
                 }
               },
               icon: const Icon(Icons.copy_outlined, size: 18),
-              label: const Text('Скопировать ссылку'),
+              label: Text(t.ui.share.copyLink),
             ),
           ],
         ),
