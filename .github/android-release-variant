@@ -1,0 +1,13 @@
+# T-027 / А2.5 — что собирает тег v* на ЭТОЙ ветке и публикуется ли сразу (читает scripts/ci_plan_android.py).
+#
+# variant:
+#   legacy — как до моста: com.pixellnet.vpn, ключ v2, как раньше (по умолчанию, если файла нет)
+#   bridge — мост 0.1.106: com.pixellnet.vpn, «PIXELLNET (старое)», ключ v2
+#   app    — новое приложение 0.1.107: com.pxllnet.app, «PXLLNET», ключ v3 (только из секретов)
+# publish:
+#   live — upload-to-server сразу переключает latest.json (как раньше)
+#   hold — файлы кладём на серверы, latest.json и ссылки не трогаем; в раздачу выпуск выкатывается командой
+#          `scripts/upload_release_to_server.sh activate all <версия>` (отдельное «да» владельца: А2.14)
+# Теги вида v0.1.106-rc1 (с дефисом) на серверы не заливаются никогда.
+variant=bridge
+publish=hold

@@ -4,10 +4,15 @@ on:
   push:
     tags:
       - 'v*'
-    # Тестовые сборки веток feat/**: без релиза и без автозаливки (upload-to-server
-    # берёт только head_branch на 'v'); APK ставится рядом с рабочим (.core5, «PIXELLNET β»).
+    # Тестовые сборки веток: без релиза и без автозаливки (upload-to-server берёт только теги vX.Y.Z без дефиса).
+    #   feat/bridge-*, feat/app-*, feat/mig-*  — ПАРА β (T-027): com.pixellnet.vpn.mig «PIXELLNET (старое) β»
+    #                                            + com.pxllnet.app.mig «PXLLNET β»; ставятся рядом с рабочим приложением
+    #   прочие feat/**                         — как раньше: com.pixellnet.vpn.core5, «PIXELLNET β»
+    #   rc/**                                  — «как настоящая» сборка без суффикса (артефакт), без выпуска и без заливки
+    # Что собирает тег и публикуется ли сразу — .github/android-release-variant; план — scripts/ci_plan_android.py.
     branches:
       - 'feat/**'
+      - 'rc/**'
   workflow_dispatch:
     inputs:
       version:
@@ -15,10 +20,20 @@ on:
         required: false
         default: 'dev'
       side_by_side:
-        description: 'Тестовая копия рядом с рабочим приложением (com.pixellnet.vpn.core5, «PIXELLNET β»)'
+        description: 'Тестовая копия рядом с рабочим приложением (com.pixellnet.vpn.core5 «PIXELLNET β»; для bridge/app — суффикс .mig)'
         type: boolean
         required: false
         default: false
+      variant:
+        description: 'Что собрать: auto — по ветке/тегу; bridge — мост; app — новое приложение; pair — оба (.mig)'
+        type: choice
+        required: false
+        default: auto
+        options:
+          - auto
+          - bridge
+          - app
+          - pair
 
 concurrency:
   group: build-android-${{ github.ref }}
@@ -28,9 +43,33 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Plan builds
+        id: plan
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_VARIANT: ${{ inputs.variant }}
+          INPUT_SIDE_BY_SIDE: ${{ inputs.side_by_side }}
+        run: python3 scripts/ci_plan_android.py >> "$GITHUB_OUTPUT"
+
+  build:
+    name: build (${{ matrix.id }})
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
 
     steps:
       - name: Checkout
@@ -44,6 +83,23 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
+
+      # Новое приложение (app) подписывается ТОЛЬКО ключом v3 из секретов GitHub (ANDROID_V3_*).
+      # Хранилище создаётся на раннере, проверяется (читается ли, тот ли отпечаток, подходит ли пароль ключа) ДО долгой
+      # сборки и удаляется в конце. Нет секретов (форк, PR) — падаем сразу с понятной ошибкой, v2/debug не подставляем.
+      - name: Prepare signing key v3 (app only)
+        id: v3key
+        if: matrix.kind == 'app'
+        env:
+          V3_B64: ${{ secrets.ANDROID_V3_KEYSTORE_BASE64 }}
+          V3_ALIAS: ${{ secrets.ANDROID_V3_KEY_ALIAS }}
+          V3_STORE_PASSWORD: ${{ secrets.ANDROID_V3_STORE_PASSWORD }}
+          V3_KEY_PASSWORD: ${{ secrets.ANDROID_V3_KEY_PASSWORD }}
+          OUT_DIR: ${{ runner.temp }}
+        run: |
+          EXPECT_SHA256=$(grep -m1 '^app.cert.sha256=' android/pixellnet-identities.properties | cut -d= -f2-)
+          export EXPECT_SHA256
+          bash scripts/ci_prepare_v3_key.sh
 
       - name: Setup Flutter 3.44.5
         uses: subosito/flutter-action@v2
@@ -59,21 +115,29 @@ jobs:
             ~/.pub-cache
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: android-${{ hashFiles('pubspec.lock', 'android/**/*.gradle*') }}
+          key: android-${{ matrix.id }}-${{ hashFiles('pubspec.lock', 'android/**/*.gradle*') }}
+          restore-keys: |
+            android-${{ matrix.id }}-
+            android-
 
       - name: Resolve version
         id: ver
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            V="${{ github.ref }}"
-            V="${V#refs/tags/v}"
-          elif [ -n "${{ inputs.version }}" ]; then
-            V="${{ inputs.version }}"
-          elif [[ "${{ github.ref }}" == refs/heads/feat/* ]]; then
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            V="${GITHUB_REF#refs/tags/v}"
+          elif [ -n "${INPUT_VERSION}" ]; then
+            V="${INPUT_VERSION}"
+          elif [[ "${GITHUB_REF}" == refs/heads/rc/* ]]; then
+            # rc/0.1.106 -> 0.1.106-rc.<номер запуска>
+            V="${GITHUB_REF_NAME#rc/}-rc.${RUN_NUMBER}"
+          elif [[ "${GITHUB_REF}" == refs/heads/feat/* ]]; then
             BASE=$(grep -m1 '^version:' pubspec.yaml | sed -E 's/^version: *([0-9.]+).*/\1/')
-            V="${BASE}-${GITHUB_REF_NAME##*/}.${{ github.run_number }}"
+            V="${BASE}-${GITHUB_REF_NAME##*/}.${RUN_NUMBER}"
           else
-            V="dev-${{ github.run_number }}"
+            V="dev-${RUN_NUMBER}"
           fi
           echo "version=$V" >> $GITHUB_OUTPUT
           echo "Resolved version: $V"
@@ -146,8 +210,11 @@ jobs:
           cp bin/hiddify-core.aar ../android/app/libs/libbox.aar
           ls -la ../android/app/libs/
 
-      - name: Verify keystore in repo
+      # Мост и legacy подписываются ключом v2, который лежит в репозитории (публичный: нужен только чтобы мост встал
+      # поверх 0.1.105). Новое приложение (app) его НЕ использует — см. шаг «Prepare signing key v3».
+      - name: Verify keystore in repo (v2, bridge/legacy only)
         id: keystore
+        if: matrix.mode == 'bridge'
         run: |
           # v0.1.21: keystore + key.properties commit'нуты в репо
           # (zero-config CI — юзеру не нужно добавлять GH secrets).
@@ -165,36 +232,82 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          # Ключ v3 — только в сборке нового приложения; Gradle читает его из окружения (android/app/build.gradle).
+          ANDROID_V3_STORE_FILE: ${{ steps.v3key.outputs.store_file }}
+          ANDROID_V3_STORE_PASSWORD: ${{ matrix.kind == 'app' && secrets.ANDROID_V3_STORE_PASSWORD || '' }}
+          ANDROID_V3_KEY_ALIAS: ${{ matrix.kind == 'app' && secrets.ANDROID_V3_KEY_ALIAS || '' }}
+          ANDROID_V3_KEY_PASSWORD: ${{ matrix.kind == 'app' && secrets.ANDROID_V3_KEY_PASSWORD || '' }}
+          MODE: ${{ matrix.mode }}
+          ID_SUFFIX: ${{ matrix.suffix }}
+          APP_LABEL: ${{ matrix.label }}
+          ASSET_PREFIX: ${{ matrix.asset_prefix }}
+          VERSION: ${{ steps.ver.outputs.version }}
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
-          EXTRA=()
-          if [ "${{ inputs.side_by_side }}" = "true" ] || [[ "${{ github.ref }}" == refs/heads/feat/* ]]; then
-            EXTRA=(--android-project-arg=pixellnetIdSuffix=.core5 "--android-project-arg=pixellnetLabel=PIXELLNET β")
-            echo "Side-by-side test build: com.pixellnet.vpn.core5"
+          EXTRA=("--android-project-arg=pixellnetMode=${MODE}")
+          if [ -n "${ID_SUFFIX}" ]; then
+            EXTRA+=("--android-project-arg=pixellnetIdSuffix=${ID_SUFFIX}")
           fi
+          if [ -n "${APP_LABEL}" ]; then
+            EXTRA+=("--android-project-arg=pixellnetLabel=${APP_LABEL}")
+          fi
+          echo "Build: mode=${MODE} suffix='${ID_SUFFIX}' label='${APP_LABEL}' version=${VERSION} versionCode=${RUN_NUMBER}"
           flutter build apk --release \
             --split-per-abi \
-            --build-number=${{ github.run_number }} \
-            --build-name=${{ steps.ver.outputs.version }} \
+            --build-number=${RUN_NUMBER} \
+            --build-name=${VERSION} \
             "${EXTRA[@]}"
           mkdir -p out
           for f in build/app/outputs/flutter-apk/*.apk; do
             base=$(basename "$f")
-            cp "$f" "out/pixellnet-${{ steps.ver.outputs.version }}-${base}"
+            cp "$f" "out/${ASSET_PREFIX}-${VERSION}-${base}"
           done
           ls -la out/
+
+      # Подпись, пакет и метка готовых APK — до заливки в артефакты и релиз.
+      - name: Verify APK (signature, package, label)
+        env:
+          EXPECT_PACKAGE: ${{ matrix.expect_package }}
+          EXPECT_CERT: ${{ matrix.expect_cert }}
+          EXPECT_LABEL: ${{ matrix.expect_label }}
+        run: |
+          rc=0
+          bash scripts/ci_verify_apk.sh out "$EXPECT_PACKAGE" "$EXPECT_CERT" "$EXPECT_LABEL" > verify.log 2>&1 || rc=$?
+          cat verify.log
+          { echo "### APK: ${{ matrix.id }}"; echo '```'; cat verify.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+
+      - name: Remove signing key
+        if: always()
+        run: rm -f "${{ runner.temp }}"/pixellnet-v3*.p12
+
+      # Метка вида выпуска: по ней upload-to-server понимает, что лежит в релизе (мост, новое приложение, как раньше).
+      - name: Write release kind marker
+        if: matrix.release == 'true'
+        env:
+          KIND: ${{ matrix.kind }}
+          PACKAGE: ${{ matrix.expect_package }}
+          PUBLISH: ${{ matrix.publish }}
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          printf '{"kind":"%s","package":"%s","version":"%s","publish":"%s","commit":"%s"}\n' \
+            "$KIND" "$PACKAGE" "$VERSION" "$PUBLISH" "$GITHUB_SHA" > out/android-kind.json
+          cat out/android-kind.json
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pixellnet-android-apk
+          name: ${{ matrix.artifact }}
           path: out/*.apk
           retention-days: 30
 
       - name: Release on tag
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: matrix.release == 'true' && startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: out/*.apk
+          files: |
+            out/*.apk
+            out/android-kind.json
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') }}

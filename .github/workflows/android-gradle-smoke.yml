@@ -1,0 +1,133 @@
+name: Android Gradle smoke
+
+# T-027 / А2.5: быстрая проверка (минуты, а не 30-45) того, что собирается в Android-сборке не из кода:
+#   - режимы pixellnetMode=bridge|app: пакет, метка, пакет и отпечаток «второго приложения» пары (BuildConfig), выбор подписи;
+#   - новое приложение БЕЗ ключа v3 падает с понятной ошибкой (а не подписывается v2/debug);
+#   - план сборок CI и сценарии скриптов выпуска (сухой прогон на временной папке, не на сервере).
+# Секретов не использует и ничего не публикует.
+
+on:
+  push:
+    branches:
+      - 'feat/**'
+      - 'rc/**'
+    paths:
+      - 'android/**'
+      - 'scripts/**'
+      - '.github/workflows/android-gradle-smoke.yml'
+      - '.github/workflows/build-android.yml'
+      - '.github/workflows/upload-to-server.yml'
+      - '.github/android-release-variant'
+  workflow_dispatch:
+
+concurrency:
+  group: android-gradle-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      LC_ALL: C.UTF-8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Unit tests (CI plan)
+        run: python3 scripts/test_ci_plan_android.py -v
+
+      - name: Release scripts - scenarios on a temporary folder (dry run, no server)
+        run: bash scripts/test_release_scenarios.sh
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter 3.38.5
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.5'
+          channel: 'stable'
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      # Новое приложение без ключа v3: release-сборка обязана упасть СРАЗУ (до компиляции) с нашим сообщением.
+      # Заодно Flutter создаёт android/gradlew и local.properties для следующих шагов.
+      - name: app without key v3 must fail with a clear message
+        run: |
+          rc=0
+          flutter build apk --release --split-per-abi \
+            --android-project-arg=pixellnetMode=app \
+            --android-project-arg=pixellnetIdSuffix=.mig > app-nokey.log 2>&1 || rc=$?
+          tail -40 app-nokey.log
+          if [ "$rc" = 0 ]; then echo "::error::сборка app без ключа v3 НЕ упала"; exit 1; fi
+          grep -q "без ключа подписи v3" app-nokey.log || { echo "::error::сборка упала, но не с нашим сообщением про ключ v3 (смотри журнал выше)"; exit 1; }
+          echo "OK: app без ключа v3 падает с понятной ошибкой"
+
+      - name: Identities per mode (applicationId, label, peer, signing)
+        working-directory: android
+        run: |
+          set -e
+          check() { # <ожидаемая строка> <файл с выводом>
+            grep -qxF -- "$1" "$2" || { echo "::error::нет строки '$1' в выводе:"; cat "$2"; exit 1; }
+          }
+          run() { # <имя> -- gradle args
+            local name="$1"; shift
+            ./gradlew -q :app:pixellnetIdentity "$@" > "id-$name.txt"
+            echo "---- $name"; cat "id-$name.txt"
+          }
+          V2=$(grep -m1 '^bridge.cert.sha256=' pixellnet-identities.properties | cut -d= -f2- | tr -d ':' | tr 'A-F' 'a-f')
+          V3=$(grep -m1 '^app.cert.sha256=' pixellnet-identities.properties | cut -d= -f2- | tr -d ':' | tr 'A-F' 'a-f')
+
+          run bridge
+          check "pixellnet.mode=bridge" id-bridge.txt
+          check "pixellnet.applicationId=com.pixellnet.vpn" id-bridge.txt
+          check "pixellnet.label=PIXELLNET (старое)" id-bridge.txt
+          check "pixellnet.peerAppId=com.pxllnet.app" id-bridge.txt
+          check "pixellnet.peerCertSha256=$V3" id-bridge.txt
+          check "pixellnet.signing=v2 (key.properties)" id-bridge.txt
+
+          run bridge-mig -PpixellnetIdSuffix=.mig
+          check "pixellnet.applicationId=com.pixellnet.vpn.mig" id-bridge-mig.txt
+          check "pixellnet.label=PIXELLNET (старое) β" id-bridge-mig.txt
+          check "pixellnet.peerAppId=com.pxllnet.app.mig" id-bridge-mig.txt
+
+          run core5 -PpixellnetIdSuffix=.core5 "-PpixellnetLabel=PIXELLNET β"
+          check "pixellnet.applicationId=com.pixellnet.vpn.core5" id-core5.txt
+          check "pixellnet.label=PIXELLNET β" id-core5.txt
+
+          run app -PpixellnetMode=app
+          check "pixellnet.mode=app" id-app.txt
+          check "pixellnet.applicationId=com.pxllnet.app" id-app.txt
+          check "pixellnet.label=PXLLNET" id-app.txt
+          check "pixellnet.peerAppId=com.pixellnet.vpn" id-app.txt
+          check "pixellnet.peerCertSha256=$V2" id-app.txt
+          check "pixellnet.signing=NONE (release build will fail)" id-app.txt
+
+          run app-mig -PpixellnetMode=app -PpixellnetIdSuffix=.mig
+          check "pixellnet.applicationId=com.pxllnet.app.mig" id-app-mig.txt
+          check "pixellnet.label=PXLLNET β" id-app-mig.txt
+          check "pixellnet.peerAppId=com.pixellnet.vpn.mig" id-app-mig.txt
+
+          # ключ v3 «виден» (подставной файл и пароли — только чтобы проверить выбор подписи, не сам ключ)
+          touch "$RUNNER_TEMP/fake.p12"
+          ANDROID_V3_STORE_FILE="$RUNNER_TEMP/fake.p12" ANDROID_V3_STORE_PASSWORD=x ANDROID_V3_KEY_ALIAS=a ANDROID_V3_KEY_PASSWORD=y \
+            ./gradlew -q :app:pixellnetIdentity -PpixellnetMode=app > id-app-v3.txt
+          check "pixellnet.signing=v3 (ANDROID_V3_*)" id-app-v3.txt
+          # то же окружение у моста подпись не меняет: мост всегда v2
+          ANDROID_V3_STORE_FILE="$RUNNER_TEMP/fake.p12" ANDROID_V3_STORE_PASSWORD=x ANDROID_V3_KEY_ALIAS=a ANDROID_V3_KEY_PASSWORD=y \
+            ./gradlew -q :app:pixellnetIdentity > id-bridge-v3env.txt
+          check "pixellnet.signing=v2 (key.properties)" id-bridge-v3env.txt
+
+          # неверный режим
+          if ./gradlew -q :app:pixellnetIdentity -PpixellnetMode=oops > id-bad.txt 2>&1; then echo "::error::pixellnetMode=oops не отвергнут"; exit 1; fi
+          grep -q "pixellnetMode должен быть" id-bad.txt || { echo "::error::нет понятного сообщения про неверный режим"; cat id-bad.txt; exit 1; }
+          echo "Gradle: режимы, метки, пары, подпись — OK"
