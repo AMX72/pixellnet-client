@@ -39,9 +39,11 @@ for apk in "${apks[@]}"; do
     echo "$sig" | sed 's/^/  /'
     echo "::error::apksigner verify не прошёл для $name"; bad=1; continue
   fi
-  signers=$(printf '%s\n' "$sig" | sed -n 's/^Number of signers: *//p' | head -1)
-  digest=$(printf '%s\n' "$sig" | sed -n 's/^Signer #1 certificate SHA-256 digest: *//p' | head -1)
-  schemes=$(printf '%s\n' "$sig" | sed -n 's/^Verified using \(v[0-9.]*\) .*: true/\1/p' | tr '\n' ' ')
+  # Строки apksigner про подписи печатаем как есть: формат менялся между версиями build-tools, в журнале должно быть видно, что он сказал.
+  printf '%s\n' "$sig" | grep -E 'certificate|signers|Verified using|WARNING|ERROR' | sed 's/^/  | /' || true
+  signers=$(printf '%s\n' "$sig" | awk -F': *' '/^Number of signers:/ {print $2; exit}')
+  digest=$(printf '%s\n' "$sig" | awk '/certificate SHA-256 digest:/ {print $NF; exit}')
+  schemes=$(printf '%s\n' "$sig" | awk '/^Verified using v[0-9.]+ scheme.*: true/ {printf "%s ", $3}')
   echo "  подписей: ${signers:-?}; схемы: ${schemes:-?}"
   echo "  отпечаток SHA-256 сертификата: $digest"
   if [ "$(printf '%s' "$digest" | normalize)" != "$(printf '%s' "$EXPECT_CERT" | normalize)" ]; then
@@ -50,10 +52,10 @@ for apk in "${apks[@]}"; do
   [ "${signers:-1}" = "1" ] || { echo "::error::$name: подписантов $signers, ожидался 1"; bad=1; }
 
   badging=$("$AAPT2" dump badging "$apk" 2>/dev/null || true)
-  pkg=$(printf '%s\n' "$badging" | sed -n "s/^package: name='\([^']*\)'.*/\1/p" | head -1)
-  vcode=$(printf '%s\n' "$badging" | sed -n "s/^package: .*versionCode='\([^']*\)'.*/\1/p" | head -1)
-  vname=$(printf '%s\n' "$badging" | sed -n "s/^package: .*versionName='\([^']*\)'.*/\1/p" | head -1)
-  label=$(printf '%s\n' "$badging" | sed -n "s/^application-label:'\(.*\)'$/\1/p" | head -1)
+  pkg=$(printf '%s\n' "$badging" | sed -n "s/^package: name='\([^']*\)'.*/\1/p" | sed -n 1p)
+  vcode=$(printf '%s\n' "$badging" | sed -n "s/^package: .*versionCode='\([^']*\)'.*/\1/p" | sed -n 1p)
+  vname=$(printf '%s\n' "$badging" | sed -n "s/^package: .*versionName='\([^']*\)'.*/\1/p" | sed -n 1p)
+  label=$(printf '%s\n' "$badging" | sed -n "s/^application-label:'\(.*\)'$/\1/p" | sed -n 1p)
   echo "  пакет: $pkg; versionCode=$vcode; versionName=$vname; метка: '$label'"
   [ "$pkg" = "$EXPECT_PACKAGE" ] || { echo "::error::$name: пакет '$pkg', ожидался '$EXPECT_PACKAGE'"; bad=1; }
   [ "$label" = "$EXPECT_LABEL" ] || { echo "::error::$name: метка '$label', ожидалась '$EXPECT_LABEL'"; bad=1; }

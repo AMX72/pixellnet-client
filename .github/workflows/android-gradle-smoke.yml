@@ -49,6 +49,21 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      # Скрипт проверки APK (scripts/ci_verify_apk.sh) — на настоящем выпущенном APK 0.1.105 (публичный релиз GitHub):
+      # проверяет и сам скрипт (разбор вывода apksigner/aapt2), и то, что отпечаток v2 в android/pixellnet-identities.properties
+      # — это ровно тот сертификат, которым подписано то, что стоит у людей (мост 0.1.106 встанет поверх только с ним).
+      - name: ci_verify_apk.sh on the real published v0.1.105 APK (v2 key) - and must reject the wrong key
+        run: |
+          mkdir -p "$RUNNER_TEMP/apk105"
+          curl -fsSL -o "$RUNNER_TEMP/apk105/pixellnet-0.1.105-app-arm64-v8a-release.apk" \
+            "https://github.com/AMX72/pixellnet-client/releases/download/v0.1.105/pixellnet-0.1.105-app-arm64-v8a-release.apk"
+          bash scripts/ci_verify_apk.sh "$RUNNER_TEMP/apk105" com.pixellnet.vpn bridge PIXELLNET
+          echo "--- то же с ключом v3 в ожиданиях: проверка обязана отказать"
+          if bash scripts/ci_verify_apk.sh "$RUNNER_TEMP/apk105" com.pixellnet.vpn app PIXELLNET; then
+            echo "::error::проверка APK пропустила чужой ключ"; exit 1
+          fi
+          echo "OK: чужой ключ отвергнут"
+
       - name: Setup Flutter 3.38.5
         uses: subosito/flutter-action@v2
         with:
