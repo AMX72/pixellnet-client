@@ -232,6 +232,10 @@ DRY_MIRRORS="" release 0.1.106 bridge | tail -3
 chk primary "состояние восстановлено из старого манифеста: android был 0.1.105 (обычный), стал мост 0.1.106" "m['version']=='0.1.106' and m['android']['arm64']['file']=='pixellnet-bridge-0.1.106-arm64.apk' and ex('pixellnet-0.1.105-arm64.apk')"
 DRY_MIRRORS="" admin rollback windows 0.1.105 | tail -2
 chk primary "откат ТОЛЬКО windows на 0.1.105: версия всё равно не ниже 0.1.106, android не тронут" "m['version']=='0.1.106' and m['windows']['zip']['file']=='pxl-win-v0.1.105.zip' and m['android']['arm64']['file']=='pixellnet-bridge-0.1.106-arm64.apk'"
+echo "  — маркер publish=hold внутри релиза (так будут идти теги этой ветки, .github/android-release-variant):"
+mkassets "$W/assets" app 0.1.107 hold
+DRY_MIRRORS="" ASSETS_DIR="$W/assets" bash "$UP" v0.1.107 2>&1 | grep -E "kind=|HOLD|staged" | sed 's/^/    | /'
+chk primary "маркер hold: файлы нового приложения на сервере, манифест и ссылки не тронуты" "ex('pxllnet-0.1.107-arm64.apk') and m['version']=='0.1.106' and 'android_app' not in m and link('pixellnet-latest-arm64.apk')=='pixellnet-0.1.105-arm64.apk'"
 DRY_MIRRORS="" admin verify | tail -2
 
 echo
