@@ -9,7 +9,8 @@ abstract class Constants {
   static const githubReleasesApiUrl = "https://api.github.com/repos/AMX72/pixellnet-client/releases";
   static const githubLatestReleaseUrl = "https://github.com/AMX72/pixellnet-client/releases/latest";
   static const appCastUrl = "https://pixellnet.com/appcast.xml";
-  static const telegramChannelUrl = "https://t.me/pixellnet";
+  // Поддержка — бот в Telegram (А3.8, решение владельца 27.11). Ссылок на чужой канал в клиенте нет.
+  static const supportBotUrl = "https://t.me/pixellnet_bot?start=support";
   static const privacyPolicyUrl = "https://pixellnet.com/privacy-policy/";
   static const termsAndConditionsUrl = "https://pixellnet.com/terms/";
   static const cfWarpPrivacyPolicy = "https://www.cloudflare.com/application/privacypolicy/";

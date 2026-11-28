@@ -17,10 +17,11 @@ class ProfileTileMain extends HookConsumerWidget {
   final bool isMain;
   // pixellnet.com покрывает и поддомены (download.pixellnet.com).
   static const verifiedDomains = ['pixellnet.com'];
+  // Только наши ссылки: канал новостей и бот поддержки. Чужого канала и ссылок Hiddify здесь нет (А3.8).
   static const verifiedLinks = [
-    'https://t.me/pixellnet',
     'https://t.me/pixellnet_support',
     'https://t.me/pixellnet_bot',
+    'https://t.me/pixellnet_bot?start=support',
   ];
   Future<void> _launchUrlWithCheck(BuildContext context, WidgetRef ref, String url) async {
     final uri = Uri.parse(url);
@@ -175,9 +176,6 @@ class ProfileTileMain extends HookConsumerWidget {
     if (host.endsWith('facebook.com')) {
       return FontAwesomeIcons.facebook;
     }
-    if (host.endsWith('hiddify.com')) {
-      // return IconData();
-    }
     return icon ?? FluentIcons.link_24_regular;
   }
 
@@ -197,7 +195,7 @@ class ProfileTileMain extends HookConsumerWidget {
     if (host.endsWith('facebook.com')) {
       return uri.pathSegments.lastWhere((e) => e.isNotEmpty, orElse: () => '');
     }
-    if (host.endsWith('hiddify.com') || host.endsWith('pixellnet.com')) {
+    if (host.endsWith('pixellnet.com')) {
       return "PIXELLNET";
     }
     return uri.host;

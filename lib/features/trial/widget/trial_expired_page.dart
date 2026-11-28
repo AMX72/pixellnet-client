@@ -83,37 +83,12 @@ class TrialExpiredPage extends ConsumerWidget {
               backgroundColor: PixellnetBrand.bgSurface,
             ),
             onPressed: () => launchUrl(
-              Uri.parse('https://t.me/pixellnet_bot?start=renew'),
+              Uri.parse('https://t.me/pixellnet_bot?start=trial'),
               mode: LaunchMode.externalApplication,
             ),
             child: Text(
               t.ui.trial.renew,
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Center(
-            child: GestureDetector(
-              onTap: () => launchUrl(
-                Uri.parse('https://t.me/pixellnet_bot'),
-                mode: LaunchMode.externalApplication,
-              ),
-              child: RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: const TextStyle(color: PixellnetBrand.textMuted, fontSize: 13),
-                  children: [
-                    TextSpan(text: t.ui.trial.noKey),
-                    const TextSpan(
-                      text: '@pixellnet_bot',
-                      style: TextStyle(
-                        color: PixellnetBrand.accent,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ),
           ),
         ],

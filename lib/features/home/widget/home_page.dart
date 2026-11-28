@@ -16,6 +16,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
 import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
+import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/gen/translations.g.dart' show AppLocale, Translations;
 import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/utils/alerts.dart';
@@ -2293,7 +2294,7 @@ class _FooterRow extends ConsumerWidget {
           children: [
             TextSpan(text: 'v$version · ${t.pages.home.support} '),
             TextSpan(
-              text: '@pixellnet_support',
+              text: '@pixellnet_bot',
               style: TextStyle(color: theme.colorScheme.primary),
               recognizer: TapGestureRecognizer()
                 ..onTap = () => _openTelegramSupport(),
@@ -2305,7 +2306,7 @@ class _FooterRow extends ConsumerWidget {
   }
 
   Future<void> _openTelegramSupport() async {
-    final uri = Uri.parse('https://t.me/pixellnet_support');
+    final uri = Uri.parse(Constants.supportBotUrl);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
