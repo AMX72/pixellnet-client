@@ -11,6 +11,8 @@ abstract class Constants {
   static const appCastUrl = "https://pixellnet.com/appcast.xml";
   // Поддержка — бот в Telegram (А3.8, решение владельца 27.11). Ссылок на чужой канал в клиенте нет.
   static const supportBotUrl = "https://t.me/pixellnet_bot?start=support";
+  // «О программе → Канал в Telegram» — наш канал новостей (владелец 28.11: «И канал в Telegram. Окей.»).
+  static const newsChannelUrl = "https://t.me/pixellnet_support";
   static const privacyPolicyUrl = "https://pixellnet.com/privacy-policy/";
   static const termsAndConditionsUrl = "https://pixellnet.com/terms/";
   static const cfWarpPrivacyPolicy = "https://www.cloudflare.com/application/privacypolicy/";
