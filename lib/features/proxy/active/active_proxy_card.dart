@@ -6,6 +6,7 @@ import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
 import 'package:hiddify/features/proxy/active/ip_widget.dart';
+import 'package:hiddify/features/proxy/channel_status.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hiddify/utils/custom_loggers.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -89,7 +90,7 @@ class ActiveProxyFooter extends ConsumerWidget with InfraLogger {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    _subtitleFor(activeProxy),
+                    _subtitleFor(t, activeProxy),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
                     ),
@@ -126,20 +127,13 @@ String _titleFor(OutboundInfo p) {
   return '$country · $name';
 }
 
-/// v0.1.22: subtitle — «Быстрый канал · 45 мс» вместо IP + protocol.
-/// Классификация по ping для домохозяек: <200ms fast, <500 обычный, >500 медленный.
-String _subtitleFor(OutboundInfo p) {
+/// subtitle — «Работает · 45 мс» вместо IP + protocol. Подпись канала — вариант «В» (владелец 28.11):
+/// «Работает» / «Не отвечает» / «Проверяем связь…»; миллисекунды — только когда канал ответил.
+String _subtitleFor(Translations t, OutboundInfo p) {
   final delay = p.urlTestDelay;
-  if (delay <= 0 || delay >= 65000) return 'Проверяем связь…';
-  final String quality;
-  if (delay < 200) {
-    quality = 'Быстрый канал';
-  } else if (delay < 500) {
-    quality = 'Обычный канал';
-  } else {
-    quality = 'Медленный канал';
-  }
-  return '$quality · $delay мс';
+  final status = channelStatusLabel(t, delay);
+  if (delay <= 0 || delay >= 65000) return status;
+  return '$status · $delay мс';
 }
 
 String _countryName(String code) {

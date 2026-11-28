@@ -105,6 +105,9 @@
     "home": {
       "title": "Главная",
       "mode": "Режим",
+      "channelWorking": "Работает",
+      "channelNotResponding": "Не отвечает",
+      "channelChecking": "Проверяем связь…",
       "key": "Ключ",
       "autoConnect": "Автоподключение при запуске",
       "language": "Язык",

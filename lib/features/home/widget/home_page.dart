@@ -31,6 +31,7 @@ import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/profile/notifier/profile_notifier.dart';
 import 'package:hiddify/features/profile/overview/profiles_notifier.dart';
 import 'package:hiddify/features/proxy/active/active_proxy_notifier.dart';
+import 'package:hiddify/features/proxy/channel_status.dart';
 import 'package:hiddify/features/proxy/overview/proxies_overview_notifier.dart';
 import 'package:hiddify/core/brand/pixellnet_brand.dart';
 import 'package:hiddify/features/stats/notifier/stats_notifier.dart';
@@ -987,15 +988,6 @@ class _ServerEmpty extends StatelessWidget {
   }
 }
 
-/// Оценка канала по задержке (те же пороги, что на экране «Ключи»).
-/// Пустая строка — задержка неизвестна или канал не ответил.
-String _channelQuality(int delayMs, bool isRu) {
-  if (delayMs <= 0 || delayMs >= 65000) return '';
-  if (delayMs < 200) return isRu ? 'Быстрый' : 'Fast';
-  if (delayMs < 500) return isRu ? 'Обычный' : 'Normal';
-  return isRu ? 'Медленный' : 'Slow';
-}
-
 class _ServerList extends ConsumerWidget {
   const _ServerList({required this.group});
   final OutboundGroup group;
@@ -1004,7 +996,7 @@ class _ServerList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final items = group.items;
-    final isRu = ref.watch(localePreferencesProvider).isRussian;
+    final t = ref.watch(translationsProvider).requireValue;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1031,12 +1023,11 @@ class _ServerList extends ConsumerWidget {
                             item.tagDisplay.isNotEmpty ? item.tagDisplay : item.tag,
                             style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
                           ),
-                          // 0.1.105 (Р0.2): вместо типа канала из ядра — «Быстрый / Обычный / Медленный».
-                          if (_channelQuality(item.urlTestDelay, isRu).isNotEmpty)
-                            Text(
-                              _channelQuality(item.urlTestDelay, isRu),
-                              style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
-                            ),
+                          // Подпись канала — «Работает / Не отвечает / Проверяем связь…» (вариант «В», владелец 28.11).
+                          Text(
+                            channelStatusLabel(t, item.urlTestDelay),
+                            style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                          ),
                         ],
                       ),
                     ),

@@ -12,6 +12,7 @@ import 'package:hiddify/features/profile/notifier/active_profile_notifier.dart';
 import 'package:hiddify/features/profile/notifier/profiles_update_notifier.dart';
 import 'package:hiddify/features/profile/overview/profiles_notifier.dart';
 import 'package:hiddify/features/profile/widget/profile_tile.dart';
+import 'package:hiddify/features/proxy/channel_status.dart';
 import 'package:hiddify/features/proxy/overview/proxies_overview_notifier.dart';
 import 'package:hiddify/hiddifycore/generated/v2/hcore/hcore.pb.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -157,7 +158,7 @@ class _ChannelsSection extends ConsumerWidget {
   }
 }
 
-class _ChannelTile extends StatelessWidget {
+class _ChannelTile extends ConsumerWidget {
   const _ChannelTile({
     required this.item,
     required this.selected,
@@ -169,10 +170,12 @@ class _ChannelTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final t = ref.watch(translationsProvider).requireValue;
     final delay = item.urlTestDelay;
-    final quality = _quality(delay);
+    // Подпись канала — «Работает / Не отвечает / Проверяем связь…» (вариант «В», владелец 28.11).
+    final quality = channelStatusLabel(t, delay);
     final delayText = delay > 0 && delay < 65000 ? '$delay мс' : '—';
     final country = _countryName(item.ipinfo.countryCode);
     final name = item.tagDisplay.isNotEmpty ? item.tagDisplay : item.tag;
@@ -221,13 +224,6 @@ class _ChannelTile extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  static String _quality(int delay) {
-    if (delay <= 0 || delay >= 65000) return 'Проверяем связь…';
-    if (delay < 200) return 'Быстрый';
-    if (delay < 500) return 'Обычный';
-    return 'Медленный';
   }
 
   static String _countryName(String code) {
