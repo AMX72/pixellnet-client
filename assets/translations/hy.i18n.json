@@ -1,0 +1,32 @@
+{
+  "pages": {
+    "home": {
+      "title": "Գլխավոր",
+      "server": "Սերվեր",
+      "protocol": "Արձանագրություն",
+      "mode": "Ռեժիմ",
+      "vpnTun": "VPN (TUN)",
+      "key": "Բանալի",
+      "autoConnect": "Ավտոմատ միացում գործարկման ժամանակ",
+      "language": "Լեզու",
+      "developer": "Մշակողի համար",
+      "notConnected": "Միացված չէ",
+      "establishing": "Կապ է հաստատվում",
+      "cancel": "Չեղարկել",
+      "support": "Աջակցություն",
+      "languageTitle": "Ինտերֆեյսի լեզու",
+      "copied": "Պատճենվեց",
+      "serverSoon": "Սերվերների ցանկ — շուտով",
+      "protocolSoon": "Արձանագրության ընտրություն — շուտով",
+      "modeSoon": "VPN (TUN) · Համակարգային պրոքսի — շուտով",
+      "developerSoon": "Մատյաններ, DNS, MTU, արտահանում — շուտով"
+    }
+  },
+  "connection": {
+    "connect": "Միացնել",
+    "connected": "Միացված է",
+    "connecting": "Միացում…",
+    "disconnect": "Անջատել",
+    "tapToConnect": "Հպեք միանալու համար"
+  }
+}

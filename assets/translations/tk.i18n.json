@@ -1,0 +1,32 @@
+{
+  "pages": {
+    "home": {
+      "title": "Baş sahypa",
+      "server": "Server",
+      "protocol": "Protokol",
+      "mode": "Režim",
+      "vpnTun": "VPN (TUN)",
+      "key": "Açar",
+      "autoConnect": "Başlanda awtomatik birikme",
+      "language": "Dil",
+      "developer": "Işläp düzüji üçin",
+      "notConnected": "Birikdirilen däl",
+      "establishing": "Birikme gurulýar",
+      "cancel": "Ýatyr",
+      "support": "Goldaw",
+      "languageTitle": "Interfeýs dili",
+      "copied": "Göçürildi",
+      "serverSoon": "Serwerler sanawy — tiz wagtda",
+      "protocolSoon": "Protokol saýlaw — tiz wagtda",
+      "modeSoon": "VPN (TUN) · Ulgam proksi — tiz wagtda",
+      "developerSoon": "Loglar, DNS, MTU, eksport — tiz wagtda"
+    }
+  },
+  "connection": {
+    "connect": "Birikdir",
+    "connected": "Birikdi",
+    "connecting": "Birikdirilýär…",
+    "disconnect": "Üzmek",
+    "tapToConnect": "Birikdirmek üçin basyň"
+  }
+}

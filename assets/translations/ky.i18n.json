@@ -1,0 +1,32 @@
+{
+  "pages": {
+    "home": {
+      "title": "Башкы бет",
+      "server": "Сервер",
+      "protocol": "Протокол",
+      "mode": "Режим",
+      "vpnTun": "VPN (TUN)",
+      "key": "Ачкыч",
+      "autoConnect": "Иштеткенде автоматтык кошулуу",
+      "language": "Тил",
+      "developer": "Иштеп чыгуучу үчүн",
+      "notConnected": "Кошулган эмес",
+      "establishing": "Байланыш түзүлүүдө",
+      "cancel": "Жокко чыгаруу",
+      "support": "Колдоо",
+      "languageTitle": "Интерфейс тили",
+      "copied": "Көчүрүлдү",
+      "serverSoon": "Серверлер тизмеси — жакында",
+      "protocolSoon": "Протокол тандоо — жакында",
+      "modeSoon": "VPN (TUN) · Системалык прокси — жакында",
+      "developerSoon": "Логдор, DNS, MTU, экспорт — жакында"
+    }
+  },
+  "connection": {
+    "connect": "Кошулуу",
+    "connected": "Кошулду",
+    "connecting": "Кошулууда…",
+    "disconnect": "Ажыратуу",
+    "tapToConnect": "Кошулуу үчүн басыңыз"
+  }
+}
