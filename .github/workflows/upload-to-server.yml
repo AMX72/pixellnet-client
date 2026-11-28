@@ -3,6 +3,13 @@ name: Upload release to pixellnet.com
 # Triggers after Build Android + Build Windows attach assets to a GitHub Release.
 # Downloads those assets and uploads to https://pixellnet.com/download/ via SSH,
 # updates latest-* symlinks, rotates to keep last 3 per platform, purges Cloudflare cache.
+#
+# T-027 / А2.5: вид выпуска (мост / новое приложение / как раньше) берётся из android-kind.json в релизе,
+# секции latest.json ведутся по отдельности (scripts/release_manifest.py), выпуск можно подготовить без включения
+# (publish=hold в .github/android-release-variant или вход hold) и откатить по секциям — см. scripts/upload_release_to_server.sh.
+#
+# ВАЖНО: для workflow_run GitHub берёт ЭТОТ файл и scripts/ из ветки по умолчанию (main), а не из ветки тега.
+# Пока эти правки не в main, на RC-теги (v0.1.106-rc1) защита ниже НЕ действует — такие теги не ставить.
 
 on:
   # Triggered after either build; the script uploads only once the release
@@ -16,8 +23,13 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (e.g. v0.1.81)'
+        description: 'Release tag (e.g. v0.1.81); only vX.Y.Z, pre-release tags (-rc, -beta) are refused'
         required: true
+      hold:
+        description: 'Только положить файлы на серверы; latest.json и ссылки не трогать (включить: scripts/upload_release_to_server.sh activate all X.Y.Z)'
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: upload-server
@@ -27,10 +39,14 @@ jobs:
   upload:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Автозапуск — только после успешной сборки ТЕГА vX.Y.Z. Ветки (feat/**, rc/**) и предварительные теги с дефисом
+    # (v0.1.106-rc1, v0.1.107-beta) на серверы не попадают никогда.
     if: >
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
-       startsWith(github.event.workflow_run.head_branch, 'v'))
+       startsWith(github.event.workflow_run.head_branch, 'v') &&
+       !contains(github.event.workflow_run.head_branch, '-') &&
+       !contains(github.event.workflow_run.head_branch, '/'))
 
     steps:
       - name: Checkout
@@ -38,12 +54,20 @@ jobs:
 
       - name: Resolve tag
         id: tag
+        env:
+          RUN_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          INPUT_TAG: ${{ github.event.inputs.tag }}
         run: |
-          if [ -n "${{ github.event.workflow_run.head_branch }}" ]; then
-            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          if [ -n "${RUN_BRANCH}" ]; then
+            TAG="${RUN_BRANCH}"
           else
-            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+            TAG="${INPUT_TAG}"
           fi
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::'$TAG' не тег вида vX.Y.Z — на серверы не заливаем (предварительные теги -rc/-beta и ветки пропускаются)"
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Wait for Android build + release to finalise
         run: sleep 30
@@ -56,6 +80,8 @@ jobs:
           SERVER_USER: ${{ secrets.NETCUP_USER }}
           CLOUDFLARE_MASTER_KEY: ${{ secrets.CLOUDFLARE_MASTER_KEY }}
           CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+          HOLD: ${{ github.event.inputs.hold == 'true' && '1' || '' }}
+          TAG: ${{ steps.tag.outputs.tag }}
         run: |
           chmod +x scripts/upload_release_to_server.sh
-          scripts/upload_release_to_server.sh ${{ steps.tag.outputs.tag }}
+          scripts/upload_release_to_server.sh "$TAG"
