@@ -1,11 +1,107 @@
 {
+  "common": {
+    "appTitle": "PIXELLNET",
+    "start": "Баштоо",
+    "version": "Версия",
+    "ok": "Макул",
+    "cancel": "Жокко чыгаруу",
+    "kContinue": "Улантуу",
+    "showMore": "Көбүрөөк көрсөтүү",
+    "showLess": "Азыраак көрсөтүү",
+    "filter": "Чыпка",
+    "all": "Баары",
+    "pause": "Тындыруу",
+    "resume": "Улантуу",
+    "clear": "Тазалоо",
+    "close": "Жабуу",
+    "auto": "Авто",
+    "manually": "Кол менен",
+    "name": "Аталышы",
+    "url": "URL",
+    "add": "Кошуу",
+    "clipboard": "Алмашуу буфери",
+    "addToClipboard": "Алмашуу буферине көчүрүү",
+    "scanQr": "QR скандоо",
+    "free": "Акысыз",
+    "warp": "WARP",
+    "fragment": "Фрагмент",
+    "help": "Жардам",
+    "save": "Сактоо",
+    "update": "Жаңыртуу",
+    "share": "Бөлүшүү",
+    "edit": "Өзгөртүү",
+    "delete": "Жок кылуу",
+    "discard": "Сактабоо",
+    "import": "Импорт",
+    "export": "Экспорт",
+    "later": "Кийинчерээк",
+    "ignore": "Көңүл бурбоо",
+    "quit": "Чыгуу",
+    "notSet": "Коюлган эмес",
+    "hide": "Жашыруу",
+    "exit": "Чыгуу",
+    "reset": "Демейкиге кайтаруу",
+    "done": "Даяр",
+    "decline": "Четке кагуу",
+    "agree": "Макулмун",
+    "empty": "Бош",
+    "unknown": "Белгисиз",
+    "hidden": "Жашыруун",
+    "timeout": "Убакыт бүттү",
+    "sort": "Иреттөө",
+    "dashboard": "Башкаруу панели",
+    "disable": "Өчүрүү",
+    "psiphon": "Кошумча кызмат 2",
+    "profile": "Профиль",
+    "configuration": "Конфигурация",
+    "file": "Файл",
+    "interval": {
+      "day": {
+        "one": "$n күн",
+        "other": "$n күн"
+      },
+      "hour": {
+        "one": "$n саат",
+        "other": "$n саат"
+      }
+    },
+    "msg": {
+      "permission": {
+        "denied": "Уруксат жок"
+      },
+      "export": {
+        "clipboard": {
+          "success": "Алмашуу буферине ийгиликтүү көчүрүлдү",
+          "failure": "Алмашуу буферине көчүрүү мүмкүн болгон жок",
+          "contentTooLarge": "Мазмун өтө чоң. Файлга экспорттоону колдонуңуз"
+        },
+        "file": {
+          "success": "JSON файлы ийгиликтүү түзүлдү",
+          "failure": "Файлды түзүү мүмкүн болгон жок"
+        }
+      },
+      "import": {
+        "confirm": "Импортту ырастоо",
+        "success": "Ийгиликтүү импорттолду",
+        "failure": "Импорттоо мүмкүн болгон жок"
+      },
+      "autoSave": {
+        "success": "Өзгөртүүлөр автоматтык түрдө сакталды"
+      }
+    }
+  },
+  "intro": {
+    "banner": "Бир баскыч менен туруктуу байланыш",
+    "termsAndPolicyCaution(rich)": "Улантуу менен сиз төмөнкүлөргө макул болосуз: ${tap(@:pages.about.termsAndConditions)}",
+    "info(rich)": "PIXELLNET командасы түздү - ${tap_source(Ачык баштапкы код)} (${tap_license(Лицензия)})"
+  },
   "pages": {
     "home": {
       "title": "Башкы бет",
-      "server": "Сервер",
-      "protocol": "Протокол",
       "mode": "Режим",
-      "vpnTun": "VPN (TUN)",
+      "channelWorking": "Иштейт",
+      "channelNotResponding": "Жооп бербейт",
+      "channelChecking": "Байланыш текшерилүүдө…",
       "key": "Ачкыч",
       "autoConnect": "Иштеткенде автоматтык кошулуу",
       "language": "Тил",
@@ -15,18 +111,949 @@
       "cancel": "Жокко чыгаруу",
       "support": "Колдоо",
       "languageTitle": "Интерфейс тили",
-      "copied": "Көчүрүлдү",
-      "serverSoon": "Серверлер тизмеси — жакында",
-      "protocolSoon": "Протокол тандоо — жакында",
-      "modeSoon": "VPN (TUN) · Системалык прокси — жакында",
-      "developerSoon": "Логдор, DNS, MTU, экспорт — жакында"
+      "copied": "Көчүрүлдү"
+    },
+    "proxies": {
+      "title": "Каналдар",
+      "sort": "Каналдарды иреттөө",
+      "testDelay": "Кечигүүнү текшерүү",
+      "empty": "Азырынча каналдар жок",
+      "activeProxy": "Учурдагы канал",
+      "unknownIp": "Белгисиз IP",
+      "sortOptions": {
+        "unsorted": "Демейки",
+        "name": "Алфавит боюнча",
+        "delay": "Кечигүү боюнча",
+        "usage": "Колдонуу боюнча"
+      },
+      "ipInfo": {
+        "address": "IP дареги",
+        "country": "Өлкө",
+        "organization": "Уюм"
+      },
+      "delay": {
+        "result": "Кечигүү: ${delay} мс",
+        "timeout": "Кечигүүнү текшерүү убактысы бүттү",
+        "testing": "Кечигүү: текшерилүүдө..."
+      }
+    },
+    "profiles": {
+      "title": "Ачкычтар",
+      "add": "Ачкыч кошуу",
+      "update": "Ачкычты жаңыртуу",
+      "viewAllProfiles": "Бардык профилдерди көрүү",
+      "activeProfileName": "Активдүү профилдин аталышы: «${name}».",
+      "nonActiveProfileName": "«${name}» профилин активдүү кылып тандоо",
+      "freeSubNotFound": "Акысыз жазылуу табылган жок",
+      "freeSubNotFoundForRegion": "«${region}» аймагы үчүн акысыз жазылуу табылган жок",
+      "failedToLoad": "Жүктөө мүмкүн болгон жок",
+      "updateSubscriptions": "Жазылууларды жаңыртуу",
+      "share": {
+        "urlToClipboard": "URL дарегин буферге көчүрүү",
+        "showUrlQr": "URL дарегинин QR кодун көрсөтүү",
+        "jsonToClipboard": "JSON түрүндө буферге көчүрүү"
+      },
+      "msg": {
+        "save": {
+          "success": "Профиль ийгиликтүү сакталды"
+        },
+        "invalidUrl": "Туура эмес URL",
+        "add": {
+          "failure": "Профилди кошуу мүмкүн болгон жок"
+        },
+        "update": {
+          "success": "Профиль ийгиликтүү жаңыртылды",
+          "successNamed": "«${name}» ийгиликтүү жаңыртылды",
+          "failure": "Профилди жаңыртуу мүмкүн болгон жок",
+          "failureNamed": "«${name}» профилин жаңыртуу мүмкүн болгон жок"
+        },
+        "delete": {
+          "success": "Профиль ийгиликтүү жок кылынды"
+        }
+      }
+    },
+    "profileDetails": {
+      "title": "Профиль",
+      "lastUpdate": "Акыркы жаңыртуу",
+      "form": {
+        "nameHint": "Профилдин аталышы",
+        "emptyName": "Аталышын толтуруу милдеттүү",
+        "invalidUrl": "Туура эмес URL",
+        "urlHint": "Конфигурациянын толук URL дареги",
+        "disableAutoUpdate": "Автожаңыртууну өчүрүү",
+        "autoUpdateInterval": "Автожаңыртуу аралыгы",
+        "loading": "Профиль кошулууда..."
+      }
+    },
+    "logs": {
+      "title": "Журнал",
+      "shareCoreLogs": "Өзөктүн журналы менен бөлүшүү",
+      "shareAppLogs": "Колдонмонун журналы менен бөлүшүү"
+    },
+    "about": {
+      "title": "Программа жөнүндө",
+      "tagline": "Бир баскыч менен туруктуу байланыш. Жакында — ЖИ-жардамчы жана кеңейтүүлөр.",
+      "notAvailableMsg": "Сизде эң акыркы версия — жаңысы азырынча жок",
+      "checkForUpdate": "Жаңыртууларды текшерүү",
+      "openWorkingDir": "Иштөө папкасын ачуу",
+      "sourceCode": "Баштапкы код",
+      "telegramChannel": "Telegram каналы",
+      "termsAndConditions": "Колдонуу шарттары",
+      "privacyPolicy": "Купуялык саясаты"
+    },
+    "settings": {
+      "title": "Жөндөөлөр",
+      "resetTunnel": "Байланышты кайра орнотуу",
+      "options": {
+        "import": {
+          "clipboard": "Жөндөөлөрдү алмашуу буферинен импорттоо",
+          "file": "Жөндөөлөрдү файлдан импорттоо"
+        },
+        "export": {
+          "anonymousToClipboard": "Жөндөөлөрдү жеке маалыматсыз көчүрүү",
+          "anonymousToFile": "Жеке маалыматсыз файлга сактоо",
+          "allToClipboard": "Бардык жөндөөлөрдү алмашуу буферине көчүрүү",
+          "allToFile": "Бардык жөндөөлөрдү файлга экспорттоо"
+        },
+        "reset": "Жөндөөлөрдү демейки абалга кайтаруу"
+      },
+      "general": {
+        "title": "Жалпы",
+        "locale": "Тил",
+        "themeMode": "Көрүнүш темасы",
+        "themeModes": {
+          "system": "Системалык",
+          "dark": "Караңгы",
+          "light": "Жарык",
+          "black": "Кара"
+        },
+        "enableAnalytics": "Мүчүлүштүктөр тууралуу кабарлоо",
+        "enableAnalyticsMsg": "Эгер бир нерсе туура эмес болуп калса, колдонмо бизге кыска отчет жөнөтө алат — ошентип биз баарын тезирээк оңдойбуз. Анда жеке маалыматтарыңыз болбойт. Эч кимге бербейбиз.",
+        "autoIpCheck": "IP даректи автоматтык түрдө текшерүү",
+        "dynamicNotification": "Билдирмеде ылдамдыкты көрсөтүү",
+        "hapticFeedback": "Басканда дирилдөө",
+        "actionAtClosing": "Жапкандагы аракет",
+        "autoStart": "Системага киргенде иштетүү",
+        "silentStart": "Кичирейтилген түрдө иштетүү",
+        "ignoreBatteryOptimizations": "Батареяны үнөмдөөнү өчүрүү",
+        "ignoreBatteryOptimizationsMsg": "Телефон PIXELLNET колдонмосун жаппашы үчүн",
+        "memoryLimit": "Эс тутумду чектөө",
+        "memoryLimitMsg": "Эс тутум жетишпей ката чыкса же колдонмо тез-тез токтоп калса, күйгүзүңүз",
+        "debugMode": "Мүчүлүштүктөрдү оңдоо режими",
+        "debugModeMsg": "Бул өзгөртүү күчүнө кириши үчүн колдонмону кайра иштетиңиз",
+        "logLevel": "Журналдын деңгээли",
+        "connectionTestUrl": "Байланышты текшерүү үчүн URL",
+        "urlTestInterval": "URL текшерүү аралыгы",
+        "clashApiPort": "Clash API порту",
+        "useXrayCoreWhenPossible": "Ачкычтын камдык форматы",
+        "useXrayCoreWhenPossibleMsg": "Күйгүзүү үчүн ачкычты кайра кошуңуз."
+      },
+      "routing": {
+        "title": "Багыттоо",
+        "routeRule": {
+          "empty": "Азырынча кошулган эрежелер жок\n\nЖаңы эреже түзүү же даяр эрежелерден тандоо үчүн + баскычын басыңыз",
+          "delete": "Эрежени жок кылуу",
+          "create": "Жаңы эреже түзүү",
+          "options": {
+            "import": {
+              "clipboard": "Эрежелерди алмашуу буферинен импорттоо",
+              "file": "Эрежелерди файлдан импорттоо"
+            },
+            "export": {
+              "clipboard": "Эрежелерди алмашуу буферине көчүрүү",
+              "file": "Эрежелерди файлга сактоо"
+            },
+            "reset": "Эрежелерди демейки абалга кайтаруу"
+          },
+          "rule": {
+            "title": "Эреже",
+            "onlyTunMode": "«Бардык колдонмолор» режиминде гана иштейт",
+            "notAvailabeInThisPlatform": "Бул платформада жеткиликсиз",
+            "canNotBeEmpty": "Бош болбошу керек",
+            "validUrlEx": "https://example.com",
+            "validUrl": "Туура «URL», мисалы\n@:pages.settings.routing.routeRule.rule.validUrlEx",
+            "validProcessNameEx": "Chrome.exe же google chrome же chrome",
+            "validProcessName": "Туура «Процесстин аты», мисалы\n@:pages.settings.routing.routeRule.rule.validProcessNameEx",
+            "validProcessPathEx": "C:\\Pro...\\chrome.exe\n/App.../Google Chrome\n/usr/lib.../chrome",
+            "validProcessPath": "Туура «Процесстин жолу», мисалы\n@:pages.settings.routing.routeRule.rule.validProcessPathEx",
+            "validPortRangeEx": "80 же 1:65000",
+            "validPortRange": "Туура «Порт» же «Порттордун диапазону», мисалы\n@:pages.settings.routing.routeRule.rule.validPortRangeEx",
+            "validIpCidrEx": "8.8.8.8 же 10.0.0.0/24",
+            "validIpCidr": "Туура IP CIDR, мисалы\n@:pages.settings.routing.routeRule.rule.validIpCidrEx",
+            "validDomainEx": "Google.com же dl.google.com",
+            "validDomain": "Туура «Домен», мисалы\n@:pages.settings.routing.routeRule.rule.validDomainEx",
+            "validDomainSuffixEx": ".com же .kg",
+            "validDomainSuffix": "Туура «Домендин суффикси», мисалы\n@:pages.settings.routing.routeRule.rule.validDomainSuffixEx",
+            "tileTitle(map)": {
+              "name": "Аталышы",
+              "outbound": "Дал келгенде багыт",
+              "rule_set": "Эрежелер топтомунун URL дареги",
+              "package_name": "Пакеттердин аттары",
+              "process_name": "Процесстердин аттары",
+              "process_path": "Процесстердин жолдору",
+              "network": "Тармактар",
+              "port_range": "Максаттуу порттор",
+              "source_port_range": "Баштапкы порттор",
+              "protocol": "Протокол",
+              "ip_cidr": "Максаттуу IP CIDR",
+              "source_ip_cidr": "Баштапкы IP CIDR",
+              "domain": "Домен",
+              "domain_suffixe": "Домендин суффикси",
+              "domain_keyword": "Домендеги ачкыч сөз",
+              "domain_regex": "Домен үчүн регулярдуу туюнтма"
+            },
+            "outbound(map)": {
+              "proxy": "PIXELLNET аркылуу",
+              "direct": "Түз",
+              "direct_with_fragment": "Түз, фрагмент менен",
+              "block": "Тыюу салуу"
+            },
+            "network(map)": {
+              "all": "Баары",
+              "tcp": "TCP",
+              "udp": "UDP"
+            },
+            "protocol(map)": {
+              "": "Баары",
+              "tls": "TLS",
+              "http": "HTTP",
+              "quic": "QUIC",
+              "stun": "STUN",
+              "dns": "DNS",
+              "bittorrent": "BitTorrent"
+            }
+          },
+          "genericList": {
+            "addNew": "Жаңы маани кошуу",
+            "update": "Маанини жаңыртуу",
+            "clearList": "Тизмени тазалоо",
+            "clearListMsg": "Бардык элементтер жок кылынды"
+          }
+        },
+        "generalOptions": {
+          "title": "Багыттоонун жалпы параметрлери",
+          "region": "Аймак",
+          "regions": {
+            "ir": "Иран (ir)",
+            "cn": "Кытай (cn)",
+            "ru": "Россия (ru)",
+            "af": "Афганистан (af)",
+            "id": "Индонезия (id)",
+            "tr": "Түркия (tr)",
+            "br": "Бразилия (br)",
+            "other": "Башка"
+          },
+          "balancerStrategy": {
+            "title": "Тең салмактоо стратегиясы",
+            "roundRobin": "Round robin",
+            "consistentHash": "Consistent hash",
+            "stickySession": "Sticky session"
+          },
+          "resolveDestination": "Максаттуу даректи аныктоо",
+          "ipv6Route": "IPv6 багыты",
+          "ipv6Modes": {
+            "disable": "Өчүрүү",
+            "enable": "Күйгүзүү",
+            "prefer": "Артыкчылык менен",
+            "only": "IPv6 гана"
+          },
+          "perAppProxy": {
+            "title": "Колдонмолор үчүн өчүрүү",
+            "hideSysApps": "Системалык колдонмолорду жашыруу",
+            "options": {
+              "import": {
+                "clipboard": "Тандоону алмашуу буферинен импорттоо",
+                "file": "Тандоону файлдан импорттоо",
+                "msg": "Импорт учурдагы тандооңузду алмаштырат. Чын эле улантасызбы?"
+              },
+              "export": {
+                "clipboard": "Тандоону алмашуу буферине көчүрүү",
+                "file": "Тандоону файлга экспорттоо"
+              },
+              "shareToAll": "Баары менен бөлүшүү",
+              "clearAllSelections": "Бардык тандоону тазалоо"
+            },
+            "modes": {
+              "all": "Баары",
+              "proxy": "Белгиленгендер гана",
+              "bypass": "Белгиленгендерден башкасы",
+              "allMsg": "Бардык колдонмолор PIXELLNET аркылуу",
+              "proxyMsg": "PIXELLNET аркылуу — белгиленгендер гана",
+              "bypassMsg": "Белгиленгендер — PIXELLNET аркылуу эмес, түз"
+            },
+            "autoSelection": {
+              "title": "Автотандоо",
+              "performNow": "Азыр аткаруу",
+              "resetToDefault": "Демейки абалга кайтаруу",
+              "autoUpdateInterval": "Автожаңыртуу аралыгы",
+              "toast": {
+                "success": "Колдонмолорду автотандоо ийгиликтүү аяктады",
+                "failure": "Автотандоо катасы",
+                "regionNotFound": "«${region}» аймагы үчүн автотандоо табылган жок",
+                "alreadyInAuto": "Тандооңуз автотандоо тизмесинде мурунтан эле бар"
+              },
+              "dialog": {
+                "title": "Колдонмолорду автотандоо",
+                "msg": "Колдонмолорду автотандоо өчүрүлдү: аймак «${region}» болуп өзгөрдү"
+              }
+            }
+          }
+        },
+        "predefinedRules": {
+          "title": "Даяр эрежелер",
+          "ads": {
+            "name": "Жарнаманы алып салуу",
+            "description": ""
+          },
+          "bypassLan": {
+            "name": "Үй тармагы — түз",
+            "description": ""
+          }
+        }
+      },
+      "dns": {
+        "title": "DNS",
+        "remoteDns": "Алыскы DNS",
+        "remoteDnsDomainStrategy": "Алыскы DNS домен стратегиясы",
+        "directDns": "Чыгуучу сервер үчүн DNS (түз)",
+        "directDnsDomainStrategy": "Чыгуучу домен стратегиясы",
+        "enableFakeDns": "Жасалма DNS күйгүзүү",
+        "domainStrategy": {
+          "auto": "Авто",
+          "preferIpv6": "Алгач IPv6",
+          "preferIpv4": "Алгач IPv4",
+          "ipv4Only": "IPv4 гана",
+          "ipv6Only": "IPv6 гана"
+        }
+      },
+      "inbound": {
+        "title": "Кирүүчү байланыштар",
+        "serviceMode": "Иштөө режими",
+        "serviceModes": {
+          "proxy": "Жергиликтүү порт гана",
+          "systemProxy": "Системалык жөндөөлөр",
+          "tun": "Бардык колдонмолор"
+        },
+        "shortServiceModes": {
+          "proxy": "Жергиликтүү порт",
+          "systemProxy": "Системалык",
+          "tun": "Бардык колдонмолор"
+        },
+        "strictRoute": "Катуу багыттоо",
+        "tunImplementation": "TUN ишке ашырылышы",
+        "tunImplementations": {
+          "mixed": "Аралаш",
+          "system": "Системалык",
+          "gvisor": "gVisor"
+        },
+        "mixedPort": "Аралаш порт",
+        "tproxyPort": "Тунук режимдин порту",
+        "directPort": "Түз порт",
+        "redirectPort": "Кайра багыттоо порту",
+        "lanSharing": "Тармактагы башка түзмөктөргө уруксат",
+        "lanSharingPasswordNotSet": "Сырсөз коюлган эмес",
+        "lanSharingPassword": "Башка түзмөктөр үчүн сырсөз",
+        "copyLink": "Шилтемени көчүрүү",
+        "qrCode": "QR-код",
+        "lanIPError": "Жергиликтүү IP даректи алуу мүмкүн болгон жок"
+      },
+      "tlsTricks": {
+        "title": "TLS ыкмалары",
+        "enable": "Фрагменттөөнү күйгүзүү",
+        "packets": "Фрагменттөө пакеттери",
+        "packetsTlsHello": "TLS Hello",
+        "packets1_1": "1-1",
+        "packets1_2": "1-2",
+        "packets1_3": "1-3",
+        "packets1_4": "1-4",
+        "packets1_5": "1-5",
+        "size": "Фрагменттин өлчөмү",
+        "sleep": "Фрагменттин кечигүүсү",
+        "mixedSniCase": {
+          "enable": "SNI аралаш регистрин күйгүзүү"
+        },
+        "padding": {
+          "enable": "Толуктоону күйгүзүү",
+          "size": "Толуктоонун өлчөмү"
+        }
+      },
+      "chain": {
+        "title": "Чынжыр",
+        "subtitle": "Кошумча коргоо жана камдык жол",
+        "finalIp": "Акыркы IP",
+        "levels": {
+          "app": {
+            "title": "Колдонмо",
+            "msg": "Колдонмолоруңуздун трафиги ушул жерден жолго чыгат"
+          },
+          "extraSecurity": {
+            "title": "Кошумча коопсуздук",
+            "msg": "Негизги профилиңиз ишенимсиз болсо да, маалыматтарыңыздын купуялыгын сактоо үчүн кошумча коргоо кошот"
+          },
+          "mainProfile": {
+            "title": "Негизги профиль"
+          },
+          "unblocker": {
+            "title": "Камдык жол",
+            "msg": "Негизги канал жооп бербесе, байланыш камдык жол менен өтөт"
+          },
+          "filtering": {
+            "title": "Чыпкалоо",
+            "msg": "Акыркы кадам: трафик интернетке чыгат"
+          }
+        },
+        "warp": {
+          "missingConfig": "WARP конфигурациясы жок",
+          "licenseKey": "Лицензиялык ачкыч",
+          "cleanIp": "Таза IP",
+          "port": "Порт",
+          "noise": {
+            "count": "Ызы-чуунун саны",
+            "mode": "Ызы-чуу режими",
+            "size": "Ызы-чуунун өлчөмү",
+            "delay": "Ызы-чуунун кечигүүсү"
+          }
+        },
+        "psiphon": {
+          "selectServerRegion": "Сервердин аймагын тандаңыз",
+          "regions": {
+            "auto": "@:common.auto",
+            "at": "Австрия (at)",
+            "au": "Австралия (au)",
+            "be": "Бельгия (be)",
+            "bg": "Болгария (bg)",
+            "ca": "Канада (ca)",
+            "ch": "Швейцария (ch)",
+            "cz": "Чехия (cz)",
+            "de": "Германия (de)",
+            "dk": "Дания (dk)",
+            "ee": "Эстония (ee)",
+            "es": "Испания (es)",
+            "fi": "Финляндия (fi)",
+            "fr": "Франция (fr)",
+            "gb": "Улуу Британия (gb)",
+            "hr": "Хорватия (hr)",
+            "hu": "Венгрия (hu)",
+            "ie": "Ирландия (ie)",
+            "in": "Индия (in)",
+            "it": "Италия (it)",
+            "jp": "Жапония (jp)",
+            "lv": "Латвия (lv)",
+            "nl": "Нидерланддар (nl)",
+            "no": "Норвегия (no)",
+            "pl": "Польша (pl)",
+            "pt": "Португалия (pt)",
+            "ro": "Румыния (ro)",
+            "rs": "Сербия (rs)",
+            "se": "Швеция (se)",
+            "sg": "Сингапур (sg)",
+            "sk": "Словакия (sk)",
+            "us": "АКШ (us)"
+          }
+        },
+        "profile": {
+          "selectProfile": "Профилди тандаңыз",
+          "conduitPairingId": "Conduit жупташтыруу ID"
+        }
+      }
+    }
+  },
+  "components": {
+    "stats": {
+      "connection": "Байланыш",
+      "traffic": "Трафик",
+      "trafficLive": "Учурдагы трафик",
+      "trafficTotal": "Жалпы трафик",
+      "uplink": "Жөнөтүү",
+      "downlink": "Кабыл алуу",
+      "speed": "Ылдамдык",
+      "totalTransferred": "Жалпы өткөрүлгөн"
+    },
+    "subscriptionInfo": {
+      "upload": "Жөнөтүлдү",
+      "download": "Алынды",
+      "total": "Бардык трафик",
+      "expireDate": "Аяктоо күнү",
+      "expired": "Мөөнөтү бүттү",
+      "noTraffic": "Квота түгөндү",
+      "remainingTime": "Калган убакыт",
+      "remainingDuration": "${duration} күн калды",
+      "remainingDurationNew": "${duration} күн",
+      "remainingTrafficSemanticLabel": "Трафик: ${total} ичинен ${consumed} колдонулду",
+      "remainingTraffic": "Калган трафик",
+      "remainingUsage": "Калды",
+      "profileSite": "Провайдер",
+      "profileSupport": "Колдоо"
+    }
+  },
+  "dialogs": {
+    "sortProfiles": {
+      "title": "Иреттөө тартиби",
+      "sort": {
+        "name": "Алфавит боюнча",
+        "lastUpdate": "Акыркы жаңыртуу боюнча"
+      }
+    },
+    "warpLicense": {
+      "title": "Cloudflare WARP макулдашуусу",
+      "description(rich)": "Бул параметрди күйгүзүү менен сиз кошумча кызмат көрсөтүүчүнүн ${tos(Тейлөө шарттарына)} жана ${privacy(Купуялык саясатына)} макул болосуз."
+    },
+    "psiphonLicense": {
+      "title": "Кошумча кызматтын лицензиясы",
+      "description(rich)": "Бул параметрди колдонуу менен сиз кошумча кызмат көрсөтүүчүнүн ${tos(Тейлөө шарттарына)} макул болосуз жана ${privacy(Купуялык саясаты менен)} таанышканыңызды ырастайсыз. Улантуудан мурун аларды кунт коюп окуп чыгыңыз."
+    },
+    "newVersion": {
+      "title": "Жаңыртуу бар",
+      "msg": "@:common.appTitle колдонмосунун жаңы версиясы чыкты. Азыр жаңыртасызбы?",
+      "currentVersion": "Учурдагы версия: ",
+      "newVersion": "Жаңы версия: ",
+      "updateNow": "Азыр жаңыртуу"
+    },
+    "confirmation": {
+      "settings": {
+        "import": {
+          "msg": "Бул конфигурациянын бардык параметрлерин берилген маанилер менен кайра жазат. Чын эле улантасызбы?"
+        }
+      },
+      "profile": {
+        "delete": {
+          "title": "Профилди жок кылуу",
+          "msg": "Чын эле бул профилди биротоло жок кыласызбы?"
+        }
+      },
+      "perAppProxy": {
+        "shareOnGithub": {
+          "title": "Автотандоону жакшыртуу",
+          "msg": "Тандалган колдонмолор менен бөлүшүп, сиз «автотандоо» тизмесин толуктоого жардам бересиз"
+        },
+        "import": {
+          "msg": "Бул колдонмолордун учурдагы тандоосун алмаштырат. Улантасызбы?"
+        }
+      },
+      "routeRule": {
+        "delete": {
+          "title": "Эрежени жок кылуу",
+          "msg": "Чын эле «$rulename» эрежесин жок кыласызбы?"
+        }
+      },
+      "addProfileByDeepLinkWarning": {
+        "title": "Профиль кошосузбу?",
+        "message": "«${host}» дарегинен келген тышкы шилтеме жаңы профиль кошууну сурап жатат. Аны импорттойсузбу?"
+      },
+      "importRouteRuleByDeepLinkWarning": {
+        "title": "Багыттоо эрежесин импорттойсузбу?",
+        "message": "Ишенимсиз булактардан багыттоо эрежелерин импорттоо коопсуздукка коркунуч келтириши мүмкүн\nБул шилтемеге ишенсеңиз гана улантыңыз"
+      }
+    },
+    "experimentalNotice": {
+      "title": "Сыноодогу функциялар колдонулууда",
+      "msg": "Сиз байланыштын сапатына таасир этип, күтүлбөгөн каталарды жаратышы мүмкүн болгон айрым сыноодогу функцияларды күйгүздүңүз. Бул параметрлерди жөндөөлөр барагында каалаган убакта өзгөртүп же демейки абалга кайтара аласыз.",
+      "disable": "Мындан ары көрсөтпөө"
+    },
+    "noActiveProfile": {
+      "title": "Ачкычты кантип кошуу керек",
+      "msg": "Кирүү ачкычы — бул шилтеме же PXN-XXXX-XXXX түрүндөгү код. Аны буферден чаптаңыз, QR кодду скандаңыз же кол менен киргизиңиз. Ачкыч жок болсо, колдоо кызматына жазыңыз.",
+      "helpBtn": {
+        "label": "Колдоо кызматына жазуу",
+        "url": "https://t.me/pixellnet_bot?start=support"
+      }
+    },
+    "unknownDomainsWarning": {
+      "title": "Тышкы шилтеме тууралуу эскертүү",
+      "youAreAboutToVisit": "Сиз бул сайтка өткөлү жатасыз:",
+      "thisWebsiteIsNotInOurTrustedList": "Бул сайт биздин ишенимдүү сайттар тизмесинде жок. Этият болуңуз."
+    },
+    "proxyInfo": {
+      "fullTag": "Толук тег:",
+      "type": "Түрү:",
+      "testTime": "Текшерүү убактысы:",
+      "testDelay": "Текшерүүдөгү кечигүү:",
+      "isSelected": "Тандалган:",
+      "isGroup": "Бул топ",
+      "isSecure": "Корголгон:",
+      "port": "Порт:",
+      "host": "Хост:",
+      "ip": "IP:",
+      "countryCode": "Өлкөнүн коду:",
+      "region": "Аймак:",
+      "city": "Шаар:",
+      "asn": "ASN:",
+      "organization": "Уюм:",
+      "location": "Жайгашкан жери:",
+      "postalCode": "Почта индекси:",
+      "download": "Алынды:",
+      "upload": "Жөнөтүлдү:"
+    },
+    "windowClosing": {
+      "askEachTime": "Ар бир жолу суроо",
+      "alertMessage": "Колдонмону жашырасызбы же андан чыгасызбы?",
+      "remember": "Тандоомду эстеп калуу"
     }
   },
   "connection": {
+    "tapToConnect": "Кошулуу үчүн басыңыз",
     "connect": "Кошулуу",
-    "connected": "Кошулду",
     "connecting": "Кошулууда…",
+    "connected": "Кошулду",
     "disconnect": "Ажыратуу",
-    "tapToConnect": "Кошулуу үчүн басыңыз"
+    "disconnecting": "Ажыратылууда…",
+    "reconnect": "Кайра кошулууда…",
+    "reconnectMsg": "Жөндөөлөр өзгөрдү — байланышты жаңыртып жатабыз…"
+  },
+  "errors": {
+    "unexpected": "Күтүлбөгөн ката",
+    "connection": {
+      "unexpected": "Кошулууда күтүлбөгөн ката",
+      "timeout": "Кошулуу убактысы бүттү",
+      "badResponse": "Туура эмес жооп",
+      "connectionError": "Кошулуу катасы",
+      "badCertificate": "Жараксыз сертификат"
+    },
+    "profiles": {
+      "unexpected": "Күтүлбөгөн ката",
+      "notFound": "Профиль табылган жок",
+      "invalidConfig": "Туура эмес конфигурация",
+      "invalidUrl": "Туура эмес URL",
+      "canceledByUser": "Колдонуучу жокко чыгарды"
+    },
+    "connectivity": {
+      "unexpected": "Күтүлбөгөн мүчүлүштүк",
+      "missingVpnPermission": "Кошулууга уруксат керек",
+      "missingNotificationPermission": "Билдирмелерге уруксат жок",
+      "core": "Өзөк катасы"
+    },
+    "singbox": {
+      "serviceNotRunning": "Кызмат иштетилген эмес",
+      "missingPrivilege": "Укуктар жок",
+      "missingPrivilegeMsg": "Администратордун укуктары керек. PIXELLNET колдонмосун жаап, кайра ачыңыз — Windows уруксат сурайт.",
+      "invalidConfigOptions": "Конфигурациянын туура эмес параметрлери",
+      "invalidConfig": "Туура эмес конфигурация"
+    },
+    "warp": {
+      "missingLicense": "Warp лицензиясы жок",
+      "missingLicenseMsg": "Тандалган профиль WARP функциясын колдонот; бул функцияны колдонуу үчүн WARP лицензиясын кабыл алуу керек"
+    },
+    "psiphon": {
+      "missingLicense": "Кошумча кызматтын лицензиясын кабыл алуу мүмкүн болгон жок",
+      "missingLicenseMsg": "Тандалган профиль кошумча кызматты колдонот; ал үчүн лицензияны кабыл алуу керек"
+    }
+  },
+  "ui": {
+    "share": {
+      "appText": "PIXELLNET — бир баскыч менен туруктуу байланыш. Жакында — ЖИ-жардамчы жана кеңейтүүлөр.\n\nAndroid жана Windows үчүн жүктөп алуу:\n$url",
+      "inviteText": "Мен PIXELLNET колдоном — бир баскыч менен туруктуу байланыш. Менин шилтемем аркылуу — 7 күн акысыз: $link",
+      "whatToSend": "Эмне жөнөтөсүз?",
+      "chooseWhat": "Досуңузга эмне керек экенин тандаңыз",
+      "keyForOtherApp": "Башка колдонмо үчүн ачкыч",
+      "keyForOtherAppHint": "Досуңузда Happ же V2rayNG орнотулган болсо, ачкычты гана жөнөтүңүз",
+      "keyForApp": "PIXELLNET үчүн ачкыч",
+      "keyForAppHint": "Алуучунун PIXELLNET колдонмосунда дароо ачылат",
+      "inviteTitle": "Досту чакырып, бонус алуу",
+      "inviteSubtitle": "Ар бир дос үчүн — экөөңүзгө тең 7 күн акысыз",
+      "otherAppSheetSubtitle": "Алуучу шилтемени өз колдонмосунда ачат",
+      "otherAppPreamble": "Мына, кирүү ачкычы. Кошулуу үчүн шилтемени өз колдонмоңузга чаптаңыз:",
+      "keyForAppSheetSubtitle": "PIXELLNET колдонмосунда дароо ачылат",
+      "appPreamble": "PIXELLNET колдонмосун жүктөп алыңыз (pixellnet.com) жана бул шилтемени ачыңыз — бардык каналдар автоматтык түрдө кошулат:",
+      "recommended": "Сунуштайбыз",
+      "sendViaMessenger": "Мессенджер аркылуу жөнөтүү",
+      "showQr": "QR кодду көрсөтүү",
+      "linkCopied": "Шилтеме көчүрүлдү",
+      "copyLink": "Шилтемени көчүрүү",
+      "linkValidUntil": "Шилтеме жазылууңуз бүткөнгө чейин жарактуу",
+      "referralTitle": "7 күн белек кылыңыз — 7 күн алыңыз",
+      "referralText": "Досуңуз сиздин шилтемеңиз аркылуу өтүп, 7 күн акысыз алат. Ал жазылууну төлөгөн замат сиз да 7 күн акысыз аласыз.",
+      "yourCode": "Сиздин кодуңуз:",
+      "bonusBadge": "+$days күн",
+      "referralCounts": "Ырасталды: $confirmed · төлөм күтүлүүдө: $pending",
+      "referralSubject": "PIXELLNET — 7 күн акысыз",
+      "sendInvite": "Чакыруу жөнөтүү",
+      "inviteLinkCopied": "Чакыруу шилтемеси көчүрүлдү"
+    },
+    "about": {
+      "collectDiagnostics": "Диагностиканы чогултуу",
+      "collectDiagnosticsHint": "Түзмөк жана интернет тууралуу маалымат + акыркы окуялар — алмашуу буферине",
+      "diagnosticsCopied": "Диагностика буферде ($count белги)",
+      "shareApp": "Колдонмо менен бөлүшүү",
+      "shareAppHint": "Досторго жүктөп алуу шилтемесин жөнөтүү"
+    },
+    "welcome": {
+      "title": "Кош келиңиз",
+      "subtitle": "Чет элдик кызматтарга туруктуу жетүү",
+      "trialTitle": "7 күн акысыз сынап көрүү",
+      "trialSubtitle": "Картасыз, каттоосуз",
+      "haveKey": "Менде ачкыч бар",
+      "clipboardFound": "Алмашуу буферинен шилтеме табылды",
+      "enterKeyHint": "Ачкычты же жазылуу шилтемесин киргизиңиз",
+      "questions": "Суроолоруңуз барбы? Жазыңыз: "
+    },
+    "trial": {
+      "expiredTitle": "Сыноо мөөнөтү буга чейин\nколдонулган",
+      "expiredText": "Бул түзмөккө биз буга чейин 7 күн бергенбиз.\nУлантуу үчүн акылуу ачкычты киргизиңиз.",
+      "enterKey": "Ачкычты киргизүү",
+      "renew": "Мөөнөттү узартуу",
+      "errServer": "Сервер $code кодун кайтарды. Кийинчерээк аракет кылыңыз.",
+      "errEmpty": "Сервер бош жооп берди",
+      "errImport": "Профилди кошуу мүмкүн болгон жок: $failure",
+      "preparing": "Сыноо мөөнөтүн даярдап жатабыз",
+      "oneSecond": "Бир секунд",
+      "createFailed": "Сыноо мөөнөтүн ачуу мүмкүн болгон жок",
+      "checkInternet": "Интернетти текшерип, кайра аракет кылыңыз",
+      "retry": "Кайталоо"
+    },
+    "perApp": {
+      "offTitle": "Бардык колдонмолор PIXELLNET аркылуу",
+      "offHint": "PIXELLNET бардык программалар үчүн иштейт. Башкача тандоо үчүн экрандын жогору жагындагы режимди басыңыз.",
+      "includeTitle": "PIXELLNET аркылуу — белгиленгендер гана",
+      "includeHint": "PIXELLNET белгиленген ✓ колдонмолор үчүн гана иштейт. Калгандары интернетке түз чыгат.",
+      "excludeTitle": "Белгиленгендерден башкасынын баары PIXELLNET аркылуу",
+      "excludeHint": "Белгиленген ✓ колдонмолор интернетке PIXELLNET аркылуу эмес, түз чыгат. Банктар, Госуслуги жана Ozon үчүн ыңгайлуу — алар түз жакшыраак иштейт."
+    },
+    "profile": {
+      "share": "Бөлүшүү…",
+      "refreshDone": "Каналдардын тизмеси жаңыртылды",
+      "refreshWithErrors": "$total ичинен $done жаңыртылды, каталар: $errors",
+      "refreshPartial": "$total ичинен $done жаңыртылды",
+      "channelsCount": "Каналдар ($count)",
+      "searching": "Каналдар изделүүдө…",
+      "connectToSee": "Бардык каналдарды көрүү үчүн кошулуңуз"
+    },
+    "general": {
+      "autoStartOnFailed": "Автоиштетүүнү күйгүзүү мүмкүн болгон жок",
+      "autoStartOffFailed": "Автоиштетүүнү өчүрүү мүмкүн болгон жок",
+      "logSize": "Журналдын өлчөмү",
+      "logSizeHint": "$mb МБ — эски жазуулар өчүрүлөт",
+      "mb": "$mb МБ",
+      "updateHow": "Кантип жаңыртуу",
+      "modeAuto": "Автоматтык",
+      "modeAsk": "Суроо",
+      "modeManual": "Кол менен",
+      "updateWhen": "Качан текшерүү",
+      "hourNight": "Түнкүсүн",
+      "hourMorning": "Эртең менен",
+      "hourDay": "Күндүз",
+      "hourEvening": "Кечинде",
+      "hourAny": "Каалаган убакта",
+      "checkNow": "Азыр текшерүү",
+      "checkNowHint": "Күтпөйбүз — жаңыртууну дал азыр издейбиз",
+      "upToDate": "Сизде эң акыркы версия — жаңысы азырынча жок",
+      "newVersion": "Жаңы версия бар · $version",
+      "refreshHow": "Каналдарды кантип жаңыртуу",
+      "refreshWhen": "Каналдарды качан жаңыртуу",
+      "refreshNow": "Каналдарды азыр жаңыртуу",
+      "refreshNowHint": "Серверлердин жаңы тизмесин жүктөп алуу",
+      "listCurrent": "Тизме актуалдуу — өзгөрүү жок",
+      "updateModeAuto": "Сурабай эле жүктөп алып, орнотот",
+      "updateModeAsk": "Сурайбыз — өзүңүз чечесиз",
+      "updateModeManual": "Өзүңүз басканда гана",
+      "hourLabelNight": "Түнкүсүн (болжол менен 3:00) — сиз уктап жатканда",
+      "hourLabelMorning": "Эртең менен (болжол менен 7:00)",
+      "hourLabelDay": "Күндүз (болжол менен 14:00)",
+      "hourLabelEvening": "Кечинде (болжол менен 21:00)",
+      "hourLabelAny": "Күндүн каалаган убагында",
+      "hourAt": "Саат $hour:00",
+      "refreshModeAuto": "Серверлердин тизмесин сурабай эле жаңыртат"
+    },
+    "guard": {
+      "xiaomiTitle": "Активдүүлүктү көзөмөлдөө",
+      "bgTitle": "Фондо иштөө",
+      "xiaomiHint": "«Чектөөсүз» дегенди тандаңыз",
+      "allowHint": "Телефондун терезесинде «Уруксат берүү» баскычын басыңыз",
+      "open": "Ачуу",
+      "allow": "Уруксат берүү",
+      "autostartTitle": "Автоиштетүү",
+      "autostartHint": "PIXELLNET колдонмосун табыңыз (издөөнү колдонсоңуз болот) жана которгучту күйгүзүңүз",
+      "launchTitle": "Колдонмолорду иштетүү",
+      "launchHint": "PIXELLNET үчүн «Автоматтык түрдө» дегенди өчүрүп, бардык которгучтарды күйгүзүңүз",
+      "switchHint": "PIXELLNET которгучун күйгүзүңүз",
+      "allowBgHint": "PIXELLNET колдонмосуна фондо иштөөгө уруксат бериңиз",
+      "banner": "PIXELLNET түнкүсүн өчүп калышы мүмкүн",
+      "setup": "Жөндөө",
+      "remindTomorrow": "Эртең эскертүү",
+      "sheetTitle": "PIXELLNET өчүп калбашы үчүн",
+      "sheetDone": "Даяр. Телефон мындан ары батареяны үнөмдөө үчүн PIXELLNET колдонмосун жаппайт.",
+      "sheetText": "Телефон батареяны үнөмдөп, PIXELLNET колдонмосун түнкүсүн жаап салышы мүмкүн — эртең менен коргоо өчүк болуп калат. Фондо иштөөгө уруксат бериңиз, бул бир мүнөт гана алат.",
+      "done": "Даяр",
+      "close": "Жабуу"
+    },
+    "dev": {
+      "reportCopied": "Отчет көчүрүлдү — колдоо чатына чаптаңыз",
+      "error": "Ката: $error",
+      "deviceCopied": "Түзмөк маалыматы көчүрүлдү",
+      "title": "Иштеп чыгуучу үчүн",
+      "about": "Колдонмо жөнүндө",
+      "version": "Версия",
+      "package": "Пакет",
+      "platform": "Платформа",
+      "diagnostics": "Диагностика",
+      "connectionLog": "Байланыш журналы",
+      "collecting": "Чогултулууда…",
+      "copyReport": "Отчетту көчүрүү",
+      "copyReportHint": "Система, версия, провайдер, акыркы окуялар",
+      "shareReport": "Отчет менен бөлүшүү",
+      "copyDevice": "Түзмөк маалыматын көчүрүү",
+      "other": "Башкалар",
+      "aboutProgram": "Программа жөнүндө"
+    },
+    "common": {
+      "close": "Жабуу",
+      "update": "Жаңыртуу",
+      "cancel": "Жокко чыгаруу",
+      "hide": "Жашыруу",
+      "copied": "Көчүрүлдү",
+      "allow": "Уруксат берүү",
+      "delete": "Жок кылуу",
+      "add": "Кошуу",
+      "notNow": "Азыр эмес",
+      "ms": "$ms мс"
+    },
+    "changelog": {
+      "whatsNew": "$version версиясындагы жаңылыктар",
+      "tellMain": "Эң негизгисин айтабыз",
+      "sectionNew": "Жаңы",
+      "sectionFixed": "Оңдолду",
+      "sectionImproved": "Жакшыртылды",
+      "fallback": "Көптөгөн майда жакшыртуулар жана туруктуулук."
+    },
+    "update": {
+      "available": "Жаңыртуу бар",
+      "version": "$version версиясы",
+      "connecting": "Серверге кошулуп жатабыз...",
+      "downloaded": "$percent% жүктөлдү",
+      "openSettings": "Жөндөөлөрдү ачуу",
+      "downloading": "Жүктөлүүдө…",
+      "again": "Кайталоо",
+      "allowInstall": "Орнотууга уруксат бериңиз → кайра келиңиз → Кайталоо",
+      "permissionNeeded": "Android жөндөөлөрүндө бул булактан колдонмо орнотууга уруксат бериңиз",
+      "hintXiaomi": "MIUI/HyperOS мындай деп көрсөтөт: «Колдонмодо коркунуч бар». «Баары бир орнотуу» → «Даяр» баскычтарын басыңыз.",
+      "hintHuawei": "EMUI орнотууну ырастоону сурайт. Бардык суроолордо «Уруксат берүү» дегенди тандаңыз.",
+      "hintOppo": "ColorOS/PurityScan аны «коркунуч» деп белгилеши мүмкүн. «Баары бир орнотуу» баскычын басыңыз.",
+      "noCell": "Операторуңуздун мунарасы азыр бул аймакта интернет таратпай жаткандай. Маселе колдонмодо эмес — кийинчерээк аракет кылыңыз же Wi-Fi тармагына кошулуңуз.",
+      "noData": "Сигнал бар, бирок интернет жок. Оператордо үзгүлтүк болушу мүмкүн — Wi-Fi аркылуу аракет кылыңыз.",
+      "errChecksum": "Жаңыртуу файлы бузулган (текшерүү суммасы дал келген жок). Кайра аракет кылыңыз.",
+      "errSizeMismatch": "$total ичинен $actual байт жүктөлдү. Файл бузулган, кайра аракет кылыңыз.",
+      "errTooSmall": "Жүктөлгөн файл өтө кичинекей ($size байт). Интернетти текшериңиз.",
+      "errInstaller": "Орноткучту ачуу мүмкүн болгон жок: $message",
+      "errTimeout": "Жаңыртуу серверине кошулуу убактысы бүттү",
+      "errOtherFile": "Булак башка файл берип жатат ($expected ордуна $length байт)",
+      "errPartial": "$total ичинен $actual байт жүктөлдү",
+      "errUnpack": "Zip архивин ачуу мүмкүн болгон жок: $message"
+    },
+    "country": {
+      "de": "Германия",
+      "nl": "Нидерланддар",
+      "lt": "Литва",
+      "fi": "Финляндия",
+      "fr": "Франция",
+      "se": "Швеция",
+      "us": "АКШ",
+      "gb": "Улуу Британия",
+      "ch": "Швейцария",
+      "at": "Австрия",
+      "pl": "Польша",
+      "cz": "Чехия",
+      "ru": "Россия",
+      "ua": "Украина",
+      "by": "Беларусь",
+      "kz": "Казакстан",
+      "tr": "Түркия"
+    },
+    "units": {
+      "b": "$n Б",
+      "kb": "$n КБ",
+      "mb": "$n МБ",
+      "gb": "$n ГБ",
+      "bps": "$n Б/с",
+      "kbps": "$n КБ/с",
+      "mbps": "$n МБ/с"
+    },
+    "home": {
+      "menu": "Меню",
+      "logs": "Журнал",
+      "bgHint": "Телефон PIXELLNET колдонмосун жаппашы үчүн",
+      "shareHint": "Досторго шилтеме жөнөтүү",
+      "otherVersions": "Башка версияларды жүктөп алуу",
+      "otherVersionsHint": "Windows · эски версиялар",
+      "refreshAskTitle": "Каналдардын тизмесин жаңыртасызбы?",
+      "refreshAskText": "Жаңы каналдар пайда болду. Азыр жаңыртасызбы?",
+      "auto": "Авто",
+      "modeTitle": "Иштөө режими",
+      "modeRecommended": "Сунушталат — бардык колдонмолор менен иштейт",
+      "modeSystemHint": "HTTP/HTTPS гана, Node.js жана Docker иштебей калат",
+      "modeProxyHint": "Тажрыйбалуу колдонуучулар үчүн — SOCKS5 порту",
+      "serverTitle": "Серверди тандоо",
+      "refreshList": "Тизмени жаңыртуу",
+      "checkPing": "Пингди текшерүү",
+      "noServers": "Серверлер жок — жазылуу ачкычын кошуңуз.",
+      "connectToSeeServers": "Серверлердин тизмесин көрүү үчүн кошулуңуз",
+      "loadError": "Жүктөө катасы: $error",
+      "today": "Бүгүн",
+      "speed": "Ылдамдык",
+      "expiry": "Мөөнөт",
+      "expired": "мөөнөтү бүттү",
+      "until": "$date чейин · $days",
+      "days(plural, param=n)": {
+        "one": "$n күн",
+        "other": "$n күн"
+      },
+      "monthsShort": [
+        "янв.",
+        "фев.",
+        "мар.",
+        "апр.",
+        "май",
+        "июн.",
+        "июл.",
+        "авг.",
+        "сен.",
+        "окт.",
+        "ноя.",
+        "дек."
+      ],
+      "keyExpired": "Ачкыч $masked · мөөнөтү бүттү",
+      "keyExpiresIn": "Ачкыч $masked: $days калды ($date)",
+      "renewTitle": "Жазылууну узартуу",
+      "renew": "Узартуу",
+      "renewHint": "@pixellnet_bot колдоо чаты ачылат",
+      "subscriptionN": "Жазылуу $n",
+      "keys": "Ачкычтар",
+      "pasteFromClipboard": "Буферден чаптоо",
+      "clipboardNoKey": "Буферде ачкыч жок",
+      "added": "Тизмеге кошулду",
+      "addSubscription": "Жазылуу кошуу",
+      "activeKey": "Активдүү ачкыч · $name",
+      "copy": "Көчүрүү",
+      "share": "Бөлүшүү",
+      "qrCode": "QR-код",
+      "scanWithOther": "Башка түзмөк менен скандаңыз",
+      "validUntil": "$date чейин жарактуу",
+      "deleteLast": "Жок кылгандан кийин колдонмо жаңы ачкыч сурайт. Жок кыласызбы?",
+      "deleteActive": "«$name» активдүү болот. Бул аракетти кайтаруу мүмкүн эмес.",
+      "deleteTitle": "«$name» жок кылынсынбы?",
+      "deleted": "Жазылуу жок кылынды",
+      "undo": "Кайтаруу",
+      "clipboardEmpty": "Буфер бош",
+      "enterManually": "Кол менен киргизүү",
+      "pasteSupportSettings": "Колдоо кызматынан келген жөндөөлөрдү чаптоо",
+      "pasteSupportSettingsHint": "Эгер колдоо кызматы жөндөөлөрдү текст менен жөнөткөн болсо",
+      "scanQrCode": "QR кодду скандоо",
+      "scanQr": "QR скандоо",
+      "flash": "Жарык",
+      "switchCamera": "Камераны алмаштыруу",
+      "cameraDenied": "Камерага уруксат жок. Android жөндөөлөрүнөн уруксат бериңиз.",
+      "cameraUnsupported": "Бул түзмөктө камера колдоого алынбайт.",
+      "cameraError": "Камеранын катасы: $code",
+      "pointCamera": "Камераны жазылуунун QR кодуна багыттаңыз",
+      "newSubscription": "Жаңы жазылуу",
+      "keyOrUrl": "Ачкыч же жазылуунун URL дареги",
+      "activate": "Активдештирүү",
+      "supportSettingsTitle": "Колдоо кызматынын жөндөөлөрү",
+      "supportSettingsText": "Колдоо кызматы жөнөткөн жөндөөлөрдүн текстин толугу менен чаптаңыз.",
+      "hideFor3Days": "3 күнгө жашыруу",
+      "updatedTo": "$version версиясына жаңыртылды",
+      "whatsNew": "Жаңылыктар →",
+      "permRequesting": "Кошулууга уруксат сурап жатабыз...",
+      "permNeeded": "Кошулууга уруксат керек",
+      "permTap": "Уруксат берип, кайра кошулуу үчүн басыңыз"
+    }
   }
 }
