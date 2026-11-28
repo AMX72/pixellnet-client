@@ -1,11 +1,107 @@
 {
+  "common": {
+    "appTitle": "PIXELLNET",
+    "start": "Başla",
+    "version": "Versiya",
+    "ok": "OK",
+    "cancel": "Ləğv et",
+    "kContinue": "Davam et",
+    "showMore": "Daha çox göstər",
+    "showLess": "Daha az göstər",
+    "filter": "Filtr",
+    "all": "Hamısı",
+    "pause": "Fasilə",
+    "resume": "Davam etdir",
+    "clear": "Təmizlə",
+    "close": "Bağla",
+    "auto": "Avto",
+    "manually": "Əl ilə",
+    "name": "Ad",
+    "url": "URL",
+    "add": "Əlavə et",
+    "clipboard": "Mübadilə buferi",
+    "addToClipboard": "Mübadilə buferinə əlavə et",
+    "scanQr": "QR kodu skan et",
+    "free": "Pulsuz",
+    "warp": "WARP",
+    "fragment": "Fraqment",
+    "help": "Kömək",
+    "save": "Yadda saxla",
+    "update": "Yenilə",
+    "share": "Paylaş",
+    "edit": "Dəyişdir",
+    "delete": "Sil",
+    "discard": "İmtina et",
+    "import": "İdxal",
+    "export": "İxrac",
+    "later": "Sonra",
+    "ignore": "Nəzərə alma",
+    "quit": "Çıxış",
+    "notSet": "Təyin edilməyib",
+    "hide": "Gizlət",
+    "exit": "Çıx",
+    "reset": "Sıfırla",
+    "done": "Hazırdır",
+    "decline": "Rədd et",
+    "agree": "Razıyam",
+    "empty": "Boşdur",
+    "unknown": "Naməlum",
+    "hidden": "Gizli",
+    "timeout": "Vaxt bitdi",
+    "sort": "Sırala",
+    "dashboard": "İdarəetmə paneli",
+    "disable": "Söndür",
+    "psiphon": "Əlavə xidmət 2",
+    "profile": "Profil",
+    "configuration": "Konfiqurasiya",
+    "file": "Fayl",
+    "interval": {
+      "day": {
+        "one": "$n gün",
+        "other": "$n gün"
+      },
+      "hour": {
+        "one": "$n saat",
+        "other": "$n saat"
+      }
+    },
+    "msg": {
+      "permission": {
+        "denied": "İcazə verilmədi"
+      },
+      "export": {
+        "clipboard": {
+          "success": "Mübadilə buferinə əlavə edildi",
+          "failure": "Mübadilə buferinə kopyalamaq alınmadı",
+          "contentTooLarge": "Məzmun çox böyükdür. Fayla ixrac edin"
+        },
+        "file": {
+          "success": "JSON faylı uğurla yaradıldı",
+          "failure": "Fayl yaratmaq alınmadı"
+        }
+      },
+      "import": {
+        "confirm": "İdxalı təsdiqlə",
+        "success": "Uğurla idxal edildi",
+        "failure": "İdxal etmək alınmadı"
+      },
+      "autoSave": {
+        "success": "Dəyişikliklər avtomatik yadda saxlanıldı"
+      }
+    }
+  },
+  "intro": {
+    "banner": "Bir düyməylə sabit bağlantı",
+    "termsAndPolicyCaution(rich)": "Davam etməklə siz ${tap(@:pages.about.termsAndConditions)} ilə razılaşırsınız",
+    "info(rich)": "PIXELLNET komandası tərəfindən yaradılıb - ${tap_source(Açıq mənbə kodu)} (${tap_license(Lisenziya)})"
+  },
   "pages": {
     "home": {
       "title": "Ana səhifə",
-      "server": "Server",
-      "protocol": "Protokol",
       "mode": "Rejim",
-      "vpnTun": "VPN (TUN)",
+      "channelWorking": "İşləyir",
+      "channelNotResponding": "Cavab vermir",
+      "channelChecking": "Bağlantı yoxlanılır…",
       "key": "Açar",
       "autoConnect": "Başladıqda avtomatik qoşulma",
       "language": "Dil",
@@ -15,18 +111,949 @@
       "cancel": "Ləğv et",
       "support": "Dəstək",
       "languageTitle": "İnterfeys dili",
-      "copied": "Kopyalandı",
-      "serverSoon": "Serverlər siyahısı — tezliklə",
-      "protocolSoon": "Protokol seçimi — tezliklə",
-      "modeSoon": "VPN (TUN) · Sistem proksi — tezliklə",
-      "developerSoon": "Loglar, DNS, MTU, ixrac — tezliklə"
+      "copied": "Kopyalandı"
+    },
+    "proxies": {
+      "title": "Kanallar",
+      "sort": "Kanalları sırala",
+      "testDelay": "Gecikməni yoxla",
+      "empty": "Hələ kanal yoxdur",
+      "activeProxy": "Cari kanal",
+      "unknownIp": "Naməlum IP",
+      "sortOptions": {
+        "unsorted": "Standart",
+        "name": "Əlifba sırası ilə",
+        "delay": "Gecikməyə görə",
+        "usage": "İstifadəyə görə"
+      },
+      "ipInfo": {
+        "address": "IP ünvanı",
+        "country": "Ölkə",
+        "organization": "Təşkilat"
+      },
+      "delay": {
+        "result": "Gecikmə: ${delay} ms",
+        "timeout": "Gecikmə testinin vaxtı bitdi",
+        "testing": "Gecikmə: yoxlanılır..."
+      }
+    },
+    "profiles": {
+      "title": "Açarlar",
+      "add": "Açar əlavə et",
+      "update": "Açarı yenilə",
+      "viewAllProfiles": "Bütün profillərə bax",
+      "activeProfileName": "Aktiv profilin adı: «${name}».",
+      "nonActiveProfileName": "«${name}» profilini aktiv profil kimi seç",
+      "freeSubNotFound": "Pulsuz abunəlik tapılmadı",
+      "freeSubNotFoundForRegion": "«${region}» regionu üçün pulsuz abunəlik tapılmadı",
+      "failedToLoad": "Yükləmək alınmadı",
+      "updateSubscriptions": "Abunəlikləri yenilə",
+      "share": {
+        "urlToClipboard": "URL-i buferə kopyala",
+        "showUrlQr": "URL üçün QR kodu göstər",
+        "jsonToClipboard": "JSON-u buferə kopyala"
+      },
+      "msg": {
+        "save": {
+          "success": "Profil uğurla yadda saxlanıldı"
+        },
+        "invalidUrl": "Yanlış URL",
+        "add": {
+          "failure": "Profil əlavə etmək alınmadı"
+        },
+        "update": {
+          "success": "Profil uğurla yeniləndi",
+          "successNamed": "«${name}» uğurla yeniləndi",
+          "failure": "Profili yeniləmək alınmadı",
+          "failureNamed": "«${name}» yenilənə bilmədi"
+        },
+        "delete": {
+          "success": "Profil uğurla silindi"
+        }
+      }
+    },
+    "profileDetails": {
+      "title": "Profil",
+      "lastUpdate": "Son yeniləmə",
+      "form": {
+        "nameHint": "Profilin adı",
+        "emptyName": "Ad mütləq daxil edilməlidir",
+        "invalidUrl": "Yanlış URL",
+        "urlHint": "Konfiqurasiyanın tam URL-i",
+        "disableAutoUpdate": "Avtomatik yeniləməni söndür",
+        "autoUpdateInterval": "Avtomatik yeniləmə intervalı",
+        "loading": "Profil əlavə edilir..."
+      }
+    },
+    "logs": {
+      "title": "Jurnal",
+      "shareCoreLogs": "Nüvə loqlarını paylaş",
+      "shareAppLogs": "Tətbiq loqlarını paylaş"
+    },
+    "about": {
+      "title": "Proqram haqqında",
+      "tagline": "Bir düyməylə sabit bağlantı. Tezliklə — süni intellekt köməkçisi və genişləndirmələr.",
+      "notAvailableMsg": "Ən son versiya sizdədir — hələ yenisi yoxdur",
+      "checkForUpdate": "Yeniləmələri yoxla",
+      "openWorkingDir": "İş qovluğunu aç",
+      "sourceCode": "Mənbə kodu",
+      "telegramChannel": "Telegram kanalı",
+      "termsAndConditions": "İstifadə şərtləri",
+      "privacyPolicy": "Məxfilik siyasəti"
+    },
+    "settings": {
+      "title": "Ayarlar",
+      "resetTunnel": "Bağlantını sıfırla",
+      "options": {
+        "import": {
+          "clipboard": "Ayarları mübadilə buferindən idxal et",
+          "file": "Ayarları fayldan idxal et"
+        },
+        "export": {
+          "anonymousToClipboard": "Ayarları şəxsi məlumatlarsız kopyala",
+          "anonymousToFile": "Şəxsi məlumatlarsız fayla saxla",
+          "allToClipboard": "Bütün ayarları mübadilə buferinə kopyala",
+          "allToFile": "Bütün ayarları fayla ixrac et"
+        },
+        "reset": "Ayarları sıfırla"
+      },
+      "general": {
+        "title": "Ümumi",
+        "locale": "Dil",
+        "themeMode": "Tema",
+        "themeModes": {
+          "system": "Sistemdəki kimi",
+          "dark": "Tünd",
+          "light": "Açıq",
+          "black": "Qara"
+        },
+        "enableAnalytics": "Nasazlıqlar barədə bildir",
+        "enableAnalyticsMsg": "Nəsə səhv getsə, tətbiq bizə qısa hesabat göndərə biləcək — beləcə hər şeyi daha tez düzəldərik. Şəxsi məlumatlarınız olmadan. Heç kimə ötürmürük.",
+        "autoIpCheck": "IP ünvanını avtomatik yoxla",
+        "dynamicNotification": "Sürəti bildirişdə göstər",
+        "hapticFeedback": "Toxunuşda vibrasiya",
+        "actionAtClosing": "Bağlayanda nə edilsin",
+        "autoStart": "Sistemə girişdə işə sal",
+        "silentStart": "Kiçildilmiş halda işə sal",
+        "ignoreBatteryOptimizations": "Batareya optimallaşdırmasını söndür",
+        "ignoreBatteryOptimizationsMsg": "Telefon PIXELLNET tətbiqini bağlamasın deyə",
+        "memoryLimit": "Yaddaş limiti",
+        "memoryLimitMsg": "Yaddaş çatışmazlığı xətaları və ya tətbiqin tez-tez çökməsi ilə qarşılaşırsınızsa, aktiv edin",
+        "debugMode": "Sazlama rejimi",
+        "debugModeMsg": "Dəyişikliyin qüvvəyə minməsi üçün tətbiqi yenidən başladın",
+        "logLevel": "Loq səviyyəsi",
+        "connectionTestUrl": "Bağlantı testi üçün URL",
+        "urlTestInterval": "URL testinin intervalı",
+        "clashApiPort": "Clash API portu",
+        "useXrayCoreWhenPossible": "Açarın ehtiyat formatı",
+        "useXrayCoreWhenPossibleMsg": "Aktiv etmək üçün açarı yenidən əlavə edin."
+      },
+      "routing": {
+        "title": "Marşrutlaşdırma",
+        "routeRule": {
+          "empty": "Hələ qayda əlavə edilməyib\n\nYeni qayda yaratmaq və ya hazır qaydalardan seçmək üçün + düyməsinə toxunun",
+          "delete": "Qaydanı sil",
+          "create": "Yeni qayda yarat",
+          "options": {
+            "import": {
+              "clipboard": "Qaydaları mübadilə buferindən idxal et",
+              "file": "Qaydaları fayldan idxal et"
+            },
+            "export": {
+              "clipboard": "Qaydaları mübadilə buferinə kopyala",
+              "file": "Qaydaları fayla saxla"
+            },
+            "reset": "Qaydaları sıfırla"
+          },
+          "rule": {
+            "title": "Qayda",
+            "onlyTunMode": "Yalnız «Bütün tətbiqlər» rejimində işləyir",
+            "notAvailabeInThisPlatform": "Bu platformada mövcud deyil",
+            "canNotBeEmpty": "Boş ola bilməz",
+            "validUrlEx": "https://example.com",
+            "validUrl": "Düzgün «URL», məsələn\n@:pages.settings.routing.routeRule.rule.validUrlEx",
+            "validProcessNameEx": "Chrome.exe və ya google chrome və ya chrome",
+            "validProcessName": "Düzgün «Proses adı», məsələn\n@:pages.settings.routing.routeRule.rule.validProcessNameEx",
+            "validProcessPathEx": "C:\\Pro...\\chrome.exe\n/App.../Google Chrome\n/usr/lib.../chrome",
+            "validProcessPath": "Düzgün «Proses yolu», məsələn\n@:pages.settings.routing.routeRule.rule.validProcessPathEx",
+            "validPortRangeEx": "80 və ya 1:65000",
+            "validPortRange": "Düzgün «Port» və ya «Port aralığı», məsələn\n@:pages.settings.routing.routeRule.rule.validPortRangeEx",
+            "validIpCidrEx": "8.8.8.8 və ya 10.0.0.0/24",
+            "validIpCidr": "Düzgün IP CIDR, məsələn\n@:pages.settings.routing.routeRule.rule.validIpCidrEx",
+            "validDomainEx": "Google.com və ya dl.google.com",
+            "validDomain": "Düzgün «Domen», məsələn\n@:pages.settings.routing.routeRule.rule.validDomainEx",
+            "validDomainSuffixEx": ".com və ya .az",
+            "validDomainSuffix": "Düzgün «Domen sonluğu», məsələn\n@:pages.settings.routing.routeRule.rule.validDomainSuffixEx",
+            "tileTitle(map)": {
+              "name": "Ad",
+              "outbound": "Uyğun gələndə çıxış",
+              "rule_set": "Qaydalar dəstinin URL-i",
+              "package_name": "Paket adları",
+              "process_name": "Proses adları",
+              "process_path": "Proses yolları",
+              "network": "Şəbəkələr",
+              "port_range": "Təyinat portları",
+              "source_port_range": "Mənbə portları",
+              "protocol": "Protokol",
+              "ip_cidr": "Təyinat IP CIDR",
+              "source_ip_cidr": "Mənbə IP CIDR",
+              "domain": "Domen",
+              "domain_suffixe": "Domen sonluğu",
+              "domain_keyword": "Domen açar sözü",
+              "domain_regex": "Domen üçün müntəzəm ifadə"
+            },
+            "outbound(map)": {
+              "proxy": "PIXELLNET üzərindən",
+              "direct": "Birbaşa",
+              "direct_with_fragment": "Birbaşa, fraqmentlə",
+              "block": "Qadağan et"
+            },
+            "network(map)": {
+              "all": "Hamısı",
+              "tcp": "TCP",
+              "udp": "UDP"
+            },
+            "protocol(map)": {
+              "": "Hamısı",
+              "tls": "TLS",
+              "http": "HTTP",
+              "quic": "QUIC",
+              "stun": "STUN",
+              "dns": "DNS",
+              "bittorrent": "BitTorrent"
+            }
+          },
+          "genericList": {
+            "addNew": "Yeni dəyər əlavə et",
+            "update": "Dəyəri yenilə",
+            "clearList": "Siyahını təmizlə",
+            "clearListMsg": "Bütün elementlər silindi"
+          }
+        },
+        "generalOptions": {
+          "title": "Marşrutlaşdırmanın ümumi parametrləri",
+          "region": "Region",
+          "regions": {
+            "ir": "İran (ir)",
+            "cn": "Çin (cn)",
+            "ru": "Rusiya (ru)",
+            "af": "Əfqanıstan (af)",
+            "id": "İndoneziya (id)",
+            "tr": "Türkiyə (tr)",
+            "br": "Braziliya (br)",
+            "other": "Digər"
+          },
+          "balancerStrategy": {
+            "title": "Balanslaşdırma strategiyası",
+            "roundRobin": "Round robin",
+            "consistentHash": "Consistent hash",
+            "stickySession": "Sticky session"
+          },
+          "resolveDestination": "Təyinat ünvanını müəyyən et",
+          "ipv6Route": "IPv6 marşrutu",
+          "ipv6Modes": {
+            "disable": "Söndür",
+            "enable": "Aktiv et",
+            "prefer": "Üstünlük verilsin",
+            "only": "Yalnız"
+          },
+          "perAppProxy": {
+            "title": "Tətbiqlər üçün söndür",
+            "hideSysApps": "Sistem tətbiqlərini gizlət",
+            "options": {
+              "import": {
+                "clipboard": "Seçimi mübadilə buferindən idxal et",
+                "file": "Seçimi fayldan idxal et",
+                "msg": "İdxal cari seçiminizi əvəz edəcək. Davam etmək istədiyinizə əminsiniz?"
+              },
+              "export": {
+                "clipboard": "Seçimi mübadilə buferinə kopyala",
+                "file": "Seçimi fayla ixrac et"
+              },
+              "shareToAll": "Hamı ilə paylaş",
+              "clearAllSelections": "Bütün seçimi təmizlə"
+            },
+            "modes": {
+              "all": "Hamısı",
+              "proxy": "Yalnız işarələnənlər",
+              "bypass": "İşarələnənlərdən başqa",
+              "allMsg": "Bütün tətbiqlər PIXELLNET üzərindən",
+              "proxyMsg": "PIXELLNET üzərindən — yalnız işarələnənlər",
+              "bypassMsg": "İşarələnənlər — birbaşa, PIXELLNET olmadan"
+            },
+            "autoSelection": {
+              "title": "Avtoseçim",
+              "performNow": "İndi icra et",
+              "resetToDefault": "Standarta qaytar",
+              "autoUpdateInterval": "Avtomatik yeniləmə intervalı",
+              "toast": {
+                "success": "Tətbiqlərin avtoseçimi uğurla başa çatdı",
+                "failure": "Avtoseçim alınmadı",
+                "regionNotFound": "«${region}» regionu üçün avtoseçim tapılmadı",
+                "alreadyInAuto": "Seçiminiz artıq avtoseçim siyahısındadır"
+              },
+              "dialog": {
+                "title": "Tətbiqlərin avtoseçimi",
+                "msg": "Tətbiqlərin avtoseçimi söndürüldü: region «${region}» olaraq dəyişdi"
+              }
+            }
+          }
+        },
+        "predefinedRules": {
+          "title": "Hazır qaydalar",
+          "ads": {
+            "name": "Reklamları gizlət",
+            "description": ""
+          },
+          "bypassLan": {
+            "name": "Ev şəbəkəsi — birbaşa",
+            "description": ""
+          }
+        }
+      },
+      "dns": {
+        "title": "DNS",
+        "remoteDns": "Uzaq DNS",
+        "remoteDnsDomainStrategy": "Uzaq DNS üçün domen strategiyası",
+        "directDns": "Çıxış serveri üçün DNS (birbaşa)",
+        "directDnsDomainStrategy": "Çıxış domeni strategiyası",
+        "enableFakeDns": "Saxta DNS-i aktiv et",
+        "domainStrategy": {
+          "auto": "Avto",
+          "preferIpv6": "Əvvəlcə IPv6",
+          "preferIpv4": "Əvvəlcə IPv4",
+          "ipv4Only": "Yalnız IPv4",
+          "ipv6Only": "Yalnız IPv6"
+        }
+      },
+      "inbound": {
+        "title": "Daxil olan bağlantılar",
+        "serviceMode": "İş rejimi",
+        "serviceModes": {
+          "proxy": "Yalnız lokal port",
+          "systemProxy": "Sistem ayarları",
+          "tun": "Bütün tətbiqlər"
+        },
+        "shortServiceModes": {
+          "proxy": "Lokal port",
+          "systemProxy": "Sistem",
+          "tun": "Bütün tətbiqlər"
+        },
+        "strictRoute": "Ciddi marşrutlaşdırma",
+        "tunImplementation": "TUN reallaşdırması",
+        "tunImplementations": {
+          "mixed": "Qarışıq",
+          "system": "Sistem",
+          "gvisor": "gVisor"
+        },
+        "mixedPort": "Qarışıq port",
+        "tproxyPort": "Şəffaf rejim portu",
+        "directPort": "Birbaşa lokal port",
+        "redirectPort": "Yönləndirmə portu",
+        "lanSharing": "Şəbəkədəki digər cihazlar üçün giriş",
+        "lanSharingPasswordNotSet": "Parol təyin edilməyib",
+        "lanSharingPassword": "Digər cihazlar üçün parol",
+        "copyLink": "Linki kopyala",
+        "qrCode": "QR kod",
+        "lanIPError": "Lokal IP ünvanını almaq alınmadı"
+      },
+      "tlsTricks": {
+        "title": "TLS üsulları",
+        "enable": "Fraqmentləşdirməni aktiv et",
+        "packets": "Fraqmentləşdirmə paketləri",
+        "packetsTlsHello": "TLS Hello",
+        "packets1_1": "1-1",
+        "packets1_2": "1-2",
+        "packets1_3": "1-3",
+        "packets1_4": "1-4",
+        "packets1_5": "1-5",
+        "size": "Fraqmentin ölçüsü",
+        "sleep": "Fraqmentin gecikməsi",
+        "mixedSniCase": {
+          "enable": "SNI-də qarışıq registri aktiv et"
+        },
+        "padding": {
+          "enable": "Doldurmanı aktiv et",
+          "size": "Doldurmanın ölçüsü"
+        }
+      },
+      "chain": {
+        "title": "Zəncir",
+        "subtitle": "Əlavə qoruma və ehtiyat yol",
+        "finalIp": "Son IP",
+        "levels": {
+          "app": {
+            "title": "Tətbiq",
+            "msg": "Tətbiqlərinizin trafikinin yolu buradan başlayır"
+          },
+          "extraSecurity": {
+            "title": "Əlavə təhlükəsizlik",
+            "msg": "Əsas profilinizə etibar olunmasa belə, məlumatlarınızı məxfi saxlamaq üçün daha bir qoruyucu qat yaradır"
+          },
+          "mainProfile": {
+            "title": "Əsas profil"
+          },
+          "unblocker": {
+            "title": "Ehtiyat yol",
+            "msg": "Əsas kanal cavab verməsə, bağlantı ehtiyat yolla gedəcək"
+          },
+          "filtering": {
+            "title": "Filtrləmə",
+            "msg": "Son addım: trafik internetə çıxır"
+          }
+        },
+        "warp": {
+          "missingConfig": "WARP konfiqurasiyası yoxdur",
+          "licenseKey": "Lisenziya açarı",
+          "cleanIp": "Təmiz IP",
+          "port": "Port",
+          "noise": {
+            "count": "Küy sayı",
+            "mode": "Küy rejimi",
+            "size": "Küy ölçüsü",
+            "delay": "Küy gecikməsi"
+          }
+        },
+        "psiphon": {
+          "selectServerRegion": "Serverin regionunu seçin",
+          "regions": {
+            "auto": "@:common.auto",
+            "at": "Avstriya (at)",
+            "au": "Avstraliya (au)",
+            "be": "Belçika (be)",
+            "bg": "Bolqarıstan (bg)",
+            "ca": "Kanada (ca)",
+            "ch": "İsveçrə (ch)",
+            "cz": "Çexiya (cz)",
+            "de": "Almaniya (de)",
+            "dk": "Danimarka (dk)",
+            "ee": "Estoniya (ee)",
+            "es": "İspaniya (es)",
+            "fi": "Finlandiya (fi)",
+            "fr": "Fransa (fr)",
+            "gb": "Böyük Britaniya (gb)",
+            "hr": "Xorvatiya (hr)",
+            "hu": "Macarıstan (hu)",
+            "ie": "İrlandiya (ie)",
+            "in": "Hindistan (in)",
+            "it": "İtaliya (it)",
+            "jp": "Yaponiya (jp)",
+            "lv": "Latviya (lv)",
+            "nl": "Niderland (nl)",
+            "no": "Norveç (no)",
+            "pl": "Polşa (pl)",
+            "pt": "Portuqaliya (pt)",
+            "ro": "Rumıniya (ro)",
+            "rs": "Serbiya (rs)",
+            "se": "İsveç (se)",
+            "sg": "Sinqapur (sg)",
+            "sk": "Slovakiya (sk)",
+            "us": "ABŞ (us)"
+          }
+        },
+        "profile": {
+          "selectProfile": "Profil seçin",
+          "conduitPairingId": "Conduit cütləşmə ID-si"
+        }
+      }
+    }
+  },
+  "components": {
+    "stats": {
+      "connection": "Bağlantı",
+      "traffic": "Trafik",
+      "trafficLive": "Cari trafik",
+      "trafficTotal": "Ümumi trafik",
+      "uplink": "Göndərmə",
+      "downlink": "Qəbul",
+      "speed": "Sürət",
+      "totalTransferred": "Cəmi ötürülüb"
+    },
+    "subscriptionInfo": {
+      "upload": "Göndərilib",
+      "download": "Alınıb",
+      "total": "Cəmi trafik",
+      "expireDate": "Bitmə tarixi",
+      "expired": "Müddəti bitib",
+      "noTraffic": "Trafik limiti bitib",
+      "remainingTime": "Qalan vaxt",
+      "remainingDuration": "${duration} gün qalıb",
+      "remainingDurationNew": "${duration} gün",
+      "remainingTrafficSemanticLabel": "${total} trafikdən ${consumed} istifadə olunub",
+      "remainingTraffic": "Qalan trafik",
+      "remainingUsage": "Qalıb",
+      "profileSite": "Provayder",
+      "profileSupport": "Dəstək"
+    }
+  },
+  "dialogs": {
+    "sortProfiles": {
+      "title": "Sıralama üsulu",
+      "sort": {
+        "name": "Əlifba sırası ilə",
+        "lastUpdate": "Son yeniləməyə görə"
+      }
+    },
+    "warpLicense": {
+      "title": "Cloudflare WARP razılaşması",
+      "description(rich)": "Bu seçimi aktiv etməklə siz əlavə xidmət təminatçısının ${tos(Xidmət şərtləri)} və ${privacy(Məxfilik siyasəti)} ilə razılaşırsınız."
+    },
+    "psiphonLicense": {
+      "title": "Əlavə xidmətin lisenziyası",
+      "description(rich)": "Bu seçimdən istifadə etməklə siz əlavə xidmət təminatçısının ${tos(Xidmət şərtləri)} ilə razılaşır və ${privacy(Məxfilik siyasəti)} ilə tanış olduğunuzu təsdiqləyirsiniz. Davam etməzdən əvvəl onları diqqətlə oxuyun."
+    },
+    "newVersion": {
+      "title": "Yeniləmə var",
+      "msg": "@:common.appTitle tətbiqinin yeni versiyası çıxıb. İndi yeniləmək istəyirsiniz?",
+      "currentVersion": "Cari versiya: ",
+      "newVersion": "Yeni versiya: ",
+      "updateNow": "İndi yenilə"
+    },
+    "confirmation": {
+      "settings": {
+        "import": {
+          "msg": "Bu, bütün konfiqurasiya parametrlərini verilən dəyərlərlə əvəz edəcək. Əminsiniz?"
+        }
+      },
+      "profile": {
+        "delete": {
+          "title": "Profili sil",
+          "msg": "Bu profili həmişəlik silmək istədiyinizə əminsiniz?"
+        }
+      },
+      "perAppProxy": {
+        "shareOnGithub": {
+          "title": "Avtoseçimin təkmilləşdirilməsi",
+          "msg": "Seçdiyiniz tətbiqləri paylaşmaqla «avtoseçim» siyahısını tamamlamağa kömək edirsiniz"
+        },
+        "import": {
+          "msg": "Bu, cari tətbiq seçiminizi əvəz edəcək. Davam edilsin?"
+        }
+      },
+      "routeRule": {
+        "delete": {
+          "title": "Qaydanı sil",
+          "msg": "«$rulename» qaydasını silmək istədiyinizə əminsiniz?"
+        }
+      },
+      "addProfileByDeepLinkWarning": {
+        "title": "Profil əlavə edilsin?",
+        "message": "«${host}» ünvanından gələn xarici link yeni profil əlavə etmək istəyir. Onu idxal etmək istəyirsiniz?"
+      },
+      "importRouteRuleByDeepLinkWarning": {
+        "title": "Marşrut qaydası idxal edilsin?",
+        "message": "Etibarsız mənbələrdən marşrut qaydalarını idxal etmək təhlükəsizlik üçün risk ola bilər\nYalnız bu linkə etibar edirsinizsə, davam edin"
+      }
+    },
+    "experimentalNotice": {
+      "title": "Eksperimental funksiyalar istifadə olunur",
+      "msg": "Bağlantının keyfiyyətinə təsir edə və gözlənilməz xətalara səbəb ola biləcək bəzi eksperimental funksiyaları aktiv etmisiniz. Bu parametrləri istənilən vaxt ayarlar səhifəsində dəyişə və ya sıfırlaya bilərsiniz.",
+      "disable": "Bir daha göstərmə"
+    },
+    "noActiveProfile": {
+      "title": "Açarı necə əlavə etməli",
+      "msg": "Giriş açarı — link və ya PXN-XXXX-XXXX kimi koddur. Onu buferdən yapışdırın, QR kodu skan edin və ya əl ilə daxil edin. Açarınız yoxdur? Dəstəyə yazın.",
+      "helpBtn": {
+        "label": "Dəstəyə yaz",
+        "url": "https://t.me/pixellnet_bot?start=support"
+      }
+    },
+    "unknownDomainsWarning": {
+      "title": "Xarici link barədə xəbərdarlıq",
+      "youAreAboutToVisit": "Bu sayta keçmək üzrəsiniz:",
+      "thisWebsiteIsNotInOurTrustedList": "Bu sayt etibarlı saytlar siyahımızda yoxdur. Lütfən, ehtiyatlı olun."
+    },
+    "proxyInfo": {
+      "fullTag": "Tam teq:",
+      "type": "Növ:",
+      "testTime": "Test vaxtı:",
+      "testDelay": "Test gecikməsi:",
+      "isSelected": "Seçilib:",
+      "isGroup": "Qrupdur",
+      "isSecure": "Qorunur:",
+      "port": "Port:",
+      "host": "Host:",
+      "ip": "IP:",
+      "countryCode": "Ölkə kodu:",
+      "region": "Region:",
+      "city": "Şəhər:",
+      "asn": "ASN:",
+      "organization": "Təşkilat:",
+      "location": "Yer:",
+      "postalCode": "Poçt indeksi:",
+      "download": "Alınıb:",
+      "upload": "Göndərilib:"
+    },
+    "windowClosing": {
+      "askEachTime": "Hər dəfə soruş",
+      "alertMessage": "Tətbiqi gizlətmək, yoxsa ondan çıxmaq?",
+      "remember": "Seçimimi yadda saxla"
     }
   },
   "connection": {
+    "tapToConnect": "Qoşulmaq üçün toxunun",
     "connect": "Qoşul",
-    "connected": "Qoşuldu",
     "connecting": "Qoşulur…",
+    "connected": "Qoşuldu",
     "disconnect": "Ayır",
-    "tapToConnect": "Qoşulmaq üçün toxunun"
+    "disconnecting": "Bağlantı kəsilir…",
+    "reconnect": "Yenidən qoşulur…",
+    "reconnectMsg": "Ayarlar dəyişdi — bağlantını yeniləyirik…"
+  },
+  "errors": {
+    "unexpected": "Gözlənilməz xəta",
+    "connection": {
+      "unexpected": "Gözlənilməz bağlantı xətası",
+      "timeout": "Bağlantının gözləmə vaxtı bitdi",
+      "badResponse": "Yanlış cavab",
+      "connectionError": "Bağlantı xətası",
+      "badCertificate": "Etibarsız sertifikat"
+    },
+    "profiles": {
+      "unexpected": "Gözlənilməz xəta",
+      "notFound": "Profil tapılmadı",
+      "invalidConfig": "Yanlış konfiqurasiya",
+      "invalidUrl": "Yanlış URL",
+      "canceledByUser": "İstifadəçi ləğv etdi"
+    },
+    "connectivity": {
+      "unexpected": "Gözlənilməz nasazlıq",
+      "missingVpnPermission": "Qoşulmaq üçün icazə lazımdır",
+      "missingNotificationPermission": "Bildirişlər üçün icazə yoxdur",
+      "core": "Nüvə xətası"
+    },
+    "singbox": {
+      "serviceNotRunning": "Xidmət işə salınmayıb",
+      "missingPrivilege": "Hüquqlar çatışmır",
+      "missingPrivilegeMsg": "Administrator hüquqları lazımdır. PIXELLNET tətbiqini bağlayın və yenidən açın — Windows icazə istəyəcək.",
+      "invalidConfigOptions": "Yanlış konfiqurasiya parametrləri",
+      "invalidConfig": "Yanlış konfiqurasiya"
+    },
+    "warp": {
+      "missingLicense": "Warp lisenziyası yoxdur",
+      "missingLicenseMsg": "Seçilmiş profil WARP funksiyasından istifadə edir; bu funksiya üçün WARP lisenziyasını qəbul etmək lazımdır"
+    },
+    "psiphon": {
+      "missingLicense": "Əlavə xidmətin lisenziyasını qəbul etmək alınmadı",
+      "missingLicenseMsg": "Seçilmiş profil əlavə xidmətdən istifadə edir; əvvəlcə onun lisenziyasını qəbul etmək lazımdır"
+    }
+  },
+  "ui": {
+    "share": {
+      "appText": "PIXELLNET — bir düyməylə sabit bağlantı. Tezliklə — süni intellekt köməkçisi və genişləndirmələr.\n\nAndroid və Windows üçün yükləyin:\n$url",
+      "inviteText": "PIXELLNET tətbiqindən istifadə edirəm — bir düyməylə sabit bağlantı. Mənim linkimlə — 7 gün pulsuz: $link",
+      "whatToSend": "Nə göndərilsin?",
+      "chooseWhat": "Dostunuza nə lazım olduğunu seçin",
+      "keyForOtherApp": "Başqa tətbiq üçün açar",
+      "keyForOtherAppHint": "Dostunuzda artıq Happ və ya V2rayNG varsa, yalnız açarı göndərin",
+      "keyForApp": "PIXELLNET üçün açar",
+      "keyForAppHint": "Alıcının PIXELLNET tətbiqində birbaşa açılacaq",
+      "inviteTitle": "Dostunuzu dəvət edin və bonus alın",
+      "inviteSubtitle": "Hər dost üçün — ikinizə də 7 gün pulsuz",
+      "otherAppSheetSubtitle": "Alıcı linki öz tətbiqində açacaq",
+      "otherAppPreamble": "Budur giriş açarı. Qoşulmaq üçün linki öz tətbiqinizə yapışdırın:",
+      "keyForAppSheetSubtitle": "PIXELLNET tətbiqində birbaşa açılacaq",
+      "appPreamble": "PIXELLNET tətbiqini yükləyin (pixellnet.com) və bu linki açın — bütün kanallar avtomatik qoşulacaq:",
+      "recommended": "Tövsiyə edirik",
+      "sendViaMessenger": "Messencerlə göndər",
+      "showQr": "QR kodu göstər",
+      "linkCopied": "Link kopyalandı",
+      "copyLink": "Linki kopyala",
+      "linkValidUntil": "Link abunəliyiniz bitənə qədər işləyir",
+      "referralTitle": "7 gün hədiyyə edin — 7 gün qazanın",
+      "referralText": "Dostunuz linkinizi açır və 7 gün pulsuz alır. O, abunəliyi ödəyən kimi siz də 7 gün pulsuz alırsınız.",
+      "yourCode": "Kodunuz:",
+      "bonusBadge": "+$days gün",
+      "referralCounts": "Təsdiqlənib: $confirmed · ödəniş gözlənilir: $pending",
+      "referralSubject": "PIXELLNET — 7 gün pulsuz",
+      "sendInvite": "Dəvət göndər",
+      "inviteLinkCopied": "Dəvət linki kopyalandı"
+    },
+    "about": {
+      "collectDiagnostics": "Diaqnostika topla",
+      "collectDiagnosticsHint": "Cihaz və internet barədə məlumat + son hadisələr — mübadilə buferinə",
+      "diagnosticsCopied": "Diaqnostika buferdədir ($count simvol)",
+      "shareApp": "Tətbiqi paylaş",
+      "shareAppHint": "Dostlara yükləmə linki göndər"
+    },
+    "welcome": {
+      "title": "Xoş gəlmisiniz",
+      "subtitle": "Xarici xidmətlərə sabit giriş",
+      "trialTitle": "7 gün pulsuz sınayın",
+      "trialSubtitle": "Kartsız, qeydiyyatsız",
+      "haveKey": "Artıq açarım var",
+      "clipboardFound": "Mübadilə buferində link tapıldı",
+      "enterKeyHint": "Açarı və ya abunəlik linkini daxil edin",
+      "questions": "Sualınız var? Yazın: "
+    },
+    "trial": {
+      "expiredTitle": "Sınaq müddətindən\nartıq istifadə olunub",
+      "expiredText": "Bu cihaza artıq 7 gün vermişik.\nDavam etmək üçün ödənişli açar daxil edin.",
+      "enterKey": "Açarı daxil et",
+      "renew": "Girişi uzat",
+      "errServer": "Server $code kodunu qaytardı. Bir az sonra yenidən cəhd edin.",
+      "errEmpty": "Serverdən boş cavab gəldi",
+      "errImport": "Profil əlavə etmək alınmadı: $failure",
+      "preparing": "Sınaq müddəti hazırlanır",
+      "oneSecond": "Bir saniyə",
+      "createFailed": "Sınaq girişi yaratmaq alınmadı",
+      "checkInternet": "İnterneti yoxlayın və yenidən cəhd edin",
+      "retry": "Yenidən cəhd et"
+    },
+    "perApp": {
+      "offTitle": "Bütün tətbiqlər PIXELLNET üzərindən",
+      "offHint": "PIXELLNET bütün proqramlar üçün işləyir. Başqa cür seçmək üçün ekranın yuxarısındakı rejimə toxunun.",
+      "includeTitle": "PIXELLNET üzərindən — yalnız işarələnənlər",
+      "includeHint": "PIXELLNET yalnız işarələnmiş ✓ tətbiqlər üçün işləyir. Qalanları internetə birbaşa çıxır.",
+      "excludeTitle": "Hamısı PIXELLNET üzərindən, işarələnənlərdən başqa",
+      "excludeHint": "İşarələnmiş ✓ tətbiqlər internetə birbaşa, PIXELLNET olmadan çıxır. Banklar, dövlət xidmətləri və Ozon kimi tətbiqlər üçün rahatdır — onlar birbaşa daha yaxşı işləyir."
+    },
+    "profile": {
+      "share": "Paylaş…",
+      "refreshDone": "Kanal siyahısı yeniləndi",
+      "refreshWithErrors": "Yeniləndi: $done / $total, xəta sayı: $errors",
+      "refreshPartial": "Yeniləndi: $done / $total",
+      "channelsCount": "Kanallar ($count)",
+      "searching": "Kanallar axtarılır…",
+      "connectToSee": "Bütün kanalları görmək üçün qoşulun"
+    },
+    "general": {
+      "autoStartOnFailed": "Avtomatik başlatmanı aktiv etmək alınmadı",
+      "autoStartOffFailed": "Avtomatik başlatmanı söndürmək alınmadı",
+      "logSize": "Jurnalın ölçüsü",
+      "logSizeHint": "$mb MB — köhnə qeydlərin üzərinə yazılır",
+      "mb": "$mb MB",
+      "updateHow": "Necə yenilənsin",
+      "modeAuto": "Avtomatik",
+      "modeAsk": "Soruşsun",
+      "modeManual": "Əl ilə",
+      "updateWhen": "Nə vaxt yoxlanılsın",
+      "hourNight": "Gecə",
+      "hourMorning": "Səhər",
+      "hourDay": "Gündüz",
+      "hourEvening": "Axşam",
+      "hourAny": "İstənilən vaxt",
+      "checkNow": "İndi yoxla",
+      "checkNowHint": "Gözləmirik — yeniləməni elə indi axtarırıq",
+      "upToDate": "Ən son versiya sizdədir — hələ yenisi yoxdur",
+      "newVersion": "Yeni versiya var · $version",
+      "refreshHow": "Kanallar necə yenilənsin",
+      "refreshWhen": "Kanallar nə vaxt yenilənsin",
+      "refreshNow": "Kanalları indi yenilə",
+      "refreshNowHint": "Serverlərin yeni siyahısını yüklə",
+      "listCurrent": "Siyahı aktualdır — dəyişiklik yoxdur",
+      "updateModeAuto": "Soruşmadan yükləyib quraşdıracaq",
+      "updateModeAsk": "Soruşacağıq — siz qərar verəcəksiniz",
+      "updateModeManual": "Yalnız özünüz toxunanda",
+      "hourLabelNight": "Gecə (təxminən 3:00) — siz yatarkən",
+      "hourLabelMorning": "Səhər (təxminən 7:00)",
+      "hourLabelDay": "Gündüz (təxminən 14:00)",
+      "hourLabelEvening": "Axşam (təxminən 21:00)",
+      "hourLabelAny": "Günün istənilən vaxtı",
+      "hourAt": "Saat $hour:00",
+      "refreshModeAuto": "Server siyahısını soruşmadan yeniləyəcək"
+    },
+    "guard": {
+      "xiaomiTitle": "Fəaliyyətə nəzarət",
+      "bgTitle": "Fonda işləmə",
+      "xiaomiHint": "«Məhdudiyyət yoxdur» seçin",
+      "allowHint": "Telefonun pəncərəsində «İcazə ver» düyməsinə toxunun",
+      "open": "Aç",
+      "allow": "İcazə ver",
+      "autostartTitle": "Avtomatik başlatma",
+      "autostartHint": "PIXELLNET tətbiqini tapın (axtarışdan istifadə edə bilərsiniz) və yanındakı düyməni aktiv edin",
+      "launchTitle": "Tətbiqlərin işə salınması",
+      "launchHint": "PIXELLNET üçün «Avtomatik» seçimini söndürün və bütün düymələri aktiv edin",
+      "switchHint": "PIXELLNET tətbiqinin yanındakı düyməni aktiv edin",
+      "allowBgHint": "PIXELLNET tətbiqinə fonda işləməyə icazə verin",
+      "banner": "PIXELLNET gecələr sönə bilər",
+      "setup": "Tənzimlə",
+      "remindTomorrow": "Sabah xatırlat",
+      "sheetTitle": "PIXELLNET sönməsin deyə",
+      "sheetDone": "Hazırdır. Telefon artıq batareyaya qənaət üçün PIXELLNET tətbiqini bağlamayacaq.",
+      "sheetText": "Telefon batareyaya qənaət edir və gecə PIXELLNET tətbiqini bağlaya bilər — səhər qoruma söndürülmüş olacaq. Fonda işləməyə icazə verin, bu bir dəqiqə çəkəcək.",
+      "done": "Hazırdır",
+      "close": "Bağla"
+    },
+    "dev": {
+      "reportCopied": "Hesabat kopyalandı — dəstək çatına yapışdırın",
+      "error": "Xəta: $error",
+      "deviceCopied": "Cihaz məlumatı kopyalandı",
+      "title": "Tərtibatçı üçün",
+      "about": "Tətbiq haqqında",
+      "version": "Versiya",
+      "package": "Paket",
+      "platform": "Platforma",
+      "diagnostics": "Diaqnostika",
+      "connectionLog": "Bağlantı jurnalı",
+      "collecting": "Toplayırıq…",
+      "copyReport": "Hesabatı kopyala",
+      "copyReportHint": "OS, versiya, provayder, son hadisələr",
+      "shareReport": "Hesabatı paylaş",
+      "copyDevice": "Cihaz məlumatını kopyala",
+      "other": "Digər",
+      "aboutProgram": "Proqram haqqında"
+    },
+    "common": {
+      "close": "Bağla",
+      "update": "Yenilə",
+      "cancel": "Ləğv et",
+      "hide": "Gizlət",
+      "copied": "Kopyalandı",
+      "allow": "İcazə ver",
+      "delete": "Sil",
+      "add": "Əlavə et",
+      "notNow": "İndi yox",
+      "ms": "$ms ms"
+    },
+    "changelog": {
+      "whatsNew": "$version versiyasında yeniliklər",
+      "tellMain": "Ən vacibini danışırıq",
+      "sectionNew": "Yeni",
+      "sectionFixed": "Düzəltdik",
+      "sectionImproved": "Daha yaxşı oldu",
+      "fallback": "Çoxlu kiçik təkmilləşdirmə və daha çox sabitlik."
+    },
+    "update": {
+      "available": "Yeniləmə var",
+      "version": "Versiya $version",
+      "connecting": "Serverə qoşuluruq...",
+      "downloaded": "Yükləndi: $percent%",
+      "openSettings": "Ayarları aç",
+      "downloading": "Yüklənir…",
+      "again": "Yenidən cəhd et",
+      "allowInstall": "Quraşdırmaya icazə verin → geri qayıdın → «Yenidən cəhd et»",
+      "permissionNeeded": "Android ayarlarında bu mənbədən tətbiq quraşdırmağa icazə verin",
+      "hintXiaomi": "MIUI/HyperOS göstərəcək: «Bu tətbiqdə risklər var». «Hər halda quraşdır», sonra «Hazırdır» düyməsinə toxunun.",
+      "hintHuawei": "EMUI quraşdırmanı təsdiqləməyi istəyəcək. Bütün sorğularda «İcazə ver» seçin.",
+      "hintOppo": "ColorOS/PurityScan onu «risk» kimi qeyd edə bilər. «Hər halda quraşdır» düyməsinə toxunun.",
+      "noCell": "Deyəsən, operatorun qülləsi bu ərazidə hazırda internet vermir. Problem tətbiqdə deyil — bir az sonra yenidən cəhd edin və ya Wi-Fi şəbəkəsinə qoşulun.",
+      "noData": "Siqnal var, amma internet işləmir. Ola bilsin, operatorda fasilələr var — Wi-Fi ilə yoxlayın.",
+      "errChecksum": "Yeniləmə faylı zədələnib (yoxlama cəmi uyğun gəlmədi). Yenidən cəhd edin.",
+      "errSizeMismatch": "$total baytdan $actual bayt yükləndi. Fayl zədələnib, yenidən cəhd edin.",
+      "errTooSmall": "Yüklənmiş fayl çox kiçikdir ($size bayt). İnterneti yoxlayın.",
+      "errInstaller": "Quraşdırıcını açmaq alınmadı: $message",
+      "errTimeout": "Yeniləmə serverinə qoşulmanın vaxtı bitdi",
+      "errOtherFile": "Mənbə başqa fayl verir ($expected əvəzinə $length bayt)",
+      "errPartial": "$total baytdan $actual bayt yükləndi",
+      "errUnpack": "Zip faylını açmaq alınmadı: $message"
+    },
+    "country": {
+      "de": "Almaniya",
+      "nl": "Niderland",
+      "lt": "Litva",
+      "fi": "Finlandiya",
+      "fr": "Fransa",
+      "se": "İsveç",
+      "us": "ABŞ",
+      "gb": "Böyük Britaniya",
+      "ch": "İsveçrə",
+      "at": "Avstriya",
+      "pl": "Polşa",
+      "cz": "Çexiya",
+      "ru": "Rusiya",
+      "ua": "Ukrayna",
+      "by": "Belarus",
+      "kz": "Qazaxıstan",
+      "tr": "Türkiyə"
+    },
+    "units": {
+      "b": "$n B",
+      "kb": "$n KB",
+      "mb": "$n MB",
+      "gb": "$n GB",
+      "bps": "$n B/s",
+      "kbps": "$n KB/s",
+      "mbps": "$n MB/s"
+    },
+    "home": {
+      "menu": "Menyu",
+      "logs": "Loqlar",
+      "bgHint": "Telefon PIXELLNET tətbiqini bağlamasın deyə",
+      "shareHint": "Dostlara link göndər",
+      "otherVersions": "Digər versiyaları yüklə",
+      "otherVersionsHint": "Windows · köhnə versiyalar",
+      "refreshAskTitle": "Kanal siyahısı yenilənsin?",
+      "refreshAskText": "Yeni kanallar var. İndi yenilənsin?",
+      "auto": "Avto",
+      "modeTitle": "İş rejimi",
+      "modeRecommended": "Tövsiyə olunur — bütün tətbiqlərlə işləyir",
+      "modeSystemHint": "Yalnız HTTP/HTTPS; Node.js və Docker ilə problem yaradır",
+      "modeProxyHint": "Təcrübəli istifadəçilər üçün — SOCKS5 portu",
+      "serverTitle": "Server seçimi",
+      "refreshList": "Siyahını yenilə",
+      "checkPing": "Pinqi yoxla",
+      "noServers": "Server yoxdur — abunəlik açarı əlavə edin.",
+      "connectToSeeServers": "Serverlərin siyahısını görmək üçün qoşulun",
+      "loadError": "Yükləmə xətası: $error",
+      "today": "Bu gün",
+      "speed": "Sürət",
+      "expiry": "Müddət",
+      "expired": "müddəti bitib",
+      "until": "$date tarixinədək · $days",
+      "days(plural, param=n)": {
+        "one": "$n gün",
+        "other": "$n gün"
+      },
+      "monthsShort": [
+        "yan.",
+        "fev.",
+        "mart",
+        "apr.",
+        "may",
+        "iyun",
+        "iyul",
+        "avq.",
+        "sen.",
+        "okt.",
+        "noy.",
+        "dek."
+      ],
+      "keyExpired": "Açar $masked · müddəti bitib",
+      "keyExpiresIn": "$masked açarının müddəti $days sonra bitir ($date)",
+      "renewTitle": "Abunəliyin uzadılması",
+      "renew": "Uzat",
+      "renewHint": "@pixellnet_bot dəstək çatı açılacaq",
+      "subscriptionN": "Abunəlik $n",
+      "keys": "Açarlar",
+      "pasteFromClipboard": "Buferdən yapışdır",
+      "clipboardNoKey": "Buferdə açar yoxdur",
+      "added": "Əlavə edildi",
+      "addSubscription": "Abunəlik əlavə et",
+      "activeKey": "Aktiv açar · $name",
+      "copy": "Kopyala",
+      "share": "Paylaş",
+      "qrCode": "QR kod",
+      "scanWithOther": "Başqa cihazla skan edin",
+      "validUntil": "$date tarixinədək qüvvədədir",
+      "deleteLast": "Silindikdən sonra tətbiq yeni açar istəyəcək. Silinsin?",
+      "deleteActive": "Aktiv açar «$name» olacaq. Bu əməliyyatı geri qaytarmaq olmaz.",
+      "deleteTitle": "«$name» silinsin?",
+      "deleted": "Abunəlik silindi",
+      "undo": "Geri qaytar",
+      "clipboardEmpty": "Bufer boşdur",
+      "enterManually": "Əl ilə daxil et",
+      "pasteSupportSettings": "Dəstəkdən gələn ayarları yapışdır",
+      "pasteSupportSettingsHint": "Dəstək ayarları mətn kimi göndəribsə",
+      "scanQrCode": "QR kodu skan et",
+      "scanQr": "QR skan et",
+      "flash": "Fənər",
+      "switchCamera": "Kameranı dəyiş",
+      "cameraDenied": "Kameraya giriş yoxdur. Android ayarlarında icazə verin.",
+      "cameraUnsupported": "Bu cihazda kamera dəstəklənmir.",
+      "cameraError": "Kamera xətası: $code",
+      "pointCamera": "Kameranı abunəliyin QR koduna tutun",
+      "newSubscription": "Yeni abunəlik",
+      "keyOrUrl": "Açar və ya abunəlik URL-i",
+      "activate": "Aktivləşdir",
+      "supportSettingsTitle": "Dəstəkdən gələn ayarlar",
+      "supportSettingsText": "Dəstəyin göndərdiyi ayarların mətnini tam yapışdırın.",
+      "hideFor3Days": "3 günlük gizlət",
+      "updatedTo": "$version versiyasına yeniləndi",
+      "whatsNew": "Yeniliklər →",
+      "permRequesting": "Bağlantı üçün icazə istəyirik...",
+      "permNeeded": "Bağlantı üçün icazə lazımdır",
+      "permTap": "İcazə verib yenidən qoşulmaq üçün toxunun"
+    }
   }
 }
