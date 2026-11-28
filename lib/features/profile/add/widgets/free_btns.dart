@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
 import 'package:hiddify/core/router/dialog/dialog_notifier.dart';
@@ -20,8 +19,6 @@ class FreeBtns extends ConsumerWidget {
     final freeProfiles = ref.watch(freeProfilesNotifierProvider);
     final freeProfilesFilteredByRegion = ref.watch(freeProfilesFilteredByRegionProvider);
     final theme = Theme.of(context);
-    final locale = ref.watch(localePreferencesProvider);
-    final isFa = locale.name == AppLocale.fa.name;
     return freeProfilesFilteredByRegion.when(
       data: (data) => data.isNotEmpty
           ? ScrollConfiguration(
@@ -44,8 +41,8 @@ class FreeBtns extends ConsumerWidget {
                   return FreeBtn(
                     freeProfile: profile,
                     onTap: () async {
-                      final title = isFa ? profile.title.fa : profile.title.en;
-                      final consent = isFa ? profile.consent.fa : profile.consent.en;
+                      final title = profile.title.en;
+                      final consent = profile.consent.en;
                       final result = await ref
                           .read(dialogNotifierProvider.notifier)
                           .showFreeProfileConsent(title: title, consent: consent);

@@ -233,23 +233,25 @@ class IntroPage extends HookConsumerWidget with PresLogger {
     }
   }
 
-  /// Регион и язык по стране — как в 0.1.104 (T-026, шаг 5). Одно отличие: для «прочих» стран язык
-  /// берётся по языку устройства среди 21 языков (`resolveAppLocale(null)`), а не всегда английский.
-  /// Иначе у человека из Казахстана или Узбекистана на первом экране казахский/узбекский сменился бы на английский.
+  /// Регион и язык по стране. Регион (правила маршрутов) определяется, как в 0.1.104; язык — только из 12
+  /// языков приложения (0.1.106: персидского, китайского, португальского и турецкого больше нет).
+  /// Русский — для России; для остальных стран — язык устройства среди 12, иначе английский
+  /// (`resolveAppLocale(null)`). Иначе у человека из Казахстана или Узбекистана на первом экране
+  /// казахский/узбекский сменился бы на английский.
   RegionLocale _getRegionLocale(String country) {
     switch (country.toUpperCase()) {
       case "IR":
-        return RegionLocale(Region.ir, AppLocale.fa);
+        return RegionLocale(Region.ir, resolveAppLocale(null));
       case "CN":
-        return RegionLocale(Region.cn, AppLocale.zhCn);
+        return RegionLocale(Region.cn, resolveAppLocale(null));
       case "RU":
         return RegionLocale(Region.ru, AppLocale.ru);
       case "AF":
-        return RegionLocale(Region.af, AppLocale.fa);
+        return RegionLocale(Region.af, resolveAppLocale(null));
       case "BR":
-        return RegionLocale(Region.br, AppLocale.ptBr);
+        return RegionLocale(Region.br, resolveAppLocale(null));
       case "TR":
-        return RegionLocale(Region.tr, AppLocale.tr);
+        return RegionLocale(Region.tr, resolveAppLocale(null));
       default:
         return RegionLocale(Region.other, resolveAppLocale(null));
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:hiddify/core/localization/locale_preferences.dart';
+import 'package:hiddify/core/localization/plural_rules.dart';
 import 'package:hiddify/gen/translations.g.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -10,7 +11,7 @@ part 'translations.g.dart';
 
 @Riverpod(keepAlive: true)
 Future<Translations> translations(Ref ref) async {
-  return await ref.watch(localePreferencesProvider).build();
+  return await ref.watch(localePreferencesProvider).buildTranslations();
 }
 
 /// Тексты текущего языка для кода, у которого есть `BuildContext`, но нет `ref`

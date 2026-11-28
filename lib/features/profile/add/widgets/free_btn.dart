@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/features/common/custom_text_scroll.dart';
 import 'package:hiddify/features/profile/add/model/free_profiles_model.dart';
@@ -15,8 +14,6 @@ class FreeBtn extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
-    final locale = ref.watch(localePreferencesProvider);
-    final isFa = locale.name == AppLocale.fa.name;
     final theme = Theme.of(context);
     final borderRadius = BorderRadius.circular(18);
 
@@ -41,7 +38,7 @@ class FreeBtn extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        isFa ? freeProfile.title.fa : freeProfile.title.en,
+                        freeProfile.title.en,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall!.copyWith(color: theme.colorScheme.onSurface),
@@ -63,7 +60,7 @@ class FreeBtn extends ConsumerWidget {
                 ),
               ),
               CustomTextScroll(
-                isFa ? freeProfile.tags.fa.join(' · ') : freeProfile.tags.en.join(' · '),
+                freeProfile.tags.en.join(' · '),
                 style: theme.textTheme.labelMedium!.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ],

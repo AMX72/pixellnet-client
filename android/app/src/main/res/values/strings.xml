@@ -2,7 +2,7 @@
 <resources>
     <!-- Notification of the connection service and of the app update download.
          The language follows the phone language (values-<lang>), not the language
-         chosen inside the app. Indonesian is values-in (legacy code that Android requires). -->
+         chosen inside the app. This file (English) is also used for every other phone language. -->
     <string name="stop">Stop</string>
     <string name="quick_toggle">Toggle</string>
     <string name="status_starting">Service starting…</string>

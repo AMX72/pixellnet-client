@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hiddify/core/localization/plural_rules.dart';
 import 'package:hiddify/gen/translations.g.dart';
 
 /// T-026, шаг 4: тексты, вынесенные из кода (`ui.*`), есть и в ru, и в en; на остальных языках работает запасной (английский).
@@ -52,20 +53,20 @@ void main() {
 
   test('ui: every language shows a text (fallback works)', () async {
     for (final l in AppLocale.values) {
-      final t = await l.build();
+      final t = await l.buildTranslations();
       expect(t.ui.home.menu, isNotEmpty, reason: l.languageTag);
       expect(t.ui.common.close, isNotEmpty, reason: l.languageTag);
     }
   });
 
   test('ui: plural of days', () async {
-    final ru = await AppLocale.ru.build();
+    final ru = await AppLocale.ru.buildTranslations();
     expect(ru.ui.home.days(n: 1), '1 день');
     expect(ru.ui.home.days(n: 2), '2 дня');
     expect(ru.ui.home.days(n: 5), '5 дней');
     expect(ru.ui.home.days(n: 11), '11 дней');
     expect(ru.ui.home.days(n: 21), '21 день');
-    final en = await AppLocale.en.build();
+    final en = await AppLocale.en.buildTranslations();
     expect(en.ui.home.days(n: 1), '1 day');
     expect(en.ui.home.days(n: 5), '5 days');
     expect(ru.ui.home.monthsShort.length, 12);

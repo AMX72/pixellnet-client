@@ -14,10 +14,11 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hiddify/core/app_info/app_info_provider.dart';
+import 'package:hiddify/core/localization/locale_extensions.dart';
 import 'package:hiddify/core/localization/locale_preferences.dart';
 import 'package:hiddify/core/localization/translations.dart';
 import 'package:hiddify/core/model/constants.dart';
-import 'package:hiddify/gen/translations.g.dart' show AppLocale, Translations;
+import 'package:hiddify/gen/translations.g.dart' show Translations;
 import 'package:hiddify/features/connection/model/connection_status.dart';
 import 'package:hiddify/utils/alerts.dart';
 import 'package:hiddify/features/connection/notifier/connection_notifier.dart';
@@ -2103,7 +2104,7 @@ class _SettingsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(translationsProvider).requireValue;
     final locale = ref.watch(localePreferencesProvider);
-    final langLabel = _localeLabel(locale);
+    final langLabel = locale.localeName;
     final autoStart = ref.watch(autoStartNotifierProvider).valueOrNull ?? false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2146,62 +2147,11 @@ class _SettingsSection extends ConsumerWidget {
   }
 }
 
-String _localeLabel(AppLocale locale) {
-  // Native name per locale; CIS languages first, then existing upstream.
-  const names = <String, String>{
-    // CIS pack
-    'ru': 'Русский',
-    'uk': 'Українська',
-    'be': 'Беларуская',
-    'kk': 'Қазақша',
-    'ky': 'Кыргызча',
-    'uz': 'Oʻzbekcha',
-    'tg': 'Тоҷикӣ',
-    'tk': 'Türkmençe',
-    'az': 'Azərbaycanca',
-    'hy': 'Հայերեն',
-    'ka': 'ქართული',
-    // Upstream
-    'en': 'English',
-    'ar': 'العربية',
-    'es': 'Español',
-    'fa': 'فارسی',
-    'fr': 'Français',
-    'id': 'Bahasa Indonesia',
-    'tr': 'Türkçe',
-    'pt-BR': 'Português (BR)',
-    'pt_BR': 'Português (BR)',
-    'zh-CN': '中文 (简体)',
-    'zh_CN': '中文 (简体)',
-    'zh-TW': '中文 (繁體)',
-    'zh_TW': '中文 (繁體)',
-    'de': 'Deutsch',
-    'it': 'Italiano',
-    'ja': '日本語',
-    'ko': '한국어',
-    'vi': 'Tiếng Việt',
-    'pl': 'Polski',
-  };
-  final key = locale.languageTag;
-  return names[key] ?? names[locale.languageCode] ?? key.toUpperCase();
-}
-
 void _showLanguageSheet(BuildContext context, WidgetRef ref) {
   final t = ref.read(translationsProvider).requireValue;
   final current = ref.read(localePreferencesProvider);
-  // Order: Russian first, CIS pack, then rest alphabetical.
-  const priority = <String>['ru', 'uk', 'be', 'kk', 'ky', 'uz', 'tg', 'tk', 'az', 'hy', 'ka'];
-  int rank(AppLocale l) {
-    final tag = l.languageTag;
-    final code = l.languageCode;
-    final i = priority.indexOf(code);
-    if (i >= 0) return i;
-    final j = priority.indexOf(tag);
-    if (j >= 0) return j;
-    return 1000 + code.codeUnitAt(0);
-  }
-  final sorted = [...AppLocale.values]..sort((a, b) => rank(a).compareTo(rank(b)));
-  final options = sorted.map((l) => (l, _localeLabel(l))).toList();
+  // Порядок (решение владельца, 28.11): русский, английский, затем языки СНГ по алфавиту — `kAppLocalesInListOrder`.
+  final options = kAppLocalesInListOrder.map((l) => (l, l.localeName)).toList();
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,

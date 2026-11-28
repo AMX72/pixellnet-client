@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:flutter/widgets.dart';
+import 'package:hiddify/core/localization/plural_rules.dart';
 import 'package:hiddify/core/preferences/preferences_provider.dart';
 import 'package:hiddify/gen/translations.g.dart';
 import 'package:hiddify/utils/custom_loggers.dart';
@@ -6,16 +10,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 part 'locale_preferences.g.dart';
 
-/// Язык интерфейса по сохранённому значению (T-026, шаг 5: снова все 21 язык).
+/// Язык устройства среди языков приложения; нет в списке — английский.
+///
+/// Свой разбор вместо `AppLocaleUtils.findDeviceLocale()`: тот при неизвестном языке без страны берёт
+/// «первый язык без страны» из списка, то есть результат зависит от порядка в перечислении.
+/// У нас у всех 12 языков страны нет, сравнивается только код языка.
+AppLocale deviceAppLocale([Locale? device]) {
+  final code = (device ?? WidgetsBinding.instance.platformDispatcher.locale).languageCode;
+  for (final l in AppLocale.values) {
+    if (l.languageCode == code) return l;
+  }
+  return AppLocale.en;
+}
+
+/// Язык интерфейса по сохранённому значению (0.1.106, 12 языков: ru, en, kk, ky, uk, be, az, hy, ka, tg, tk, uz).
 ///
 /// Чистая функция без Riverpod: ей же пользуются места без `ref` (текст приглашения).
-/// - сохранён язык (любой из 21) — открывается он, замены на русский нет;
-/// - ничего не сохранено — язык устройства, если он среди 21; иначе, как в 0.1.104, запасной (английский);
-/// - сохранено значение, которого нет в списке, — английский, как в 0.1.104.
-AppLocale resolveAppLocale(String? persisted) {
-  if (persisted == null) return AppLocaleUtils.findDeviceLocale();
-  // keep backward compatibility with chinese after changing zh to zh_CN
-  if (persisted == "zh") return AppLocale.zhCn;
+/// - сохранён язык из 12 — открывается он;
+/// - сохранён убранный язык (ar, es, fa, fr, id, pt-BR, tr, zh, zh-CN, zh-TW) или любое незнакомое значение — английский;
+/// - ничего не сохранено — язык устройства, если он среди 12; иначе английский.
+AppLocale resolveAppLocale(String? persisted, {Locale? device}) {
+  if (persisted == null) return deviceAppLocale(device);
   for (final l in AppLocale.values) {
     if (l.name == persisted) return l;
   }
@@ -24,16 +39,20 @@ AppLocale resolveAppLocale(String? persisted) {
 
 /// Тексты языка, сохранённого в настройках, — для кода без `ref` и без `BuildContext` (службы).
 Future<Translations> translationsFromPrefs(SharedPreferences prefs) =>
-    resolveAppLocale(prefs.getString("locale")).build();
+    resolveAppLocale(prefs.getString("locale")).buildTranslations();
 
 @Riverpod(keepAlive: true)
 class LocalePreferences extends _$LocalePreferences with AppLogger {
   @override
   AppLocale build() {
-    final persisted = ref.watch(sharedPreferencesProvider).requireValue.getString("locale");
+    final prefs = ref.watch(sharedPreferencesProvider).requireValue;
+    final persisted = prefs.getString("locale");
     final locale = resolveAppLocale(persisted);
-    if (persisted != null && persisted != "zh" && locale.name != persisted) {
-      loggy.error("error setting locale: [$persisted]");
+    if (persisted != null && locale.name != persisted) {
+      // Сохранён язык, которого в приложении больше нет: открываем английский и перезаписываем значение,
+      // чтобы не разбирать его при каждом запуске.
+      loggy.info("saved locale [$persisted] is not supported anymore, switching to [${locale.name}]");
+      unawaited(prefs.setString("locale", locale.name));
     }
     return locale;
   }
