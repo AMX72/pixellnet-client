@@ -51,7 +51,7 @@
     "sort": "Sort",
     "dashboard": "Dashboard",
     "disable": "Disable",
-    "psiphon": "Psiphon",
+    "psiphon": "Extra service 2",
     "profile": "Profile",
     "configuration": "Configuration",
     "file": "File",
@@ -601,8 +601,8 @@
       "description(rich)": "By enabling this option you agree to the provider's ${tos(Terms of service)} and ${privacy(Privacy policy)}."
     },
     "psiphonLicense": {
-      "title": "Psiphon License Agreement",
-      "description(rich)": "By using Psiphon, you agree to the ${tos(Terms of Service)} and acknowledge the ${privacy(Privacy Policy)}. Please read them carefully before proceeding."
+      "title": "License of an additional service",
+      "description(rich)": "By using this option, you agree to the provider's ${tos(Terms of Service)} and acknowledge the ${privacy(Privacy Policy)}. Please read them carefully before proceeding."
     },
     "newVersion": {
       "title": "Update available",
@@ -736,8 +736,8 @@
       "missingLicenseMsg": "The selected profile uses the WARP feature; to use this feature, the WARP license must be agreed to"
     },
     "psiphon": {
-      "missingLicense": "Psiphon license required",
-      "missingLicenseMsg": "The selected profile uses the Psiphon feature; to use this feature, the Psiphon license must be agreed to"
+      "missingLicense": "Could not accept the license of an additional service",
+      "missingLicenseMsg": "The selected profile uses an additional service; its license must be accepted first"
     }
   },
   "ui": {
