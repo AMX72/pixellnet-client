@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stop">Duruz</string>
+    <string name="quick_toggle">Çalyşdyr</string>
+    <string name="status_starting">Başlanýar…</string>
+    <string name="status_started">Işleýär</string>
+    <string name="notification_channel_service">Birikme</string>
+    <string name="update_channel_name">PIXELLNET täzelenmesi</string>
+    <string name="update_channel_description">Täze wersiýany ýükläp almagyň barşy</string>
+    <string name="update_download_title">PIXELLNET %1$s ýüklenýär</string>
+    <string name="update_download_connecting">Birikdirilýär…</string>
+</resources>

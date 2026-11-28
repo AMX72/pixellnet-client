@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stop">Dayandır</string>
+    <string name="quick_toggle">Dəyişdir</string>
+    <string name="status_starting">Başladılır…</string>
+    <string name="status_started">İşləyir</string>
+    <string name="notification_channel_service">Bağlantı</string>
+    <string name="update_channel_name">PIXELLNET yeniləməsi</string>
+    <string name="update_channel_description">Yeni versiyanın endirilmə gedişi</string>
+    <string name="update_download_title">PIXELLNET %1$s endirilir</string>
+    <string name="update_download_connecting">Qoşulur…</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stop">Токтотуу</string>
+    <string name="quick_toggle">Которуу</string>
+    <string name="status_starting">Иштеп баштоодо…</string>
+    <string name="status_started">Иштеп жатат</string>
+    <string name="notification_channel_service">Байланыш</string>
+    <string name="update_channel_name">PIXELLNET жаңыртуусу</string>
+    <string name="update_channel_description">Жаңы нускасын жүктөп алуу жүрүшү</string>
+    <string name="update_download_title">PIXELLNET %1$s жүктөлүүдө</string>
+    <string name="update_download_connecting">Кошулууда…</string>
+</resources>

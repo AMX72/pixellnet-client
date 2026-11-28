@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stop">إيقاف</string>
+    <string name="quick_toggle">تبديل</string>
+    <string name="status_starting">جارٍ البدء…</string>
+    <string name="status_started">يعمل</string>
+    <string name="notification_channel_service">الاتصال</string>
+    <string name="update_channel_name">تحديث PIXELLNET</string>
+    <string name="update_channel_description">تقدم تنزيل الإصدار الجديد</string>
+    <string name="update_download_title">جارٍ تنزيل PIXELLNET %1$s</string>
+    <string name="update_download_connecting">جارٍ الاتصال…</string>
+</resources>

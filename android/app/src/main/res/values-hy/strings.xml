@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stop">Կանգնեցնել</string>
+    <string name="quick_toggle">Փոխարկել</string>
+    <string name="status_starting">Գործարկվում է…</string>
+    <string name="status_started">Աշխատում է</string>
+    <string name="notification_channel_service">Միացում</string>
+    <string name="update_channel_name">PIXELLNET-ի թարմացում</string>
+    <string name="update_channel_description">Նոր տարբերակի ներբեռնման ընթացքը</string>
+    <string name="update_download_title">Ներբեռնվում է PIXELLNET %1$s</string>
+    <string name="update_download_connecting">Միացում…</string>
+</resources>

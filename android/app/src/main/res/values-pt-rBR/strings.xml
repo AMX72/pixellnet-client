@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stop">Parar</string>
+    <string name="quick_toggle">Alternar</string>
+    <string name="status_starting">Iniciando…</string>
+    <string name="status_started">Em funcionamento</string>
+    <string name="notification_channel_service">Conexão</string>
+    <string name="update_channel_name">Atualização do PIXELLNET</string>
+    <string name="update_channel_description">Progresso do download da nova versão</string>
+    <string name="update_download_title">Baixando o PIXELLNET %1$s</string>
+    <string name="update_download_connecting">Conectando…</string>
+</resources>

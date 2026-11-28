@@ -5,4 +5,8 @@
     <string name="status_starting">Запуск…</string>
     <string name="status_started">Работает</string>
     <string name="notification_channel_service">Соединение</string>
+    <string name="update_channel_name">PIXELLNET Обновление</string>
+    <string name="update_channel_description">Прогресс скачивания новой версии</string>
+    <string name="update_download_title">Скачиваем PIXELLNET %1$s</string>
+    <string name="update_download_connecting">Подключаемся...</string>
 </resources>

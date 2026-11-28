@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Notification of the connection service and of the app update download.
+         The language follows the phone language (values-<lang>), not the language
+         chosen inside the app. Indonesian is values-in (legacy code that Android requires). -->
     <string name="stop">Stop</string>
     <string name="quick_toggle">Toggle</string>
     <string name="status_starting">Service starting…</string>
     <string name="status_started">Service started</string>
     <string name="notification_channel_service">Connection</string>
+    <string name="update_channel_name">PIXELLNET Update</string>
+    <string name="update_channel_description">New version download progress</string>
+    <string name="update_download_title">Downloading PIXELLNET %1$s</string>
+    <string name="update_download_connecting">Connecting…</string>
 </resources>

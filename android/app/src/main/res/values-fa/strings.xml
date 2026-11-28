@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stop">توقف</string>
+    <string name="quick_toggle">تغییر وضعیت</string>
+    <string name="status_starting">در حال راه‌اندازی…</string>
+    <string name="status_started">در حال اجرا</string>
+    <string name="notification_channel_service">اتصال</string>
+    <string name="update_channel_name">به‌روزرسانی PIXELLNET</string>
+    <string name="update_channel_description">پیشرفت دانلود نسخه جدید</string>
+    <string name="update_download_title">در حال دانلود PIXELLNET %1$s</string>
+    <string name="update_download_connecting">در حال اتصال…</string>
+</resources>

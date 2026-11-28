@@ -530,19 +530,27 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
     // v0.1.31: notification helpers — простой прогресс-бар для download.
     // POST_NOTIFICATIONS permission на Android 13+ может отсутствовать — тогда
     // silently skip (не критично, скачивание всё равно идёт).
+    // 0.1.106: тексты — из ресурсов строк (res/values*/strings.xml, 21 язык по языку телефона).
+    // Канал создаём заново, если у него другое имя или описание: так у тех, у кого канал уже
+    // создан с русским именем, имя сменится на язык телефона (Android обновляет имя и описание
+    // существующего канала, важность не меняет). Проверка нужна, чтобы не вызывать
+    // createNotificationChannel на каждое обновление полосы загрузки.
     private fun ensureNotifChannel(ctx: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val nm = ctx.getSystemService(NotificationManager::class.java)
-            if (nm?.getNotificationChannel(UPDATE_NOTIF_CHANNEL_ID) == null) {
+            val nm = ctx.getSystemService(NotificationManager::class.java) ?: return
+            val name = ctx.getString(R.string.update_channel_name)
+            val desc = ctx.getString(R.string.update_channel_description)
+            val old = nm.getNotificationChannel(UPDATE_NOTIF_CHANNEL_ID)
+            if (old == null || old.name?.toString() != name || old.description != desc) {
                 val ch = NotificationChannel(
                     UPDATE_NOTIF_CHANNEL_ID,
-                    "PIXELLNET Обновление",
+                    name,
                     NotificationManager.IMPORTANCE_LOW,
                 ).apply {
-                    description = "Прогресс скачивания новой версии"
+                    description = desc
                     setShowBadge(false)
                 }
-                nm?.createNotificationChannel(ch)
+                nm.createNotificationChannel(ch)
             }
         }
     }
@@ -552,8 +560,10 @@ class PlatformSettingsHandler : FlutterPlugin, MethodChannel.MethodCallHandler, 
         ensureNotifChannel(ctx)
         val builder = NotificationCompat.Builder(ctx, UPDATE_NOTIF_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Скачиваем PIXELLNET $version")
-            .setContentText(if (percent > 0) "$percent%" else "Подключаемся...")
+            .setContentTitle(ctx.getString(R.string.update_download_title, version))
+            .setContentText(
+                if (percent > 0) "$percent%" else ctx.getString(R.string.update_download_connecting)
+            )
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)

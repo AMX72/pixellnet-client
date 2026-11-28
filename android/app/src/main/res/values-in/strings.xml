@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stop">Hentikan</string>
+    <string name="quick_toggle">Alihkan</string>
+    <string name="status_starting">Memulai…</string>
+    <string name="status_started">Berjalan</string>
+    <string name="notification_channel_service">Koneksi</string>
+    <string name="update_channel_name">Pembaruan PIXELLNET</string>
+    <string name="update_channel_description">Kemajuan pengunduhan versi baru</string>
+    <string name="update_download_title">Mengunduh PIXELLNET %1$s</string>
+    <string name="update_download_connecting">Menyambungkan…</string>
+</resources>

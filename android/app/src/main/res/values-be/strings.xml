@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stop">Спыніць</string>
+    <string name="quick_toggle">Пераключыць</string>
+    <string name="status_starting">Запуск…</string>
+    <string name="status_started">Працуе</string>
+    <string name="notification_channel_service">Падлучэнне</string>
+    <string name="update_channel_name">Абнаўленне PIXELLNET</string>
+    <string name="update_channel_description">Ход спампоўкі новай версіі</string>
+    <string name="update_download_title">Спампоўваем PIXELLNET %1$s</string>
+    <string name="update_download_connecting">Падлучэнне…</string>
+</resources>

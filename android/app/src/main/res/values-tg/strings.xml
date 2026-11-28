@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stop">Қатъ кардан</string>
+    <string name="quick_toggle">Иваз кардан</string>
+    <string name="status_starting">Оғоз мешавад…</string>
+    <string name="status_started">Кор мекунад</string>
+    <string name="notification_channel_service">Алоқа</string>
+    <string name="update_channel_name">Навсозии PIXELLNET</string>
+    <string name="update_channel_description">Пешрафти зеркашии версияи нав</string>
+    <string name="update_download_title">Зеркашии PIXELLNET %1$s</string>
+    <string name="update_download_connecting">Пайвастшавӣ…</string>
+</resources>

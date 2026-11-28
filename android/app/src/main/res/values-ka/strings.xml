@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stop">გაჩერება</string>
+    <string name="quick_toggle">გადართვა</string>
+    <string name="status_starting">იწყება…</string>
+    <string name="status_started">მუშაობს</string>
+    <string name="notification_channel_service">კავშირი</string>
+    <string name="update_channel_name">PIXELLNET-ის განახლება</string>
+    <string name="update_channel_description">ახალი ვერსიის ჩამოტვირთვის პროგრესი</string>
+    <string name="update_download_title">იტვირთება PIXELLNET %1$s</string>
+    <string name="update_download_connecting">მიმდინარეობს დაკავშირება…</string>
+</resources>
